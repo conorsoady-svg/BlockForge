@@ -10,8 +10,8 @@ self.addEventListener('install', event => {
         './BlockForge.html',
         // add icons/manifest if you have them:
         // './manifest.webmanifest',
-        // './icons/icon - 192x192.png',
-        // './icons/icon - 512x512.png',
+        // './icons/192x192.png',
+        // './icons/512x512.png',
       ]).catch(err => {
         console.warn('Cache addAll warning:', err);
       })
