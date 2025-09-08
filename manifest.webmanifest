@@ -1,0 +1,14 @@
+{
+  "name": "Block Forge",
+  "short_name": "BlockForge",
+  "description": "Neon block-blast puzzle • Classic • Adventure • Tetris",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#0c1226",
+  "theme_color": "#0c1226",
+  "icons": [
+    { "src": "icons/192x192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icons/512x512.png", "sizes": "512x512", "type": "image/png" }
+  ]
+}
