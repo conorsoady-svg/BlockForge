@@ -18,6 +18,39 @@ html,body{height:100%;-webkit-text-size-adjust:100%}
 body{margin:0;background:radial-gradient(1200px 800px at 20% 0%,#0b1022,#0c1226 50%,#0a0f1f);color:#e8ebf3;text-align:center;font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;overscroll-behavior-y:none;-webkit-user-select:none;user-select:none}
 .hidden{display:none!important}
 
+/* --- Update toast (PWA) --- */
+#updateToast {
+  position: fixed;
+  left: 50%;
+  bottom: 16px;
+  transform: translateX(-50%) translateY(20px);
+  background: rgba(12,18,38,.92);
+  color: #e8ebf3;
+  border-radius: 12px;
+  padding: 10px 14px;
+  box-shadow: 0 10px 24px rgba(0,0,0,.35), 0 0 14px rgba(57,255,20,.25);
+  display: none;
+  z-index: 9999;
+  font-weight: 700;
+  letter-spacing: .2px;
+}
+#updateToast.show { display: flex; gap: 10px; align-items: center; }
+#updateToast button {
+  margin: 0;
+  padding: 6px 10px;
+  font-size: 14px;
+  border: none;
+  border-radius: 10px;
+  background: #111827;
+  color: #39ff14;
+  cursor: pointer;
+}
+#updateToast button.primary { background:#39ff14; color:#0b1022; font-weight:900; }
+#updateToast button:hover { background: #1f2937; box-shadow: 0 0 12px rgba(57,255,20,.7); }
+#updateToast button:active { transform: translateY(1px); }
+
+
+
 /* UI */
 button{margin:6px;padding:10px 20px;font-size:16px;border:none;border-radius:12px;background:#111827;color:#39ff14;cursor:pointer;box-shadow:0 0 8px rgba(57,255,20,.35);transition:background .2s,box-shadow .2s,transform .06s}
 button:hover{background:#1f2937;box-shadow:0 0 12px rgba(57,255,20,.7)}
@@ -755,6 +788,75 @@ function runSelfTests(){
 window.addEventListener('resize', ()=>{ sizePreviewLayer(); sizeDemoPreviewFixed(); fitTetrisToViewport(); }, {passive:true});
 window.addEventListener('DOMContentLoaded', ()=>{ showHome(); runSelfTests(); fitTetrisToViewport(); }, {once:true});
 
+<!-- Update prompt toast -->
+<div id="updateToast" role="status" aria-live="polite">
+  <span>New version available</span>
+  <button id="updateLaterBtn" type="button">Later</button>
+  <button id="updateNowBtn" class="primary" type="button">Refresh</button>
+</div>
+
+/* ===== Service Worker: update prompt flow ===== */
+(function setupSWUpdatePrompt(){
+  if (!('serviceWorker' in navigator)) return;
+
+  let newWorkerWaiting = null;
+  let refreshing = false;
+
+  function showToast(){
+    const el = document.getElementById('updateToast');
+    if(!el) return;
+    el.classList.add('show');
+    const later = document.getElementById('updateLaterBtn');
+    const now   = document.getElementById('updateNowBtn');
+
+    // Hide only
+    later.onclick = () => el.classList.remove('show');
+
+    // Ask waiting worker to become active, then page will reload once
+    now.onclick = () => {
+      if (newWorkerWaiting) {
+        newWorkerWaiting.postMessage({ type: 'SKIP_WAITING' });
+      }
+    };
+  }
+
+  // When controller changes, the new SW took control -> safe to reload once
+  navigator.serviceWorker.addEventListener('controllerchange', () => {
+    if (refreshing) return;
+    refreshing = true;
+    // If you want to protect in-play sessions, you could persist state here first.
+    location.reload();
+  });
+
+  window.addEventListener('load', async () => {
+    try {
+      const reg = await navigator.serviceWorker.register('./sw.js', { scope: './' });
+      // If a new service worker is found
+      reg.addEventListener('updatefound', () => {
+        const installing = reg.installing;
+        if (!installing) return;
+
+        installing.addEventListener('statechange', () => {
+          // When the new SW is installed and we already have a controller,
+          // it means an update is ready (waiting) rather than first install.
+          if (installing.state === 'installed' && navigator.serviceWorker.controller) {
+            newWorkerWaiting = reg.waiting;
+            showToast();
+          }
+        });
+      });
+
+      // Also handle the case where the new worker is already waiting (fast check)
+      if (reg.waiting && navigator.serviceWorker.controller) {
+        newWorkerWaiting = reg.waiting;
+        showToast();
+      }
+    } catch (err) {
+      console.error('SW registration failed', err);
+    }
+  });
+})();
+
 
 /* Unlock audio once the user taps/clicks */
 let audioOK = false;
@@ -792,13 +894,8 @@ if ('serviceWorker' in navigator) {
       }
       enableInstantUpdates(reg);
 
-      // When the active SW changes, reload once to show the new version
-      let reloaded = false;
-      navigator.serviceWorker.addEventListener('controllerchange', () => {
-        if (reloaded) return;
-        reloaded = true;
-        location.reload();
-      });
+   
+     
 
     } catch (err) {
       console.error('[SW] registration failed:', err);
