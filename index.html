@@ -797,14 +797,6 @@ function runSelfTests(){
 window.addEventListener('resize', ()=>{ sizePreviewLayer(); sizeDemoPreviewFixed(); fitTetrisToViewport(); }, {passive:true});
 window.addEventListener('DOMContentLoaded', ()=>{ showHome(); runSelfTests(); fitTetrisToViewport(); }, {once:true});
 
-//<!-- Update prompt toast -->
-<div id="updateToast" role="status" aria-live="polite">
-  <span>New version available</span>
-  <button id="updateLaterBtn" type="button">Later</button>
-  <button id="updateNowBtn" class="primary" type="button">Refresh</button>
-</div>
-
-
 // If the demo didn't start for some reason on mobile, kick it on first tap.
 window.addEventListener('pointerdown', () => {
   try { if (document.getElementById('home') && !document.getElementById('home').classList.contains('hidden')) {
@@ -931,5 +923,12 @@ if ('serviceWorker' in navigator) {
 
 
 </script>
+<!-- Update prompt toast -->
+<div id="updateToast" role="status" aria-live="polite" class="hidden">
+  <span>New version available</span>
+  <button id="updateLaterBtn" type="button">Later</button>
+  <button id="updateNowBtn" class="primary" type="button">Refresh</button>
+</div>
+
 </body>
 </html>
