@@ -142,6 +142,15 @@ button:active{transform:translateY(1px)}
 #comboBanner.levelUp{ animation:comboBump .25s ease, comboGlow .8s ease; }
 @keyframes comboGlow{0%{ box-shadow:0 0 0 rgba(57,255,20,0);}40%{ box-shadow:0 0 20px rgba(57,255,20,.8);}100%{ box-shadow:0 0 0 rgba(57,255,20,0);}}
 
+/* Make sure foreground UI is always clickable on mobile */
+.stage{ z-index:0 !important; pointer-events:none !important; }
+.app{ position:relative; z-index:2 !important; }
+#home button, #offline button, #online button, #game button{ pointer-events:auto; }
+
+/* Safety: if any full-screen layer accidentally shows, force it behind */
+#overlay.hidden, #backMenu.hidden{ display:none !important; }
+#overlay, #backMenu{ z-index: 5; }  /* higher than .app only when visible */
+
 /* Tetris on-screen controls (mobile) */
 #tetrisControls{display:none;gap:8px;justify-content:center;margin:8px 0}
 #tetrisControls button{min-width:64px}
@@ -794,6 +803,23 @@ window.addEventListener('DOMContentLoaded', ()=>{ showHome(); runSelfTests(); fi
   <button id="updateLaterBtn" type="button">Later</button>
   <button id="updateNowBtn" class="primary" type="button">Refresh</button>
 </div>
+
+
+// If the demo didn't start for some reason on mobile, kick it on first tap.
+window.addEventListener('pointerdown', () => {
+  try { if (document.getElementById('home') && !document.getElementById('home').classList.contains('hidden')) {
+    // If home is visible, ensure demo is running
+    if (typeof startDemo === 'function') startDemo();
+  }} catch(e){}
+}, { once:true });
+
+// Debug helper: log which element is on top where you tap
+document.addEventListener('pointerdown', (e) => {
+  const el = document.elementFromPoint(e.clientX, e.clientY);
+  if (el) console.log('Tapped element:', el.tagName, el.id, el.className);
+}, { passive:true });
+
+
 
 /* ===== Service Worker: update prompt flow ===== */
 (function setupSWUpdatePrompt(){
