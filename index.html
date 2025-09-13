@@ -760,29 +760,52 @@ window.addEventListener('DOMContentLoaded', ()=>{ showHome(); runSelfTests(); fi
 let audioOK = false;
 window.addEventListener('pointerdown', () => { audioOK = true; }, { once:true });
 
-/* Single, file-based SW registration */
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', async () => {
     try {
-      const reg = await navigator.serviceWorker.register('./sw.js'); // or 'sw.js'
-      console.log('SW registered:', reg.scope);
-    } catch (err) {
-      console.error('SW registration failed', err);
-    }
-  });
-}
-
-
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', async () => {
-    try {
+      // Register sw.js at the project root scope
       const reg = await navigator.serviceWorker.register('./sw.js', { scope: './' });
-      console.log('SW registered', reg.scope);
+      console.log('[SW] Registered:', reg.scope);
+
+      // Periodically ask for updates while the page is open
+      setInterval(() => reg.update(), 30_000);
+
+      // If a new SW is found, tell it to activate right away
+      function enableInstantUpdates(swReg) {
+        if (!swReg) return;
+
+        // If a new worker is already waiting, tell it to take over
+        if (swReg.waiting) {
+          swReg.waiting.postMessage({ type: 'SKIP_WAITING' });
+        }
+
+        // When a new worker appears, skip waiting after it’s installed
+        swReg.addEventListener('updatefound', () => {
+          const installing = swReg.installing;
+          if (!installing) return;
+          installing.addEventListener('statechange', () => {
+            if (installing.state === 'installed' && navigator.serviceWorker.controller) {
+              installing.postMessage({ type: 'SKIP_WAITING' });
+            }
+          });
+        });
+      }
+      enableInstantUpdates(reg);
+
+      // When the active SW changes, reload once to show the new version
+      let reloaded = false;
+      navigator.serviceWorker.addEventListener('controllerchange', () => {
+        if (reloaded) return;
+        reloaded = true;
+        location.reload();
+      });
+
     } catch (err) {
-      console.error('SW registration failed', err);
+      console.error('[SW] registration failed:', err);
     }
   });
 }
+
 
 </script>
 </body>
