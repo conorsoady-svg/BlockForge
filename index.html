@@ -5,13 +5,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <meta name="format-detection" content="telephone=no" />
 <title>Block Forge — Full Game (Neon, Mobile, Demo AI)</title>
-  <link rel="manifest" href="./manifest.webmanifest">
-  <meta name="theme-color" content="#0c1226">
-
-  <!-- Favicon / PWA icons -->
-  <link rel="manifest" href="./manifest.webmanifest">
-<link rel="icon" href="icons/192x192.png">
+ <link rel="manifest" href="manifest.webmanifest?v=4">
+<link rel="icon" type="image/png" sizes="192x192" href="icons/192x192.png">
 <link rel="apple-touch-icon" href="icons/192x192.png">
+<meta name="theme-color" content="#0c1226">
+
 
 <style>
 :root{--cell:40;--gap:2;--pad:4;--clear-ms:420;--cols:8}
@@ -758,30 +756,21 @@ window.addEventListener('resize', ()=>{ sizePreviewLayer(); sizeDemoPreviewFixed
 window.addEventListener('DOMContentLoaded', ()=>{ showHome(); runSelfTests(); fitTetrisToViewport(); }, {once:true});
 
 
-if ('serviceWorker' in navigator) {
-  // Inline service worker as a Blob so there's nothing to fetch from disk
-  const swCode = `
-    self.addEventListener('install', e => {
-      self.skipWaiting();
-      // simple cache for the main page:
-      e.waitUntil(caches.open('bf-v1').then(c => c.addAll(['./'])));
-    });
-    self.addEventListener('activate', e => self.clients.claim());
-    self.addEventListener('fetch', e => {
-      e.respondWith(
-        caches.match(e.request).then(r => r || fetch(e.request))
-      );
-    });
-  `;
-  const blob = new Blob([swCode], { type: 'text/javascript' });
-  const swUrl = URL.createObjectURL(blob);
-
-  navigator.serviceWorker.register(swUrl, { scope: './' })
-    .then(reg => console.log('SW registered', reg))
-    .catch(err => console.error('SW registration failed', err));
-}
+/* Unlock audio once the user taps/clicks */
 let audioOK = false;
 window.addEventListener('pointerdown', () => { audioOK = true; }, { once:true });
+
+/* Single, file-based SW registration */
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', async () => {
+    try {
+      const reg = await navigator.serviceWorker.register('./sw.js'); // or 'sw.js'
+      console.log('SW registered:', reg.scope);
+    } catch (err) {
+      console.error('SW registration failed', err);
+    }
+  });
+}
 
 
 if ('serviceWorker' in navigator) {
