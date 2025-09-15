@@ -607,7 +607,8 @@ function detectFullLines(){
 function animatePlacedCells(cells){ if(currentMode==='tetris') return; const b=$('board'); cells.forEach(({x,y})=>{const idx=y*width+x; const cell=b.children[idx]; if(cell){ cell.style.animation='pop .26s ease'; setTimeout(()=>{cell.style.animation=''},280) }}) }
 function playClearSound(){
   const ctx = getAudioCtx();
-  if (!ctx || !audioUnlocked) return; // skip until user taps/clicks
+    if (!ctx || !audioOK) return;
+ // skip until user taps/clicks
 
   const o = ctx.createOscillator();
   const g = ctx.createGain();
