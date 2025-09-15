@@ -51,6 +51,8 @@ body{margin:0;background:radial-gradient(1200px 800px at 20% 0%,#0b1022,#0c1226 
 
 
 
+
+
 /* UI */
 button{margin:6px;padding:10px 20px;font-size:16px;border:none;border-radius:12px;background:#111827;color:#39ff14;cursor:pointer;box-shadow:0 0 8px rgba(57,255,20,.35);transition:background .2s,box-shadow .2s,transform .06s}
 button:hover{background:#1f2937;box-shadow:0 0 12px rgba(57,255,20,.7)}
@@ -243,6 +245,50 @@ const gap=()=>parseInt(getComputedStyle(document.documentElement).getPropertyVal
   window.addEventListener('resize', setVh, {passive:true});
   setVh();
 })();
+
+// Hard clear for Classic: zeros grid + cleans DOM + re-renders
+function classicHardClear(lines) {
+  const rows = lines?.rows || [];
+  const cols = lines?.cols || [];
+  const n = grid.length;
+
+  // A) zero out DATA on the same grid Classic uses
+  for (const r of rows) for (let c = 0; c < n; c++) grid[r][c] = 0;
+  for (const c of cols) for (let r = 0; r < n; r++) grid[r][c] = 0;
+
+  // B) clean up the DOM (classes/attrs) so visuals match data immediately
+  const boardEl =
+    document.querySelector('#board') ||           // try id=board
+    document.querySelector('.classic-grid') ||    // try class=classic-grid
+    document;                                     // fallback (still works)
+  
+  // clear row cells
+  for (const r of rows) {
+    for (let c = 0; c < n; c++) {
+      const el = boardEl.querySelector(`[data-r="${r}"][data-c="${c}"]`);
+      if (el) {
+        el.classList.remove('clearing', 'row', 'col', 'filled', 'placed', 'block');
+        el.removeAttribute('data-filled');
+        el.style.removeProperty('--cDelay');
+      }
+    }
+  }
+  // clear col cells
+  for (const c of cols) {
+    for (let r = 0; r < n; r++) {
+      const el = boardEl.querySelector(`[data-r="${r}"][data-c="${c}"]`);
+      if (el) {
+        el.classList.remove('clearing', 'row', 'col', 'filled', 'placed', 'block');
+        el.removeAttribute('data-filled');
+        el.style.removeProperty('--cDelay');
+      }
+    }
+  }
+
+  // C) re-render from data (forces UI ↔ data sync)
+  try { renderBoard(); } catch {}
+}
+
 
 function clearTetrisOverrides(){
   $('boardWrap')?.classList.remove('tetris');
@@ -605,9 +651,41 @@ function detectFullLines(){
   return {rows,cols}
 }
 function animatePlacedCells(cells){ if(currentMode==='tetris') return; const b=$('board'); cells.forEach(({x,y})=>{const idx=y*width+x; const cell=b.children[idx]; if(cell){ cell.style.animation='pop .26s ease'; setTimeout(()=>{cell.style.animation=''},280) }}) }
+
+
+
+function getAudioCtx() {
+  if (__audioCtx) return __audioCtx;
+  const AC = window.AudioContext || window.webkitAudioContext;
+  if (!AC) return null; // no WebAudio support
+  __audioCtx = new AC();
+  return __audioCtx;
+}
+
+// Unlock audio on first user gesture (mobile needs this)
+function __unlockAudio() {
+  const ctx = getAudioCtx();
+  if (!ctx) return;
+  if (ctx.state === 'suspended') ctx.resume();
+  // Tiny silent tick to satisfy some browsers
+  try {
+    const b = ctx.createBuffer(1, 1, 22050);
+    const s = ctx.createBufferSource();
+    s.buffer = b; s.connect(ctx.destination); s.start(0);
+  } catch {}
+  audioOK = true;
+  document.removeEventListener('pointerdown', __unlockAudio);
+  document.removeEventListener('touchstart', __unlockAudio);
+  document.removeEventListener('click', __unlockAudio);
+}
+document.addEventListener('pointerdown', __unlockAudio, { once: true });
+document.addEventListener('touchstart', __unlockAudio, { once: true });
+document.addEventListener('click', __unlockAudio, { once: true });
+
 function playClearSound(){
   const ctx = getAudioCtx();
-    if (!ctx || !audioOK) return;
+if (!ctx) return; // skip until audio context exists
+
  // skip until user taps/clicks
 
   const o = ctx.createOscillator();
@@ -629,21 +707,66 @@ function playClearSound(){
 }
 
 function animateAndClear(lines){
-  if(currentMode==='tetris') return Promise.resolve(0);
-  const{rows,cols}=lines; if(!rows.length && !cols.length) return Promise.resolve(0);
-  const b=$('board');
-  for(let y=0;y<height;y++)for(let x=0;x<width;x++){
-    const isRow=rows.includes(y), isCol=cols.includes(x);
-    if(isRow||isCol){ const idx=y*width+x; const cell=b.children[idx]; if(cell&&grid[y][x]){cell.style.animation='jumpOut .2s ease both'; cell.style.setProperty('--cDelay','140ms'); cell.classList.add('clearing',isRow?'row':'col')} }
+  if (currentMode === 'tetris') return Promise.resolve(0);
+  const { rows, cols } = lines;
+  if (!rows.length && !cols.length) return Promise.resolve(0);
+
+  const b = $('board'); // classic board element
+  for (let y = 0; y < height; y++) for (let x = 0; x < width; x++) {
+    const isRow = rows.includes(y), isCol = cols.includes(x);
+    if (isRow || isCol) {
+      const idx = y * width + x;
+      const cell = b.children[idx];
+      if (cell && grid[y][x]) {
+        cell.style.animation = 'jumpOut .2s ease both';
+        cell.style.setProperty('--cDelay', '140ms');
+        cell.classList.add('clearing', isRow ? 'row' : 'col');
+      }
+    }
   }
-  playClearSound();
-  const delay=parseInt(getComputedStyle(document.documentElement).getPropertyValue('--clear-ms'))+160;
-  return new Promise(res=>setTimeout(()=>{
-    rows.forEach(y=>{grid[y]=Array(width).fill(0)});
-    cols.forEach(x=>{for(let y=0;y<height;y++)grid[y][x]=0});
-    renderBoard(); res(rows.length+cols.length);
-  },delay))
+
+  try { playClearSound(); } catch (_) {}
+
+  // read CSS var and fall back if missing
+  const cssMs = parseInt(getComputedStyle(document.documentElement)
+                   .getPropertyValue('--clear-ms')) || 420;
+  const delay = cssMs + 160;
+
+  return new Promise(res => setTimeout(() => {
+    // 1) ZERO DATA IN-PLACE (don’t replace row arrays)
+    for (const y of rows) for (let x = 0; x < width; x++) grid[y][x] = 0;
+    for (const x of cols) for (let y = 0; y < height; y++) grid[y][x] = 0;
+
+    // 2) RE-RENDER FROM DATA
+    renderBoard();
+
+    // 3) BELT & BRACES: strip any lingering classes/attrs from cleared cells
+    //    (prevents visuals staying filled if renderBoard missed anything)
+    const boardEl = $('board') || document;
+    for (const y of rows) for (let x = 0; x < width; x++) {
+      const idx = y * width + x;
+      const el = boardEl.children[idx];
+      if (el) {
+        el.classList.remove('clearing','row','col','filled','placed','block');
+        el.removeAttribute?.('data-filled');
+        el.style.removeProperty?.('--cDelay');
+      }
+    }
+    for (const x of cols) for (let y = 0; y < height; y++) {
+      const idx = y * width + x;
+      const el = boardEl.children[idx];
+      if (el) {
+        el.classList.remove('clearing','row','col','filled','placed','block');
+        el.removeAttribute?.('data-filled');
+        el.style.removeProperty?.('--cDelay');
+      }
+    }
+
+    res(rows.length + cols.length);
+  }, delay));
 }
+
+
 function startDrag(piece,cx,cy){
   if(currentMode==='tetris') return;
   dragging={piece};
