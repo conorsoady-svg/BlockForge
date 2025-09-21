@@ -42,11 +42,11 @@ body{margin:0;background:radial-gradient(1200px 800px at 20% 0%,#0b1022,#0c1226 
   border: none;
   border-radius: 10px;
   background: #111827;
-  color: #39ff14;
+  color: #00fff2;
   cursor: pointer;
 }
-#updateToast button.primary { background:#39ff14; color:#0b1022; font-weight:900; }
-#updateToast button:hover { background: #1f2937; box-shadow: 0 0 12px rgba(57,255,20,.7); }
+#updateToast button.primary { background:#00ffea; color:#0b1022; font-weight:900; }
+#updateToast button:hover { background: #1f2937; box-shadow: 0 0 12px rgb(0, 247, 255); }
 #updateToast button:active { transform: translateY(1px); }
 
 
@@ -54,8 +54,7 @@ body{margin:0;background:radial-gradient(1200px 800px at 20% 0%,#0b1022,#0c1226 
 
 
 /* UI */
-button{margin:6px;padding:10px 20px;font-size:16px;border:none;border-radius:12px;background:#111827;color:#39ff14;cursor:pointer;box-shadow:0 0 8px rgba(57,255,20,.35);transition:background .2s,box-shadow .2s,transform .06s}
-button:hover{background:#1f2937;box-shadow:0 0 12px rgba(57,255,20,.7)}
+button{margin:6px;padding:10px 20px;font-size:16px;border:none;border-radius:12px;background:#111827;color:#00ffea;cursor:pointer;box-shadow:0 0 8px rgb(0, 255, 234);transition:background .2s,box-shadow .2s,transform .06s}
 button:active{transform:translateY(1px)}
 .app{max-width:920px;margin:0 auto;padding:16px;position:relative;z-index:1}
 .sub{opacity:.8;margin-bottom:8px}
@@ -65,6 +64,8 @@ button:active{transform:translateY(1px)}
 .board{display:grid;grid-template-columns:repeat(var(--cols),calc(var(--cell)*1px));gap:calc(var(--gap)*1px);background:#0e1324;padding:calc(var(--pad)*1px);border-radius:16px;box-shadow:0 0 28px rgba(0,255,255,.25),0 10px 28px rgba(0,0,0,.45);position:relative;width:calc(var(--cols) * var(--cell) * 1px + (var(--cols) - 1) * var(--gap) * 1px + 2 * var(--pad) * 1px);overflow:hidden}
 .cell{width:calc(var(--cell)*1px);height:calc(var(--cell)*1px);background:rgba(255,255,255,0.10);border-radius:10px;position:relative;overflow:hidden;will-change:transform,opacity}
 .block{box-shadow:inset 0 2px 0 rgba(255,255,255,.35),inset 0 -3px 0 rgba(0,0,0,.35),0 0 12px rgba(0,255,255,.35);background-image:radial-gradient(120% 90% at 20% 10%, rgba(255,255,255,.35), rgba(255,255,255,0) 55%),linear-gradient(180deg, rgba(255,255,255,.08), rgba(0,0,0,.12))}
+
+
 
 /* Animations */
 @keyframes pop{0%{transform:scale(1)}50%{transform:scale(1.16)}100%{transform:scale(1)}}
@@ -87,7 +88,7 @@ button:active{transform:translateY(1px)}
 
 /* Tray */
 #tray{display:grid;grid-template-columns:repeat(3,max-content);gap:16px;justify-content:center;margin:14px auto 8px}
-.piece.slot{display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,.08);border-radius:12px;padding:8px;min-width:120px;min-height:120px;box-shadow:0 6px 16px rgba(0,0,0,.25)}
+.piece.slot{display:flex;align-items:center;justify-content:center;background:transparent;border-radius:0;padding:0;min-width:auto;min-height:auto;box-shadow:none}
 #tray .placeholder{opacity:.25}
 
 /* Overlays */
@@ -156,6 +157,241 @@ button:active{transform:translateY(1px)}
 /* Tetris on-screen controls (mobile) */
 #tetrisControls{display:none;gap:8px;justify-content:center;margin:8px 0}
 #tetrisControls button{min-width:64px}
+
+/* ===== Neon portrait home — reference match ===== */
+:root{ --hf-green:#65ff57; --hf-cyan1:#7bf5ff; --hf-cyan2:#22d6ff; }
+
+#homeOverlay{
+  position:fixed; inset:0; z-index:10000;
+  display:none; align-items:flex-start; justify-content:center;
+  min-height:100svh; height:100dvh;
+  --homeOffset: clamp(28px, 8svh, 120px); /* push card down */
+  background:#000D27;
+  backdrop-filter: blur(6px);
+  padding:
+    max(10px, env(safe-area-inset-top))
+    max(10px, env(safe-area-inset-right))
+    max(16px, env(safe-area-inset-bottom))
+    max(10px, env(safe-area-inset-left));
+}
+#homeOverlay.show{ display:flex; }
+
+/* phone card */
+.hf-phone{
+  width:clamp(0px, 33vw, 420px);
+  display:flex; flex-direction:column; align-items:center; gap:16px;
+  margin-top: var(--homeOffset);
+}
+
+/* framed board */
+.hf-board{
+  position:relative; width:104%; aspect-ratio:9/11.2;
+  border-radius:15px; overflow:hidden; padding:14px;
+  background: #010722;
+  box-shadow:
+    0 0 28px rgba(0,255,255,.25),
+    0 10px 28px rgba(0,0,0,.45),
+    inset 0 0 0 1px rgba(255,255,255,.12),
+    inset 0 6px 16px rgba(0,0,0,.35);
+  
+}
+/* inner vignette */
+/*.hf-board::before{
+  content:""; position:absolute; inset:0; pointer-events:none;
+  background:
+    radial-gradient(80% 100% at 50% 20%, rgba(0,0,0,.0), rgba(0,0,0,.28) 70%),
+    linear-gradient(180deg, rgba(0,0,0,.25), rgba(0,0,0,0) 20%, rgba(0,0,0,0) 80%, rgba(0,0,0,.35));
+}
+
+
+/* title */
+.hf-title{
+  position:absolute; left:52px; top:30px; z-index:2;
+  margin:0; text-align:center; letter-spacing:1px; line-height:.9;
+  color:#53FF11; font-weight:800;
+  font-size:clamp(44px, 12vw, 92px);
+  text-shadow:0 0 10px rgb(9, 255, 0), 0 0 40px rgba(101,255,87,.25);
+  pointer-events:none;
+  font-family: 'Microsoft Sans Serif';
+}
+
+/* compact 8×12 grid */
+.hf-grid{
+  --hfCell: clamp(50px, 5.2vw, 30px);
+  position:absolute; left:50%; top:60%; transform:translate(-50%,-50%);
+  display:grid; gap:4px;
+  grid-template-columns:repeat(8,var(--hfCell));
+  grid-template-rows:repeat(8,var(--hfCell));
+  
+
+}
+/* empty cell */
+.hf-cell{
+  width:var(--hfCell); height:var(--hfCell); border-radius:13px;
+  background: #020723;         /* dimmer empties */
+  box-shadow: inset 0 2px 0 #020723, inset 0 -3px 0 #020723;
+  
+}
+/* center dark '+' cluster */
+.hf-ghost{
+  width:var(--hfCell); height:var(--hfCell); border-radius:13px;
+  background: #0B102A;
+  box-shadow:none;
+  color: #0B102A;
+}
+/* more ghosts */
+.hf-ghost2{
+  width:var(--hfCell); height:var(--hfCell); border-radius:13px;
+  background: #0B102A;
+  box-shadow:none;
+  color: #0B102A;
+}
+.hf-ghost3{
+  width:var(--hfCell); height:var(--hfCell); border-radius:13px;
+  background: linear-gradient(180deg, #090F27, #0C112D 100%);
+  box-shadow:none;
+  color: #0B102A;
+}
+.hf-ghost4{
+  width:var(--hfCell); height:var(--hfCell); border-radius:13px;
+  background: linear-gradient(180deg, #001126, #0C102D 100%);
+  box-shadow:none;
+  color: #0B102A;
+}
+.hf-ghost5{
+  width:var(--hfCell); height:var(--hfCell); border-radius:13px;
+  background: linear-gradient(90deg, #010C25, #080F28 100%);
+  box-shadow:none;
+  color: #0B102A;
+}
+.hf-ghost6{
+  width:var(--hfCell); height:var(--hfCell); border-radius:13px;
+  background: linear-gradient(90deg, #080F28, #010C25 100%);
+  box-shadow:none;
+  color: #0B102A;
+}
+.hf-ghost7{
+  width:var(--hfCell); height:var(--hfCell); border-radius:13px;
+  background: linear-gradient(180deg, #000C25, #000C25 100%);
+  box-shadow:none;
+  color: #0B102A;
+}
+.hf-ghost8{
+  width:var(--hfCell); height:var(--hfCell); border-radius:13px;
+  background: linear-gradient(225deg, #010722, #020B26 110%);
+  box-shadow:none;
+  color: #0B102A;
+}
+.hf-ghost9{
+  width:var(--hfCell); height:var(--hfCell); border-radius:13px;
+  background: linear-gradient(180deg, #0B152B 0%, #02303D 100%);
+  box-shadow:none;
+  color: #0B102A;
+}
+.hf-ghost10{
+  width:var(--hfCell); height:var(--hfCell); border-radius:13px;
+  background: linear-gradient(270deg, #0B152B 0%, #02303D 100%);
+  box-shadow:none;
+  color: #0B102A;
+}
+.hf-ghost11{
+  width:var(--hfCell); height:var(--hfCell); border-radius:13px;
+  background: #0B152B;
+  box-shadow:none;
+  color: #0B102A;
+}
+/* colored blocks (gloss + glow) */
+.hf-block{
+  width:var(--hfCell); height:var(--hfCell); border-radius:10px;
+  box-shadow: 0 0 18px rgba(255, 255, 255, 0.35),
+              inset 0 2px 0 rgba(255, 255, 255, 0.60),
+              inset 0 -3px 0 rgba(0, 0, 0, 0.35);
+}
+.hf-cyan   { background:linear-gradient(180deg,#7bf5ff,#00B5E5); }
+.hf-magenta{ background:linear-gradient(180deg,#FF31F4,#9F0BDB); }
+.hf-orange { background:linear-gradient(180deg,#FEA019,#CD7317); }
+
+/* PLAY button */
+.hf-cta{
+  display:block; width:min(320px, 82%);
+  font-weight:900; letter-spacing:3px;
+  font-size:clamp(50px,3.6vw,28px);
+  font-family: 'Microsoft Sans Serif';
+  padding:16px 24px; border-radius:9999px; border:0; cursor:pointer;
+  color:#000000;
+  background:linear-gradient(180deg, var(--hf-cyan1), var(--hf-cyan2));
+  box-shadow:
+    0 0px 0px rgb(251, 252, 251),
+    0 0 0 5px #00B3D0 inset,
+    0 0 20px rgb(0, 225, 255);
+}
+.hf-cta{background: linear-gradient(180deg,#00F2E4,#0083C7);
+  text-shadow:0 0 2px rgb(0, 0, 0);
+  transition:transform .25s ease, filter 1.5s ease;}
+
+.hf-cta:hover{ transform:translateY(+5px); filter:brightness(2); }
+.hf-cta:active{ transform:translateY(+1px) scale(1); }
+
+/* mini cards with small block grids */
+.hf-tray{ display:flex; gap:14px; justify-content:center; align-items:center; }
+#tray table{border-collapse:collapse}
+#tray td{padding:0}
+#tray .block{border-radius:10px}
+
+
+.hf-card{
+  width:150px; height:110px; border-radius:25px;
+  background:#0B112B;
+  display:grid; place-items:center;
+}
+.hf-mini{
+
+ --m: clamp(12px, 2.8vw, 26px);
+--g: calc(var(--m) / 13);                /* gap size (tweak this) */
+ display:grid; 
+ grid-template-columns: repeat(4, var(--m)); 
+ gap: var(--g);                           /* adds space between squares */
+}
+
+
+
+/* Nudge the mini grid inside each card */
+#homeOverlay .hf-tray .hf-card:nth-child(1) .hf-mini { position: relative; left: -2px; top: 12px; }
+#homeOverlay .hf-tray .hf-card:nth-child(2) .hf-mini { position: relative; left:  15px; top: -15px; }
+#homeOverlay .hf-tray .hf-card:nth-child(3) .hf-mini { position: relative; left:  15px; top: -2px; }
+
+/* Base cells = invisible, keep grid positions */
+.hf-mini .b{
+  width:var(--m); height:var(--m);
+  border-radius:0;            /* square corners like the game */
+  background:transparent;     /* no fill for empty cells */
+  box-shadow:none;            /* no faint edges on empty cells */
+}
+
+/* Only the COLOURED cells get the bevel/glow */
+.hf-mini .b.mag{
+  border-radius: 5px;  /* rounded corners for blocks */
+  box-shadow: 0 0 5px rgb(255, 0, 0),
+              inset 0 1px 0 rgba(255,255,255,.22),
+              inset 0 -2px 0 rgba(0,0,0,.35);
+}
+.hf-mini .b.vio{
+  border-radius: 5px;  /* rounded corners for blocks */
+  box-shadow: 0 0 10px rgb(140, 0, 255),
+              inset 0 1px 0 rgba(255,255,255,.22),
+              inset 0 -2px 0 rgba(0,0,0,.35);
+}
+.hf-mini .b.orn{
+  border-radius: 5px;  /* rounded corners for blocks */
+  box-shadow: 0 0 5px rgb(51, 255, 0),
+              inset 0 1px 0 rgba(255,255,255,.22),
+              inset 0 -2px 0 rgba(0,0,0,.35);
+}
+
+.hf-mini .mag{ background:linear-gradient(180deg,#ff0000,#ff0000b4); }
+.hf-mini .vio{ background:linear-gradient(180deg,#7A5CFF,#7c82ff); }
+.hf-mini .orn{ background:linear-gradient(180deg,#9AFF00,#4bb630); }
+
 </style>
 </head>
 <body>
@@ -218,6 +454,7 @@ button:active{transform:translateY(1px)}
   </div>
   <div id="boardWrap" class="board-wrap">
     <div id="board" class="board"></div>
+    
     <div id="preview" class="preview-layer"></div>
   </div>
   <div id="tray"></div>
@@ -231,6 +468,8 @@ button:active{transform:translateY(1px)}
   <button onclick="showBackMenu()">⬅ Back</button>
 </div>
 
+     
+
 <script>
 /* ---------- Shorthands ---------- */
 const $=id=>document.getElementById(id);
@@ -238,6 +477,62 @@ const randi=n=>Math.floor(Math.random()*n);
 const cellSize=()=>{ const b=$('board'); const v=b?parseInt(getComputedStyle(b).getPropertyValue('--cell'),10):NaN; return Number.isFinite(v)&&v>0?v:parseInt(getComputedStyle(document.documentElement).getPropertyValue('--cell'),10); };
 const pad=()=>parseInt(getComputedStyle(document.documentElement).getPropertyValue('--pad'));
 const gap=()=>parseInt(getComputedStyle(document.documentElement).getPropertyValue('--gap'));
+
+
+// Ctrl+Alt+R -> clear SW caches and hard-reload (dev only)
+document.addEventListener('keydown', (e) => {
+  if (e.ctrlKey && e.altKey && (e.key === 'r' || e.key === 'R')) {
+    navigator.serviceWorker?.controller?.postMessage({ type: 'CLEAR_CACHES' });
+    setTimeout(() => location.reload(true), 80);
+  }
+});
+
+
+
+/* Disable SW + caches on localhost so changes show instantly */
+if (/(^localhost$|^127\.0\.0\.1$)/.test(location.hostname)) {
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.getRegistrations()
+      .then(rs => rs.forEach(r => r.unregister()));
+  }
+  if ('caches' in window) {
+    caches.keys().then(keys => keys.forEach(k => caches.delete(k)));
+  }
+}
+
+
+
+  
+  
+  function emitter({ rate=3, area=[0,0,100,100], color='rgba(122,92,255,.85)',
+                     size=[3,7], life=[1400,2400], drift=[-12,12,-6,-36] } = {}) {
+    let stop = false;
+    (function tick(){
+      if (stop) return;
+      const [x1,y1,x2,y2] = area;
+      spawn({
+        x: rand(x1,x2) + '%',
+        y: rand(y1,y2) + '%',
+        size: Math.round(rand(size[0], size[1])),
+        color, life: Math.round(rand(life[0], life[1])),
+        drift
+      });
+      setTimeout(tick, 1000 / rate);
+    })();
+    return () => { stop = true; };
+  }
+
+  function path(type='drift'){
+    switch(type){
+      case 'rise':  return [-6, 6, -60, -120];
+      case 'fall':  return [-6, 6,  40,   90];
+      case 'left':  return [-120, -40, -10, 10];
+      case 'right': return [  40, 120, -10, 10];
+      default:      return [-12, 12,  -6, -36];
+    }
+  }
+
+  
 
 /* iOS viewport nudge */
 (function(){
@@ -919,7 +1214,260 @@ function runSelfTests(){
 
 /* Listeners */
 window.addEventListener('resize', ()=>{ sizePreviewLayer(); sizeDemoPreviewFixed(); fitTetrisToViewport(); }, {passive:true});
-window.addEventListener('DOMContentLoaded', ()=>{ showHome(); runSelfTests(); fitTetrisToViewport(); }, {once:true});
+// Build the framed grid + decorative blocks + mini cards to match the reference
+function initHomeArt(){
+  const grid = document.getElementById('hfGrid');
+  if (!grid || grid.dataset.built) return;
+
+  const COLS = 6, ROWS = 8;
+
+  // 1) dark grid cells
+  for (let i = 0; i < COLS*ROWS; i++){
+    const s = document.createElement('i');
+    s.className = 'hf-cell';
+    grid.appendChild(s);
+  }
+
+  // 2) center dark '+' cluster (like the mock)
+  const ghost = (c,r) => {
+    const g = document.createElement('i');
+    g.className = 'hf-ghost';
+    g.style.gridColumn = String(c);
+    g.style.gridRow    = String(r);
+    grid.appendChild(g);
+  };
+  // plus centered roughly midframe
+  ghost(5,7); ghost(4,7); ghost(6,7); ghost(5,6); ghost(5,8);
+
+
+  // Other bright ghosts apart from the +
+  const ghost2 = (c,r) => {
+    const g = document.createElement('i');
+    g.className = 'hf-ghost2';
+    g.style.gridColumn = String(c);
+    g.style.gridRow    = String(r);
+    grid.appendChild(g);
+  };
+//locations
+ghost2(4,8); ghost2(4,9);
+
+const ghost3 = (c,r) => {
+    const g = document.createElement('i');
+    g.className = 'hf-ghost3';
+    g.style.gridColumn = String(c);
+    g.style.gridRow    = String(r);
+    grid.appendChild(g);
+  };
+//locations
+ghost3(4,10);
+
+const ghost4 = (c,r) => {
+    const g = document.createElement('i');
+    g.className = 'hf-ghost4';
+    g.style.gridColumn = String(c);
+    g.style.gridRow    = String(r);
+    grid.appendChild(g);
+  };
+//locations
+ghost4(3,10); ghost4(5,10);
+
+const ghost5 = (c,r) => {
+    const g = document.createElement('i');
+    g.className = 'hf-ghost5';
+    g.style.gridColumn = String(c);
+    g.style.gridRow    = String(r);
+    grid.appendChild(g);
+  };
+//locations
+ghost5(2,10);
+
+const ghost6 = (c,r) => {
+    const g = document.createElement('i');
+    g.className = 'hf-ghost6';
+    g.style.gridColumn = String(c);
+    g.style.gridRow    = String(r);
+    grid.appendChild(g);
+  };
+//locations
+ghost6(6,10);
+
+const ghost7 = (c,r) => {
+    const g = document.createElement('i');
+    g.className = 'hf-ghost7';
+    g.style.gridColumn = String(c);
+    g.style.gridRow    = String(r);
+    grid.appendChild(g);
+  };
+//locations
+ghost7(5,9);
+
+const ghost8 = (c,r) => {
+    const g = document.createElement('i');
+    g.className = 'hf-ghost8';
+    g.style.gridColumn = String(c);
+    g.style.gridRow    = String(r);
+    grid.appendChild(g);
+  };
+//locations
+ghost8(6,9);
+
+const ghost9 = (c,r) => {
+    const g = document.createElement('i');
+    g.className = 'hf-ghost9';
+    g.style.gridColumn = String(c);
+    g.style.gridRow    = String(r);
+    grid.appendChild(g);
+  };
+//locations
+ghost9(1,2);
+
+const ghost10 = (c,r) => {
+    const g = document.createElement('i');
+    g.className = 'hf-ghost10';
+    g.style.gridColumn = String(c);
+    g.style.gridRow    = String(r);
+    grid.appendChild(g);
+  };
+//locations
+ghost10(2,3); ghost10(2,4);
+
+const ghost11 = (c,r) => {
+    const g = document.createElement('i');
+    g.className = 'hf-ghost11';
+    g.style.gridColumn = String(c);
+    g.style.gridRow    = String(r);
+    grid.appendChild(g);
+  };
+//locations
+ghost11(1,1); ghost11(3,1); ghost11(4,1); ghost11(2,2); ghost11(3,2); ghost11(4,2); ghost11(3,3); ghost11(4,3); ghost11(5,2); ghost11(2,1); ghost11(3,4);
+  //3) colored blocks in fixed spots (pixel-matched layout)
+  const drop = (c,r,cls) => {
+    const b = document.createElement('b');
+    b.className = 'hf-block ' + cls;
+    b.style.gridColumn = String(c);
+    b.style.gridRow    = String(r);
+    grid.appendChild(b);
+  };
+
+  // cyan singles (left/top & mid-left)
+  drop(1,3,'hf-cyan');
+  drop(1,4,'hf-cyan');
+  drop(2,7,'hf-cyan');
+
+  // magenta vertical stacks on right (top & lower)
+  [4,5].forEach(r => drop(8,r,'hf-magenta'));
+  [8,9].forEach(r => drop(8,r,'hf-magenta'));
+  [10].forEach(r => drop(7,r,'hf-magenta'));
+
+  // bottom-left and bottom-right corner singles (magenta)
+  drop(1,12,'hf-magenta');
+  drop(8,12,'hf-magenta');
+  drop(1,10,'hf-magenta');
+  
+
+  // orange L near bottom-left
+  drop(2,9,'hf-orange');
+  drop(3,9,'hf-orange');
+  drop(3,8,'hf-orange');
+  
+
+  grid.dataset.built = '1';
+
+  // 4) mini cards — draw shapes
+  const cards = document.querySelectorAll('#homeOverlay .hf-card');
+  if (cards.length === 3){
+    // helper to place small blocks on a 4×3 mini grid
+    const mini = (el, coords, cls) => {
+      const m = document.createElement('div'); m.className = 'hf-mini';
+      // 4 cols × 3 rows grid space
+      const index = (x,y)=> y*4 + x;
+      for(let i=0;i<12;i++){
+        const d=document.createElement('i'); d.className='b'; m.appendChild(d);
+      }
+      coords.forEach(([x,y])=>{
+        const cell = m.children[index(x,y)];
+        if(cell) cell.classList.add(cls);
+      });
+      el.innerHTML=''; el.appendChild(m);
+    };
+    // Left card: magenta little L (3 blocks)
+    mini(cards[0], [[1,1],[2,0]], 'mag');
+    // Middle card: violet T (4 blocks)
+    mini(cards[1], [[1,2],[0,1],[1,1],[2,1]], 'vio');
+    // Right card: orange 3 horizontal
+    mini(cards[2], [[0,1],[1,1],[2,1]], 'orn');
+  }
+}
+
+// show/hide overlay (keeps your existing nav)
+function showHomeOverlay(){ document.getElementById('homeOverlay')?.classList.add('show'); }
+function hideHomeOverlay(){ document.getElementById('homeOverlay')?.classList.remove('show'); }
+
+window.addEventListener('DOMContentLoaded', ()=>{
+  showHome();
+  runSelfTests();
+  fitTetrisToViewport();
+  initHomeArt();
+  showHomeOverlay();
+  fitHomeOverlay();                      // <— NEW
+  requestAnimationFrame(fitHomeOverlay); // <— NEW (wait one frame for CSS to apply)
+  setTimeout(fitHomeOverlay, 250); // <— NEW (in case fonts/images load late)
+  document.getElementById('hfPlay')?.addEventListener('click', ()=>{
+    hideHomeOverlay();
+  });
+});
+
+window.addEventListener('resize', fitHomeOverlay, { passive:true });
+window.addEventListener('orientationchange', () => setTimeout(fitHomeOverlay, 50), { passive:true });
+document.fonts?.ready?.then?.(fitHomeOverlay);
+window.visualViewport?.addEventListener?.('resize', fitHomeOverlay, { passive: true });
+
+// Re-fit if the inside card reflows (only if the element exists)
+document.addEventListener('DOMContentLoaded', () => {
+  const phone = document.querySelector('#homeOverlay .hf-phone');
+  if (phone && 'ResizeObserver' in window) {
+    const ro = new ResizeObserver(() => fitHomeOverlay());
+    ro.observe(phone);
+  }
+});
+
+
+
+
+// Fit the portrait card into the real viewport (handles toolbars/URL bars)
+function fitHomeOverlay(){
+  const overlay = document.getElementById('homeOverlay');
+  const phone   = overlay?.querySelector('.hf-phone');
+  if (!overlay || !phone) return;
+
+  // Reset to natural size to measure
+  phone.style.transform = 'none';
+  phone.style.marginTop = phone.style.marginBottom = '0px';
+
+  // Prefer visualViewport (excludes browser UI), fall back to window
+  const vw = (window.visualViewport?.width  ?? window.innerWidth);
+  const vh = (window.visualViewport?.height ?? window.innerHeight);
+
+  // Padding budget so it never kisses the edges
+  const pad = 24;
+  const availW = Math.max(280, vw - pad * 2);
+  const availH = Math.max(360, vh - pad * 2);
+
+  const rect = phone.getBoundingClientRect();
+  const scale = Math.min(1, availW / rect.width, availH / rect.height);
+
+  phone.style.transform       = `scale(${scale})`;
+  phone.style.transformOrigin = 'top center';
+
+  // Center vertically after scaling
+  const usedH = rect.height * scale;
+  const margin = Math.max(0, (availH - usedH) / 2);
+  phone.style.marginTop    = `${margin}px`;
+  phone.style.marginBottom = `${margin}px`;
+}
+
+
+
 
 // If the demo didn't start for some reason on mobile, kick it on first tap.
 window.addEventListener('pointerdown', () => {
@@ -1047,12 +1595,37 @@ if ('serviceWorker' in navigator) {
 
 
 </script>
+<!-- ===== NEON HOME OVERLAY (first screen) ===== -->
+<!-- ===== NEON PORTRAIT HOME (exact mock) ===== -->
+<div id="homeOverlay" aria-hidden="true">
+  <div class="hf-phone">
+    <div class="hf-board">
+
+      <h1 class="hf-title">
+        <span>BLOCK</span><br><span>FORGE</span>
+      </h1>
+
+      <!-- mini 8×12 grid + decorative blocks (filled by JS) -->
+      <div id="hfGrid" class="hf-grid" aria-hidden="true"></div>
+    </div>
+
+    <button id="hfPlay" class="hf-cta">PLAY</button>
+
+    <div class="hf-tray">
+      <div class="hf-card"><div class="hf-piece p1"></div></div>
+      <div class="hf-card"><div class="hf-piece p2"></div></div>
+      <div class="hf-card"><div class="hf-piece p3"></div></div>
+    </div>
+  </div>
+</div>
+
+
 <!-- Update prompt toast -->
 <div id="updateToast" role="status" aria-live="polite" class="hidden">
   <span>New version available</span>
   <button id="updateLaterBtn" type="button">Later</button>
   <button id="updateNowBtn" class="primary" type="button">Refresh</button>
 </div>
-
+ 
 </body>
 </html>
