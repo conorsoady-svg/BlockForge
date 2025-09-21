@@ -12,6 +12,45 @@
 
 
 <style>
+  /*  A. Viewport hygiene */
+html,body{height:100%;margin:0}
+:root{
+  /* your design size (edit to match your mock) */
+  --base-w: 420px;
+  --base-h: 820px;
+
+  /* mobile-safe height so URL bars don’t squash you */
+  --vh: 100svh;  /* use svh (small viewport height) */
+}
+
+/* B. Center stage that we’ll scale into */
+.stage{
+  width: 100vw;
+  height: var(--vh);
+  display: grid;
+  place-items: center;
+  overflow: hidden;          /* no scroll during glow/shadows */
+  background: #0c121b;       /* your page bg */
+  padding:
+    max(env(safe-area-inset-top), 0px)
+    max(env(safe-area-inset-right), 0px)
+    max(env(safe-area-inset-bottom), 0px)
+    max(env(safe-area-inset-left), 0px); /* respect notches */
+}
+
+/* C. Your designed root—never changes size, only scales */
+#gameRoot{
+  width: var(--base-w);
+  height: var(--base-h);
+  transform-origin: top left;
+  will-change: transform;
+  contain: layout paint size;   /* perf: isolate internal layout */
+}
+
+/* D. Nice defaults so children don’t overflow on narrow screens */
+*,*::before,*::after{box-sizing:border-box;min-width:0;min-height:0}
+img,canvas,video{max-width:100%;height:auto}
+
 :root{
   --cell: 40px;
   --gap:  2px;
@@ -418,6 +457,11 @@ button:active{transform:translateY(1px)}
     <div id="demoPreview" class="preview-layer"></div>
     <div id="demoScore" class="score-banner">0</div>
     <div id="demoTray" class="tray"></div>
+  </div>
+</div>
+<div class="stage">
+  <div id="gameRoot"> 
+    <!-- your whole UI: home overlay, canvas/board, buttons, etc. -->
   </div>
 </div>
 
@@ -1642,6 +1686,49 @@ if ('serviceWorker' in navigator) {
   <button id="updateLaterBtn" type="button">Later</button>
   <button id="updateNowBtn" class="primary" type="button">Refresh</button>
 </div>
- 
+ <script>
+(() => {
+  const stage = document.querySelector('.stage');
+  const root  = document.getElementById('gameRoot');
+
+  // Read your design size from CSS variables (so you keep one source of truth)
+  function cssPx(name){
+    return parseFloat(getComputedStyle(document.documentElement).getPropertyValue(name));
+  }
+  function fit(){
+    const BASE_W = cssPx('--base-w');
+    const BASE_H = cssPx('--base-h');
+
+    // Stage rect = safe area we can use
+    const r = stage.getBoundingClientRect();
+
+    // Scale to contain: no squish, show full app, letterbox if needed
+    const scale = Math.min(r.width / BASE_W, r.height / BASE_H);
+
+    root.style.transform = `scale(${scale})`;
+
+    // Optional: center inside stage (top-left origin by default)
+    const x = (r.width  - BASE_W * scale) / 2;
+    const y = (r.height - BASE_H * scale) / 2;
+    root.style.marginLeft = x + 'px';
+    root.style.marginTop  = y + 'px';
+  }
+
+  // Keep svh fresh (iOS address bar changes on scroll)
+  function updateSVH(){
+    document.documentElement.style.setProperty('--vh', window.innerHeight + 'px');
+  }
+
+  // Initial + reactive
+  const run = () => { updateSVH(); fit(); };
+  window.addEventListener('resize', run, { passive:true });
+  window.addEventListener('orientationchange', run);
+  window.addEventListener('DOMContentLoaded', run);
+  // settle after soft keyboard/URL bar animations
+  requestAnimationFrame(run);
+  setTimeout(run, 200);
+})();
+</script>
+
 </body>
 </html>
