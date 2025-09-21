@@ -1729,6 +1729,72 @@ if ('serviceWorker' in navigator) {
   setTimeout(run, 200);
 })();
 </script>
+<script>
+/* ===== Universal Fit (no squish) — no gist required ===== */
+(() => {
+  const BASE_W = 420;   // <-- change to your design width (px)
+  const BASE_H = 820;   // <-- change to your design height (px)
+
+  // Ensure viewport meta (mobile)
+  if (!document.querySelector('meta[name="viewport"]')) {
+    const m = document.createElement('meta');
+    m.name = 'viewport';
+    m.content = 'width=device-width, initial-scale=1, viewport-fit=cover';
+    document.head.appendChild(m);
+  }
+
+  // Inject minimal CSS once
+  if (!document.getElementById('universal-fit-css')) {
+    const css = `
+html,body{height:100%;margin:0}
+:root{--base-w:${BASE_W}px;--base-h:${BASE_H}px;--vh:100svh}
+.stage{
+  width:100vw;height:var(--vh);display:grid;place-items:center;overflow:hidden;background:#0c121b;
+  padding:max(env(safe-area-inset-top),0px) max(env(safe-area-inset-right),0px)
+          max(env(safe-area-inset-bottom),0px) max(env(safe-area-inset-left),0px);
+}
+#gameRoot{width:var(--base-w);height:var(--base-h);transform-origin:top left;will-change:transform;contain:layout paint size}
+*,*::before,*::after{box-sizing:border-box;min-width:0;min-height:0}
+img,canvas,video{max-width:100%;height:auto}
+`;
+    const tag = document.createElement('style');
+    tag.id = 'universal-fit-css';
+    tag.textContent = css;
+    document.head.appendChild(tag);
+  }
+
+  // Wrap everything once: .stage > #gameRoot, then move all existing body nodes inside
+  function wrapOnce(){
+    if (document.querySelector('.stage') && document.getElementById('gameRoot')) return;
+    const stage = document.createElement('div'); stage.className = 'stage';
+    const root  = document.createElement('div'); root.id = 'gameRoot';
+    const toMove = Array.from(document.body.children).filter(n => n !== stage && n.id !== 'gameRoot' && n.tagName !== 'SCRIPT');
+    toMove.forEach(n => root.appendChild(n));
+    stage.appendChild(root);
+    document.body.appendChild(stage);
+  }
+
+  // Scale #gameRoot to contain within .stage (no distortion)
+  function fit(){
+    document.documentElement.style.setProperty('--vh', window.innerHeight + 'px'); // keep svh fresh
+    const stage = document.querySelector('.stage');
+    const root  = document.getElementById('gameRoot');
+    if (!stage || !root) return;
+    const r = stage.getBoundingClientRect();
+    const bw = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--base-w'));
+    const bh = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--base-h'));
+    const s = Math.min(r.width / bw, r.height / bh);
+    root.style.transform = `scale(${s})`;
+    root.style.marginLeft = ((r.width  - bw * s) / 2) + 'px';
+    root.style.marginTop  = ((r.height - bh * s) / 2) + 'px';
+  }
+
+  const start = () => { wrapOnce(); fit(); requestAnimationFrame(fit); setTimeout(fit, 200); };
+  (document.readyState === 'loading') ? addEventListener('DOMContentLoaded', start, {once:true}) : start();
+  addEventListener('resize', fit, {passive:true});
+  addEventListener('orientationchange', fit);
+})();
+</script>
 
 </body>
 </html>
