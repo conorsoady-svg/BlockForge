@@ -12,66 +12,11 @@
 
 
 <style>
-  /*  A. Viewport hygiene */
-html,body{height:100%;margin:0}
-:root{
-  /* your design size (edit to match your mock) */
-  --base-w: 420px;
-  --base-h: 820px;
-
-  /* mobile-safe height so URL bars don’t squash you */
-  --vh: 100svh;  /* use svh (small viewport height) */
-}
-
-/* B. Center stage that we’ll scale into */
-.stage{
-  width: 100vw;
-  height: var(--vh);
-  display: grid;
-  place-items: center;
-  overflow: hidden;          /* no scroll during glow/shadows */
-  background: #0c121b;       /* your page bg */
-  padding:
-    max(env(safe-area-inset-top), 0px)
-    max(env(safe-area-inset-right), 0px)
-    max(env(safe-area-inset-bottom), 0px)
-    max(env(safe-area-inset-left), 0px); /* respect notches */
-}
-
-/* C. Your designed root—never changes size, only scales */
-#gameRoot{
-  width: var(--base-w);
-  height: var(--base-h);
-  transform-origin: top left;
-  will-change: transform;
-  contain: layout paint size;   /* perf: isolate internal layout */
-}
-
-/* D. Nice defaults so children don’t overflow on narrow screens */
-*,*::before,*::after{box-sizing:border-box;min-width:0;min-height:0}
-img,canvas,video{max-width:100%;height:auto}
-
-:root{
-  --cell: 40px;
-  --gap:  2px;
-  --pad:  4px;
-  --clear-ms: 420ms; /* duration with unit */
-  --cols: 8;         /* unitless is fine for counts */
-}
-
-*, *::before, *::after{ box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-html, body{ height:100%; -webkit-text-size-adjust:100%; text-size-adjust:100%; }
-body{
-  margin:0;
-  background: radial-gradient(1200px 800px at 20% 0%, #0b1022, #0c1226 50%, #0a0f1f);
-  color:#e8ebf3;
-  text-align:center;
-  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-  overscroll-behavior-y: none;
-  -webkit-user-select: none; user-select: none;
-}
-.hidden{ display:none !important; }
-
+:root{--cell:40;--gap:2;--pad:4;--clear-ms:420;--cols:8}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;-webkit-text-size-adjust:100%}
+body{margin:0;background:radial-gradient(1200px 800px at 20% 0%,#0b1022,#0c1226 50%,#0a0f1f);color:#e8ebf3;text-align:center;font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;overscroll-behavior-y:none;-webkit-user-select:none;user-select:none}
+.hidden{display:none!important}
 
 /* --- Update toast (PWA) --- */
 #updateToast {
@@ -258,6 +203,16 @@ button:active{transform:translateY(1px)}
     linear-gradient(180deg, rgba(0,0,0,.25), rgba(0,0,0,0) 20%, rgba(0,0,0,0) 80%, rgba(0,0,0,.35));
 }
 
+/* sparkles */
+.hf-sparkles{
+  position:absolute; inset:0; pointer-events:none;
+  background:
+    radial-gradient(6px 6px at 20% 30%, rgba(124,87,255,.45), transparent 55%),
+    radial-gradient(5px 5px at 78% 60%, rgba(124,87,255,.35), transparent 60%),
+    radial-gradient(4px 4px at 12% 70%, rgb(255, 255, 255), transparent 60%);
+  animation:infinite 6s linear infinite; filter: blur(1px); opacity:.55;
+}
+@keyframes hfDrift{ 0%{transform:translateY(0)} 50%{transform:translateY(-6px)} 100%{transform:translateY(0)} }
 
 /* title */
 .hf-title{
@@ -447,6 +402,32 @@ button:active{transform:translateY(1px)}
 .hf-mini .vio{ background:linear-gradient(180deg,#7A5CFF,#7c82ff); }
 .hf-mini .orn{ background:linear-gradient(180deg,#9AFF00,#4bb630); }
 
+:root{
+  --base-w: 420;  /* <- change to your design width (px) */
+  --base-h: 820;  /* <- change to your design height (px) */
+  --ratio: calc(var(--base-w) / var(--base-h));
+}
+
+/* full-screen stage that centers the fitbox */
+.fitstage{
+  min-height: 100svh;
+  width: 100vw;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  background: #0c121b; /* your app bg */
+}
+
+/* the homescreen canvas with a locked aspect ratio */
+.fitbox{
+  aspect-ratio: var(--base-w) / var(--base-h);
+  width: min(100vw, calc(100svh * var(--ratio)));
+  max-width: 100vw;
+  max-height: 100svh;
+}
+
+.fitbox *{ box-sizing:border-box; min-width:0; min-height:0; }
+
 </style>
 </head>
 <body>
@@ -457,11 +438,6 @@ button:active{transform:translateY(1px)}
     <div id="demoPreview" class="preview-layer"></div>
     <div id="demoScore" class="score-banner">0</div>
     <div id="demoTray" class="tray"></div>
-  </div>
-</div>
-<div class="stage">
-  <div id="gameRoot"> 
-    <!-- your whole UI: home overlay, canvas/board, buttons, etc. -->
   </div>
 </div>
 
@@ -528,8 +504,6 @@ button:active{transform:translateY(1px)}
   <button onclick="showBackMenu()">⬅ Back</button>
 </div>
 
-     
-
 <script>
 /* ---------- Shorthands ---------- */
 const $=id=>document.getElementById(id);
@@ -559,40 +533,6 @@ if (/(^localhost$|^127\.0\.0\.1$)/.test(location.hostname)) {
     caches.keys().then(keys => keys.forEach(k => caches.delete(k)));
   }
 }
-
-
-
-  
-  
-  function emitter({ rate=3, area=[0,0,100,100], color='rgba(122,92,255,.85)',
-                     size=[3,7], life=[1400,2400], drift=[-12,12,-6,-36] } = {}) {
-    let stop = false;
-    (function tick(){
-      if (stop) return;
-      const [x1,y1,x2,y2] = area;
-      spawn({
-        x: rand(x1,x2) + '%',
-        y: rand(y1,y2) + '%',
-        size: Math.round(rand(size[0], size[1])),
-        color, life: Math.round(rand(life[0], life[1])),
-        drift
-      });
-      setTimeout(tick, 1000 / rate);
-    })();
-    return () => { stop = true; };
-  }
-
-  function path(type='drift'){
-    switch(type){
-      case 'rise':  return [-6, 6, -60, -120];
-      case 'fall':  return [-6, 6,  40,   90];
-      case 'left':  return [-120, -40, -10, 10];
-      case 'right': return [  40, 120, -10, 10];
-      default:      return [-12, 12,  -6, -36];
-    }
-  }
-
-  
 
 /* iOS viewport nudge */
 (function(){
@@ -1467,6 +1407,7 @@ window.addEventListener('DOMContentLoaded', ()=>{
   showHome();
   runSelfTests();
   fitTetrisToViewport();
+
   initHomeArt();
   showHomeOverlay();
   fitHomeOverlay();                      // <— NEW
@@ -1660,6 +1601,7 @@ if ('serviceWorker' in navigator) {
 <div id="homeOverlay" aria-hidden="true">
   <div class="hf-phone">
     <div class="hf-board">
+      <div class="hf-sparkles" aria-hidden="true"></div>
 
       <h1 class="hf-title">
         <span>BLOCK</span><br><span>FORGE</span>
@@ -1686,113 +1628,32 @@ if ('serviceWorker' in navigator) {
   <button id="updateLaterBtn" type="button">Later</button>
   <button id="updateNowBtn" class="primary" type="button">Refresh</button>
 </div>
- <script>
-(() => {
-  const stage = document.querySelector('.stage');
-  const root  = document.getElementById('gameRoot');
-
-  // Read your design size from CSS variables (so you keep one source of truth)
-  function cssPx(name){
-    return parseFloat(getComputedStyle(document.documentElement).getPropertyValue(name));
-  }
-  function fit(){
-    const BASE_W = cssPx('--base-w');
-    const BASE_H = cssPx('--base-h');
-
-    // Stage rect = safe area we can use
-    const r = stage.getBoundingClientRect();
-
-    // Scale to contain: no squish, show full app, letterbox if needed
-    const scale = Math.min(r.width / BASE_W, r.height / BASE_H);
-
-    root.style.transform = `scale(${scale})`;
-
-    // Optional: center inside stage (top-left origin by default)
-    const x = (r.width  - BASE_W * scale) / 2;
-    const y = (r.height - BASE_H * scale) / 2;
-    root.style.marginLeft = x + 'px';
-    root.style.marginTop  = y + 'px';
-  }
-
-  // Keep svh fresh (iOS address bar changes on scroll)
-  function updateSVH(){
-    document.documentElement.style.setProperty('--vh', window.innerHeight + 'px');
-  }
-
-  // Initial + reactive
-  const run = () => { updateSVH(); fit(); };
-  window.addEventListener('resize', run, { passive:true });
-  window.addEventListener('orientationchange', run);
-  window.addEventListener('DOMContentLoaded', run);
-  // settle after soft keyboard/URL bar animations
-  requestAnimationFrame(run);
-  setTimeout(run, 200);
-})();
-</script>
 <script>
-/* ===== Universal Fit (no squish) — no gist required ===== */
 (() => {
-  const BASE_W = 420;   // <-- change to your design width (px)
-  const BASE_H = 820;   // <-- change to your design height (px)
+  function wrapHome(){
+    const home = document.getElementById('homeOverlay');
+    if (!home) return console.warn('fitstage: #homeOverlay not found');
 
-  // Ensure viewport meta (mobile)
-  if (!document.querySelector('meta[name="viewport"]')) {
-    const m = document.createElement('meta');
-    m.name = 'viewport';
-    m.content = 'width=device-width, initial-scale=1, viewport-fit=cover';
-    document.head.appendChild(m);
+    // Already wrapped? exit.
+    if (home.closest('.fitstage')) return;
+
+    // Create wrappers
+    const stage = document.createElement('div');
+    stage.className = 'fitstage';
+    const box = document.createElement('div');
+    box.className = 'fitbox';
+
+    // Insert stage where #homeOverlay currently sits
+    const parent = home.parentNode;
+    parent.insertBefore(stage, home);
+    stage.appendChild(box);
+    box.appendChild(home); // move your existing overlay inside the fitbox
   }
 
-  // Inject minimal CSS once
-  if (!document.getElementById('universal-fit-css')) {
-    const css = `
-html,body{height:100%;margin:0}
-:root{--base-w:${BASE_W}px;--base-h:${BASE_H}px;--vh:100svh}
-.stage{
-  width:100vw;height:var(--vh);display:grid;place-items:center;overflow:hidden;background:#0c121b;
-  padding:max(env(safe-area-inset-top),0px) max(env(safe-area-inset-right),0px)
-          max(env(safe-area-inset-bottom),0px) max(env(safe-area-inset-left),0px);
-}
-#gameRoot{width:var(--base-w);height:var(--base-h);transform-origin:top left;will-change:transform;contain:layout paint size}
-*,*::before,*::after{box-sizing:border-box;min-width:0;min-height:0}
-img,canvas,video{max-width:100%;height:auto}
-`;
-    const tag = document.createElement('style');
-    tag.id = 'universal-fit-css';
-    tag.textContent = css;
-    document.head.appendChild(tag);
-  }
-
-  // Wrap everything once: .stage > #gameRoot, then move all existing body nodes inside
-  function wrapOnce(){
-    if (document.querySelector('.stage') && document.getElementById('gameRoot')) return;
-    const stage = document.createElement('div'); stage.className = 'stage';
-    const root  = document.createElement('div'); root.id = 'gameRoot';
-    const toMove = Array.from(document.body.children).filter(n => n !== stage && n.id !== 'gameRoot' && n.tagName !== 'SCRIPT');
-    toMove.forEach(n => root.appendChild(n));
-    stage.appendChild(root);
-    document.body.appendChild(stage);
-  }
-
-  // Scale #gameRoot to contain within .stage (no distortion)
-  function fit(){
-    document.documentElement.style.setProperty('--vh', window.innerHeight + 'px'); // keep svh fresh
-    const stage = document.querySelector('.stage');
-    const root  = document.getElementById('gameRoot');
-    if (!stage || !root) return;
-    const r = stage.getBoundingClientRect();
-    const bw = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--base-w'));
-    const bh = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--base-h'));
-    const s = Math.min(r.width / bw, r.height / bh);
-    root.style.transform = `scale(${s})`;
-    root.style.marginLeft = ((r.width  - bw * s) / 2) + 'px';
-    root.style.marginTop  = ((r.height - bh * s) / 2) + 'px';
-  }
-
-  const start = () => { wrapOnce(); fit(); requestAnimationFrame(fit); setTimeout(fit, 200); };
-  (document.readyState === 'loading') ? addEventListener('DOMContentLoaded', start, {once:true}) : start();
-  addEventListener('resize', fit, {passive:true});
-  addEventListener('orientationchange', fit);
+  // run after DOM is parsed
+  (document.readyState === 'loading')
+    ? document.addEventListener('DOMContentLoaded', wrapHome, { once:true })
+    : wrapHome();
 })();
 </script>
 
