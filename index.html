@@ -12,11 +12,27 @@
 
 
 <style>
-:root{--cell:40;--gap:2;--pad:4;--clear-ms:420;--cols:8}
-*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-html,body{height:100%;-webkit-text-size-adjust:100%}
-body{margin:0;background:radial-gradient(1200px 800px at 20% 0%,#0b1022,#0c1226 50%,#0a0f1f);color:#e8ebf3;text-align:center;font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;overscroll-behavior-y:none;-webkit-user-select:none;user-select:none}
-.hidden{display:none!important}
+:root{
+  --cell: 40px;
+  --gap:  2px;
+  --pad:  4px;
+  --clear-ms: 420ms; /* duration with unit */
+  --cols: 8;         /* unitless is fine for counts */
+}
+
+*, *::before, *::after{ box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+html, body{ height:100%; -webkit-text-size-adjust:100%; text-size-adjust:100%; }
+body{
+  margin:0;
+  background: radial-gradient(1200px 800px at 20% 0%, #0b1022, #0c1226 50%, #0a0f1f);
+  color:#e8ebf3;
+  text-align:center;
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  overscroll-behavior-y: none;
+  -webkit-user-select: none; user-select: none;
+}
+.hidden{ display:none !important; }
+
 
 /* --- Update toast (PWA) --- */
 #updateToast {
