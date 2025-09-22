@@ -179,15 +179,15 @@ button:active{transform:translateY(1px)}
   backdrop-filter: blur(6px);
   padding:
     max(10px, env(safe-area-inset-top))
-    max(15px, env(safe-area-inset-right))
+    max(1px, env(safe-area-inset-right))
     max(16px, env(safe-area-inset-bottom))
-    max(15px, env(safe-area-inset-left));
+    max(1px, env(safe-area-inset-left));
 }
 #homeOverlay.show{ display:flex; }
 
 /* phone card */
 .hf-phone{
-  width:clamp(450px, 33vw, 420px);
+  width:clamp(420px, 33vw, 420px);
   display:flex; flex-direction:column; align-items:center; gap:16px;
   margin-top: var(--homeOffset);
 }
