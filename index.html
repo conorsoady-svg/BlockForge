@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
 <meta name="format-detection" content="telephone=no" />
 <title>Block Forge — Full Game (Neon, Mobile, Demo AI)</title>
  <link rel="manifest" href="manifest.webmanifest?v=4">
@@ -427,6 +427,25 @@ button:active{transform:translateY(1px)}
 }
 
 .fitbox *{ box-sizing:border-box; min-width:0; min-height:0; }
+
+html, body {
+  height: 100%;
+  margin: 0;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+img, canvas, svg, video { max-width: 100%; height: auto; display: block; }
+
+button, input, select, textarea { font: inherit; }
+
+.safe {
+  /* Add this class to your top-level wrapper */
+  padding: env(safe-area-inset-top) env(safe-area-inset-right)
+           env(safe-area-inset-bottom) env(safe-area-inset-left);
+}
 
 </style>
 </head>
@@ -1655,6 +1674,8 @@ if ('serviceWorker' in navigator) {
     ? document.addEventListener('DOMContentLoaded', wrapHome, { once:true })
     : wrapHome();
 })();
+
+
 </script>
 
 </body>
