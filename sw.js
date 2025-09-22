@@ -1,5 +1,5 @@
 /* sw.js — update-prompt style */
-const CACHE = "bf-static-v6";
+const CACHE = "bf-static-v7";
 
 /* Optional: very small precache (safe files only) */
 self.addEventListener("install", (event) => {
