@@ -403,48 +403,30 @@ button:active{transform:translateY(1px)}
 .hf-mini .orn{ background:linear-gradient(180deg,#9AFF00,#4bb630); }
 
 :root{
-  --base-w: 420;   /* your design width (px) */
-  --base-h: 820;   /* your design height (px) */
+  --base-w: 420;  /* <- change to your design width (px) */
+  --base-h: 820;  /* <- change to your design height (px) */
   --ratio: calc(var(--base-w) / var(--base-h));
-  --app-h: 100dvh; /* dynamic viewport height (mobile-safe) */
 }
-
-/* Fallback for older WebViews that don't support dvh */
-@supports not (height: 100dvh) {
-  :root { --app-h: 100vh; }
-}
-
-/* optional: normalize text zoom on iOS/Android */
-html, body { height: 100%; margin: 0; -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
-*, *::before, *::after { box-sizing: border-box; }
-img, canvas, svg, video { max-width: 100%; height: auto; display: block; }
 
 /* full-screen stage that centers the fitbox */
 .fitstage{
-  min-height: var(--app-h);
+  min-height: 100dvh;
   width: 100vw;
   display: grid;
   place-items: center;
   overflow: hidden;
-  background: #0c121b;
-  padding: env(safe-area-inset-top) env(safe-area-inset-right)
-           env(safe-area-inset-bottom) env(safe-area-inset-left);
+  background: #0c121b; /* your app bg */
 }
 
 /* the homescreen canvas with a locked aspect ratio */
 .fitbox{
   aspect-ratio: var(--base-w) / var(--base-h);
-
-  /* fit inside viewport height while respecting aspect ratio */
-  width: min(100vw, calc(var(--app-h) * var(--ratio)));
+  width: min(100vw, calc(100svh * var(--ratio)));
   max-width: 100vw;
-  max-height: var(--app-h);
-
-  /* prevents content overflow from causing squish */
-  contain: layout paint size;
+  max-height: 100svh;
 }
 
-.fitbox *{ min-width:0; min-height:0; }
+.fitbox *{ box-sizing:border-box; min-width:0; min-height:0; }
 
 html, body {
   height: 100%;
@@ -1694,18 +1676,6 @@ if ('serviceWorker' in navigator) {
 })();
 
 
-</script>
-<script>
-(function () {
-  function setVH() {
-    var vh = window.innerHeight * 0.01;
-    document.documentElement.style.setProperty('--app-h', (vh * 100) + 'px');
-  }
-  setVH();
-  addEventListener('resize', setVH);
-  addEventListener('orientationchange', setVH);
-  document.addEventListener('visibilitychange', setVH, { passive: true });
-})();
 </script>
 
 </body>
