@@ -15,7 +15,7 @@
 :root{--cell:40;--gap:2;--pad:4;--clear-ms:420;--cols:8}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{height:100%;-webkit-text-size-adjust:100%}
-body{margin:0;background:radial-gradient(1200px 800px at 20% 0%,#0b1022,#0c1226 50%,#0a0f1f);color:#e8ebf3;text-align:center;font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;overscroll-behavior-y:none;-webkit-user-select:none;user-select:none}
+body{margin:0;background: radial-gradient(circle farthest-corner at 50% 50%, #010724 70%, #3A5292 150%); background-attachment: fixed; background-size: 100dvw 100dvh; background-repeat: no-repeat; background-position: center;color:#54FF10;text-align:center;font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;overscroll-behavior-y:none;-webkit-user-select:none;user-select:none}
 .hidden{display:none!important}
 
 /* --- Update toast (PWA) --- */
@@ -28,7 +28,7 @@ body{margin:0;background:radial-gradient(1200px 800px at 20% 0%,#0b1022,#0c1226 
   color: #e8ebf3;
   border-radius: 12px;
   padding: 10px 14px;
-  box-shadow: 0 10px 24px rgba(0,0,0,.35), 0 0 14px rgba(57,255,20,.25);
+  box-shadow: 0 10px 24px rgba(0,0,0,.35), 0 0 14px rgb(0, 247, 255);
   display: none;
   z-index: 9999;
   font-weight: 700;
@@ -54,25 +54,136 @@ body{margin:0;background:radial-gradient(1200px 800px at 20% 0%,#0b1022,#0c1226 
 
 
 /* UI */
-button{margin:6px;padding:10px 20px;font-size:16px;border:none;border-radius:12px;background:#111827;color:#00ffea;cursor:pointer;box-shadow:0 0 8px rgb(0, 255, 234);transition:background .2s,box-shadow .2s,transform .06s}
-button:active{transform:translateY(1px)}
+button{
+  margin:6px;
+  padding:15px 20px;
+  font-size:16px;              /* ← fix */
+  border:none;
+  border-radius:12px;
+  background:#111827;
+  color:#00ffea;
+  cursor:pointer;
+  box-shadow:0 0 8px rgb(0, 255, 234);
+  transition:background .2s, box-shadow .2s, transform .06s;
+}
+button:active{ transform:translateY(1px); }
+
+/* Move Classic down a bit */
+#offline #classicBtn{ margin-top:20px; }
+
+/* Nudge Tetris to the right */
+#offline #tetrisBtn{ margin-left:24px; }
+
+/* Pull Online closer to Tetris and down slightly */
+#offline #onlineBtn{ margin-left:12px; margin-top:6px; }
+
+/* Offline = teal */
+#homeOfflineBtn{
+  background:linear-gradient(#264bc5, #002c6e); color:#ffffff;
+  border:1px solid rgba(0,224,212,.35);
+  box-shadow:0 0 0px rgba(0,224,212,.35), 0 0 2px rgba(0,224,212,.6) inset;
+}
+
+/* Online = purple */
+#homeOnlineBtn{
+  background:linear-gradient(#f89500, #583d00); color:#ffffff;
+  border:1px solid rgba(167,125,255,.35);
+  box-shadow:0 0 0px rgba(167,125,255,.35), 0 0 2px rgba(167,125,255,.6) inset;
+}
+
+/* Theme = amber */
+#homeThemeBtn{
+  background:linear-gradient(#ff0000, #470202); color:#ffffff;
+  border:1px solid rgba(255,178,71,.35);
+  box-shadow:0 0 0px rgba(255,178,71,.35), 0 0 2px rgba(255,178,71,.6) inset;
+}
+
 .app{
-  width: 100%;
-  max-width: min(560px, 92vw);
-  margin: 0 auto;
-  padding: 16px;
-  position: relative;
-  z-index: 1;
+  width:100%;
+  max-width:min(560px, 92vw);
+  margin:0 auto;
+  padding:16px;
+  position:relative;
+  z-index:1;
 }
 
 
 .sub{opacity:.8;margin-bottom:8px}
 
+
+#home .home-layout > button:not(.icon-btn){
+  --btnw: clamp(140px, 40vw, 220px);
+  min-width: var(--btnw);
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+}
+#home .home-layout > button:not(.icon-btn):active{
+  transform: translate(-50%, 1px);
+}
+
+
+
+
+/* --- PIN SETTINGS ICON TO SCREEN CORNER (first page only) --- */
+/* Neutralize any earlier absolute positioning */
+
+#homeSettingsBtn{
+  position: fixed !important;
+  z-index: 2000;
+  top:  max(env(safe-area-inset-top), 6px) !important;
+  right:max(env(safe-area-inset-right), 6px) !important;
+  left: auto !important;
+  transform: none !important;
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  padding: 10px;
+  line-height: 0;
+  color: #00ffea;
+}
+#homeSettingsBtn svg{
+  width: clamp(60px, 4vw, 60px);
+  height: clamp(60px, 4vw, 60px);
+  fill: currentColor;
+}
+#homeSettingsBtn:active{ transform: none !important; }
+#homeSettingsBtn:active svg{ transform: translateY(1px); }
+
+
+/* If your global button:active applies translateY(1px) to all buttons,
+   this prevents the container from moving (only the SVG moves). */
+#homeSettingsBtn:active{ transform: none !important; }
+
+
+
+
+/* === Clamp & free placement: FIRST PAGE ONLY (#home) === */
+#home { position: relative; }
+
+/* Positions (edit the clamp values to taste) */
+#homeOfflineBtn {
+  top:  clamp(560px, 18dvh, 158px);
+  right: clamp(200px, 5vw, 200px);
+}
+#homeOnlineBtn  {
+  top:   clamp(660px, 18dvh, 158px);
+  right: clamp(200px, 5vw, 200px);
+}
+/* Center Theme using the same clamped width */
+#homeThemeBtn   {
+  top:  clamp(760px, 18dvh, 158px);
+  left: calc(200px, 5vw, 200px);
+}
+
+
+
+
 /* Boards */
 .board-wrap{position:relative;display:inline-block}
-.board{display:grid;grid-template-columns:repeat(var(--cols),calc(var(--cell)*1px));gap:calc(var(--gap)*1px);background:#0e1324;padding:calc(var(--pad)*1px);border-radius:16px;box-shadow:0 0 28px rgba(0,255,255,.25),0 10px 28px rgba(0,0,0,.45);position:relative;width:calc(var(--cols) * var(--cell) * 1px + (var(--cols) - 1) * var(--gap) * 1px + 2 * var(--pad) * 1px);overflow:hidden}
-.cell{width:calc(var(--cell)*1px);height:calc(var(--cell)*1px);background:rgba(255,255,255,0.10);border-radius:10px;position:relative;overflow:hidden;will-change:transform,opacity}
-.block{box-shadow:inset 0 2px 0 rgba(255,255,255,.35),inset 0 -3px 0 rgba(0,0,0,.35),0 0 12px rgba(0,255,255,.35);background-image:radial-gradient(120% 90% at 20% 10%, rgba(255,255,255,.35), rgba(255,255,255,0) 55%),linear-gradient(180deg, rgba(255,255,255,.08), rgba(0,0,0,.12))}
+.board{display:grid;grid-template-columns:repeat(var(--cols),calc(var(--cell)*1px));gap:calc(var(--gap)*1px);background:#020724;box-shadow: 0 0 10px rgba(0, 247, 255, 0.61);padding:calc(var(--pad)*1px);border-radius:16px;position:relative;width:calc(var(--cols) * var(--cell) * 1px + (var(--cols) - 1) * var(--gap) * 1px + 2 * var(--pad) * 1px);overflow:hidden}
+.cell{width:calc(var(--cell)*1px);height:calc(var(--cell)*1px);background:#0A0F28;border-radius:10px;position:relative;overflow:hidden;will-change:transform,opacity}
+.block{box-shadow:inset 0 2px 0 rgb(255, 1, 1),inset 0 -3px 0 rgb(255, 1, 1),0 0 12px rgb(255, 0, 0);background-image:radial-gradient(120% 90% at 20% 10%, rgb(255, 0, 0), rgb(255, 0, 0) 55%),linear-gradient(180deg, rgb(255, 0, 0), rgb(255, 9, 9))}
 
 
 
@@ -340,16 +451,16 @@ button:active{transform:translateY(1px)}
   color:#000000;
   background:linear-gradient(180deg, var(--hf-cyan1), var(--hf-cyan2));
   box-shadow:
-    0 0px 0px rgb(251, 252, 251),
+    
     0 0 0 5px #00B3D0 inset,
-    0 0 20px rgb(0, 225, 255);
+    0 0 1px rgb(0, 225, 255);
 }
 .hf-cta{background: linear-gradient(180deg,#00F2E4,#0083C7);
-  text-shadow:0 0 2px rgb(0, 0, 0);
+ 
   transition:transform .25s ease, filter 1.5s ease;}
 
-.hf-cta:hover{ transform:translateY(+5px); filter:brightness(2); }
-.hf-cta:active{ transform:translateY(+1px) scale(1); }
+
+.hf-cta:active{ transform:translateY(+6px) scale(1); }
 
 /* mini cards with small block grids */
 .hf-tray{ display:flex; gap:14px; justify-content:center; align-items:center; }
@@ -358,11 +469,8 @@ button:active{transform:translateY(1px)}
 #tray .block{border-radius:10px}
 
 
-.hf-card{
-  width:150px; height:110px; border-radius:25px;
-  background:#0B112B;
-  display:grid; place-items:center;
-}
+
+
 .hf-mini{
 
  --m: clamp(30px, 2.8vw, 26px);
@@ -430,8 +538,8 @@ html, body {
 img, canvas, svg, video { max-width: 100%; height: auto; display: block; }
 button, input, select, textarea { font: inherit; }
 
-/* FULL-SCREEN background; center content */
-.fitstage{
+/* FULL-SCREEN 2nd screen background; center content */
+/*.fitstage{
   min-height: var(--app-h);
   width: 100vw;
   display: grid;
@@ -440,7 +548,7 @@ button, input, select, textarea { font: inherit; }
   background: #0c121b;
   padding: env(safe-area-inset-top) env(safe-area-inset-right)
            env(safe-area-inset-bottom) env(safe-area-inset-left);
-}
+}*/
 
 /* THE GAME AREA with locked aspect;
    - Sized by HEIGHT (not vw) so gutters don't squish it
@@ -456,38 +564,437 @@ button, input, select, textarea { font: inherit; }
 
 .fitbox *{ min-width:0; min-height:0; }
 
+#demoStage,
+#demoWrap,
+#demoBoard,
+#demoPreview,
+#demoScore,
+#demoTray {
+  display: none !important;
+}
+#demoScore, .stage .score-banner {
+  display: none !important;
+}
+
+/* Mini banner wrapper: allow the board's shadow to show */
+#home .mini-stage{
+  position: relative;
+  width: min(350px, 92vw);
+  height: clamp(360px, 28vh, 260px);
+  margin: 10px auto 8px;
+  pointer-events: none;
+  background: transparent;
+  filter: none;
+  opacity: 1;
+  /* was: overflow:hidden;  ← remove it so box-shadow isn't clipped */
+  overflow: visible;
+  z-index: 1;
+}
+
+
+/* Board fills the banner; its box-shadow can now extend freely */
+#home .mini-stage #miniBoardClone{
+  position: absolute; inset: 0; margin: auto;
+  --cols: 8; --gap: var(--gap, 6); --pad: var(--pad, 8);
+  z-index:1;                         /* above the pseudo background */
+  
+}
+
+/* Canvas overlay for the ghost piece */
+#home .mini-stage #homeMiniCanvas{
+  position:absolute; inset:0; width:100%; height:100%;
+  background: transparent; display:block; pointer-events:none;
+  z-index:2;
+}
+
+/* Mini grid spacing (between squares) */
+#home .mini-stage #miniBoardClone{
+  position: absolute;
+  --gap: 2;      /* ← gap in px (no unit in the var) */
+  --pad: 3; 
+   z-index: 2;     /* ← padding around the whole grid (px) */
+  /* if you want to hard-override, add: gap: 10px !important; padding: 8px !important; */
+}
+
+.bfmini-piece{
+  display: grid;
+  gap: calc(var(--gap) * 1px);
+  border-radius: 12px;
+  background: transparent;
+  outline: none;
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+}
+
+.bfmini-piece.dragging{ opacity:.75; cursor: grabbing; }
+.bfmini-piece:active{ transform:none; } /* don’t inherit global press shift */
+
+/* Each tray piece can have its own scale */
+.bfmini-piece .cell{
+  /* var(--cell) comes from the board; --piece-scale is per-piece */
+  width:  calc(var(--cell, 40) * var(--piece-scale, 0.8) * 1px);
+  height: calc(var(--cell, 40) * var(--piece-scale, 0.8) * 1px);
+  border-radius: 8px;
+  background: none;
+  box-shadow: inset 0 0 2px rgba(255,255,255,.06),
+              0 0 8px var(--glow, rgba(0,255,234,.10));
+  outline: none;
+}
+
+
+/* If you put the module on #offline, it still works; no selector change needed */
+#miniBoardClone.board{
+  position: absolute;
+  inset: 0;
+  margin: auto;
+  z-index: 2;                          /* above the wrapper bg */
+}
+/* --- Mini tray with 3 draggable pieces --- */
+.bfmini-tray{
+  margin: 12px auto 0;
+  display: flex;
+  gap: 14px;
+  justify-content: center;
+  pointer-events: auto;      /* allow dragging */
+}
+
+/* Pieces: small grid of cells */
+.bfmini-piece{
+  display: grid;
+  gap: 4.5px;
+  border-radius: 12px;
+  background: transparent;
+  outline: none;
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+}
+.bfmini-piece.dragging{ opacity:.75; cursor: grabbing; }
+.bfmini-piece:active{ transform:none; }
+
+/* Cells inside pieces (slightly smaller than board cells) */
+.bfmini-piece .cell{
+  width: calc(var(--cell, 40) * 0.8px);
+  height: calc(var(--cell, 40) * 0.8px);
+  border-radius: 8px;
+  background: none;
+  box-shadow: inset 0 0 2px rgba(255,255,255,.06), 0 0 8px rgba(0,255,234,.10);
+  outline: none;
+}
+
+/* Tray piece cells use the same variables so preview matches */
+.bfmini-piece .cell{
+  width: calc(var(--cell, 40) * 0.8px);
+  height: calc(var(--cell, 40) * 0.8px);
+  border-radius: 8px;
+  background: none;
+  box-shadow: inset 0 0 2px rgba(255,255,255,.06), 0 0 8px var(--glow, rgba(0,255,234,.10));
+  outline: none;
+}
+
+.board .cell.hover-ok{ background:#08362e; outline:2px dashed rgba(0,224,212,.85); }
+
+/* Kill the floating canvas overlay, keep DOM happy */
+#homeMiniCanvas { display: none !important; }
+
+/* Filled board cells use per-piece vars */
+.board .cell.filled{
+  background: var(--fill, #0f2b19);
+  outline: 1px solid var(--stroke, rgba(57,255,20,.35));
+  box-shadow:
+    inset 0 0 3px var(--glow-inset, rgba(57,255,20,.35)),
+    0 0 8px var(--glow, rgba(57,255,20,.22));
+    z-index: 4;
+}
+
+/* Tray piece cells pick up the same vars */
+.bfmini-piece .cell{
+  width: calc(var(--cell, 40) * 0.8px);
+  height: calc(var(--cell, 40) * 0.8px);
+  border-radius: 8px;
+  background: var(--fill, #0e1324);
+  outline: 1px solid var(--stroke, rgba(0,255,234,.18));
+
+}
+
+/* SAFE tray layout (centered, below banner) */
+#bfTray.bfmini-tray{
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+  align-items: center;
+  justify-items: center;
+  margin: 12px auto 0;
+  max-width: min(560px, 92vw);
+  position: relative;
+  z-index: 1;              /* ← tray below grid */
+}
+
+/* Grid above tray so placed cells are visible */
+#homeMiniDemo.mini-stage{ position: relative; z-index: 2; }
+#miniBoardClone.board{ position: relative; z-index: 3; }
+
+#bfTray .bfmini-piece{
+  position: absolute;          /* move each piece wherever you want */
+}
+
+
+
+
+/* Ensure the grid sits above anything below it */
+#homeMiniDemo.mini-stage{ position: relative; z-index: 2; }
+#miniBoardClone.board{ position: relative; z-index: 3; }
+
+
+
+/* If you still had an old ghost canvas, hide it hard */
+#homeMiniCanvas{ display:none !important; }
+
+/* Row/column clear effect */
+.board .cell.clearing{
+  animation: bfClear 240ms ease-in-out forwards;
+}
+@keyframes bfClear{
+  0%{ transform: scale(1);   opacity: 1; }
+  100%{ transform: scale(.6); opacity: 0; }
+}
+/* Board cells inherit the piece's colors/gradients */
+.board .cell.filled{
+  background: var(--fill) !important;            /* gradient or solid from the piece */
+  outline: 1px solid var(--stroke, rgba(0,0,0,.3));
+  width:var(--hfCell); height:var(--hfCell); border-radius:8px;
+  box-shadow: 0 0 1px rgba(255, 255, 255, 0.35),
+              inset 0 2px 0 rgba(255, 255, 255, 0.60),
+              inset 0 -3px 0 rgba(0, 0, 0, 0.35);}
+/* Make tray/board cells host a sheen overlay */
+.bfmini-piece .cell,
+.board .cell{
+  position: relative;          /* needed so ::before sits on each square */
+  overflow: hidden;            /* clip the sheen to the rounded square */
+  border-radius: 8px;          /* match whatever radius you use */
+}
+
+/* Sheen for tray cells + placed board cells */
+.bfmini-piece .cell::before,
+.board .cell.filled::before{
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+
+  /* bright hairline at top → fade → subtle dark at bottom */
+  background:
+    linear-gradient(
+      to bottom,
+      rgba(255,255,255,.45) 0px,
+      rgba(255,255,255,.28) 2px,
+      rgba(255,255,255,0) 28%,
+      rgba(0,0,0,0)       72%,
+      rgba(0,0,0,.22)    100%
+    );
+
+  /* makes the highlight pop over gradients without washing color */
+  mix-blend-mode: screen;
+  opacity: 0.9;
+}
+
+/* Optional: keep preview cells clean when the bot hovers invalid spots */
+.board .cell.hover-bad::before { opacity: 0; }
+
+/* Optional: a touch stronger sheen when preview is valid */
+.board .cell.hover-ok::before  { opacity: 1; }
+
+/* Fix grid track size so rows never reflow during effects */
+#miniBoardClone.board{
+  grid-auto-rows: calc(var(--cell, 40) * 1px);
+}
+
+/* Use a fade-only clear on BOARD cells (no scale → no layout jitter) */
+.board .cell.filled.clearing{
+  animation: bfClearFade 240ms ease-out forwards;
+}
+
+@keyframes bfClearFade{
+  from { opacity: 1; }
+  to   { opacity: 0; }
+}
+
+/* 3 equal, fixed positions; each slot centers its content */
+#bfTray.bfmini-tray{
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+  align-items: stretch;
+  justify-items: stretch;
+  margin: 12px auto 0;
+  max-width: min(560px, 92vw);
+  position: relative;
+  z-index: 1;
+}
+
+/* Each slot is a little stage that centers the piece */
+#bfTray .slot{
+  display: grid;
+  place-items: center;
+  min-height: calc(var(--cell, 40) * 3px + 16px);  /* room for tall shapes */
+}
+
+/* Make sure pieces size to their content and stay centered */
+#bfTray .slot > .bfmini-piece{
+  display: grid;
+  place-items: center;
+}
+
+/* Slots anchor pieces; they don't disappear or shift */
+#bfTray .slot{
+  display: grid;
+  place-items: center;
+  min-height: calc(var(--cell, 40) * 3px + 16px); /* room for tall shapes */
+}
+
+/* Make sure the piece centers inside the slot */
+#bfTray .slot > .bfmini-piece{
+  display: grid;
+  place-items: center;
+}
+
+/* Nudge each shape: left/right = first/second/third */
+#bfTray .slot[data-slot="0"] > .bfmini-piece { transform: translate( 40px, -30px); }
+#bfTray .slot[data-slot="1"] > .bfmini-piece { transform: translate( 4px, -30px); }
+#bfTray .slot[data-slot="2"] > .bfmini-piece { transform: translate( -40px, -30px); }
+
+/* default */
+#bfTray .bfmini-piece{ box-shadow: none; border-radius: 12px; }
+
+/* per-colour shadows using data-tint (edit RGBA freely) */
+
+/* cyan */
+#bfTray .bfmini-piece[data-tint="0"]{
+  filter:
+    drop-shadow(0 0 3px rgba(0,181,229,1))
+
+}
+/* magenta */
+#bfTray .bfmini-piece[data-tint="1"]{
+  filter:
+    drop-shadow(0 0 3px rgba(255,49,244,1))
+}
+/* orange */
+#bfTray .bfmini-piece[data-tint="2"]{
+  filter:
+    drop-shadow(0 0 3px rgba(254,160,25,1))
+}
+/* red */
+#bfTray .bfmini-piece[data-tint="3"]{
+  filter:
+    drop-shadow(0 0 3px rgb(255, 0, 0))
+}
+/* violet */
+#bfTray .bfmini-piece[data-tint="4"]{
+  filter:
+    drop-shadow(0 0 3px rgba(122,92,255,1))
+}
+/* lime */
+#bfTray .bfmini-piece[data-tint="5"]{
+  filter:
+    drop-shadow(0 0 3px rgba(51,255,0,1))
+    
+}
+
+/* Pop + fade when the board resets */
+@keyframes bfBoardPop {
+  0%   { transform: scale(1);    opacity: 1; }
+  50%  { transform: scale(1.10); opacity: .9; }
+  100% { transform: scale(1);    opacity: 1; }
+}
+@keyframes bfResetCell {
+  from { opacity: 1;   filter: brightness(1);   }
+  to   { opacity: 0;   filter: brightness(1.6); }
+}
+.board.resetting{ animation: bfBoardPop 360ms ease-in-out; }
+.board .cell.filled.reset-fade{ animation: bfResetCell 1000ms ease-out forwards; }
+
+/* Transparent color-matched preview */
+.board .cell.preview{
+  background: var(--fill);        /* same gradient/colour as the piece */
+  opacity: .35;                   /* make it see-through */
+  outline: 1px dashed var(--stroke, rgba(255,255,255,.25));
+  box-shadow: none;               /* optional: keep preview clean */
+}
+
 
 </style>
 </head>
 <body>
 <!-- Background demo -->
-<div id="demoStage" class="stage">
+<!--<div id="demoStage" class="stage">
   <div id="demoWrap" class="board-wrap">
     <div id="demoBoard" class="board"></div>
     <div id="demoPreview" class="preview-layer"></div>
     <div id="demoScore" class="score-banner">0</div>
     <div id="demoTray" class="tray"></div>
   </div>
-</div>
+</div>-->
 
 <!-- Home + Menus -->
 <div id="home" class="app center">
-  <h1>Block Forge</h1>
-  <div class="sub">Neon block-blast puzzle • Classic • Adventure • Tetris</div>
-  <button onclick="showOffline()">Offline</button>
-  <button onclick="showOnline()">Online</button>
-  <button onclick="toggleTheme()">Theme</button>
+  <h1>Mode</h1>
+  <!-- Mini background gameplay (HOME) -->
+<div id="homeMiniDemo" class="mini-stage" aria-hidden="true">
+  <!-- real board skin (identical look to Classic) -->
+  <div id="miniBoardClone" class="board"></div>
+  <!-- transparent overlay for the falling block -->
+  <canvas id="homeMiniCanvas"></canvas>
 </div>
+<div id="bfTray" class="bfmini-tray">
+  <div class="slot" data-slot="0"></div>
+  <div class="slot" data-slot="1"></div>
+  <div class="slot" data-slot="2"></div>
+</div>
+
+
+
+
+
+
+  <!-- Positioning wrapper for first-page buttons -->
+  <div id="homeLayout" class="home-layout">
+    <button id="homeOfflineBtn" onclick="showOffline()">Classic</button>
+    <button id="homeOnlineBtn"  onclick="showOnline()">Tetris</button>
+    <button id="homeThemeBtn"   onclick="toggleTheme()">Versus</button>
+    <!-- inside: <div id="homeLayout" class="home-layout"> ... -->
+<button id="homeSettingsBtn" class="icon-btn" onclick="openSettings()" aria-label="Settings" title="Settings">
+  <!-- Gear icon -->
+  <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">
+    <path d="M12 8.5a3.5 3.5 0 110 7 3.5 3.5 0 010-7zm9 3.5l-1.9.5a7.7 7.7 0 00-.6 1.6l1.1 1.6-1.9 1.9-1.6-1.1c-.5.25-1.05.45-1.6.6L12 20l-.5-1.9a7.7 7.7 0 01-1.6-.6l-1.6 1.1-1.9-1.9 1.1-1.6a7.7 7.7 0 01-.6-1.6L4 12l1.9-.5c.14-.55.34-1.1.6-1.6L5.9 8.3 7.8 6.4l1.6 1.1c.5-.26 1.05-.46 1.6-.6L12 4l.5 1.9c.55.14 1.1.34 1.6.6l1.6-1.1 1.9 1.9-1.1 1.6c.26.5.46 1.05.6 1.6L21 12z"/>
+  </svg>
+</button>
+
+  </div>
+</div>
+
 
 <div id="offline" class="app center hidden">
   <h1>Offline Modes</h1>
   <div class="sub">Choose a mode</div>
-  <button onclick="startMode('classic')">▶ Classic</button>
-  <button onclick="startMode('adventure')">▶ Adventure</button>
-  <button onclick="startMode('tetris')">▶ Tetris</button>
-  <div style="margin-top:10px">
-    <button onclick="showHome()">⬅ Home</button>
-    <button onclick="toggleTheme()">☀/🌙 Theme</button>
+
+  <!-- Positioning canvas just for second-page buttons -->
+  <div id="offLayout" class="off-layout">
+    <!-- Mode buttons -->
+    <button id="btnClassic" onclick="startMode('classic')">▶ Classic</button>
+    <!-- (Optional) keep Adventure; remove this line if you don't want it -->
+    <button id="btnAdventure" onclick="startMode('adventure')">▶ Adventure</button>
+    <button id="btnTetris"  onclick="startMode('tetris')">▶ Tetris</button>
+
+    <!-- Utility buttons duplicated on the second page -->
+    <button id="btnOffline" onclick="showOffline()">Offline</button>
+    <button id="btnOnline"  onclick="showOnline()">Online</button>
+    <button id="btnTheme"   onclick="toggleTheme()">Theme</button>
+
+    <!-- Keep Home accessible too -->
+    <button id="btnHome2"   onclick="showHome()">⬅ Home</button>
   </div>
 </div>
 
@@ -521,6 +1028,13 @@ button, input, select, textarea { font: inherit; }
     <div id="board" class="board"></div>
     
     <div id="preview" class="preview-layer"></div>
+ <div id="bfTray" class="bfmini-tray">
+  <div class="slot" data-slot="0"></div>
+  <div class="slot" data-slot="1"></div>
+  <div class="slot" data-slot="2"></div>
+</div>
+
+
   </div>
   <div id="tray"></div>
   <div id="tetrisControls">
@@ -900,8 +1414,47 @@ function renderBoard(){
   }
 }
 
-function makePiece(){return{shape:copyShape(SHAPES[randi(SHAPES.length)]),color:randColor(),used:false}}
-function refillTray(){ if(currentMode==='tetris'){ tRenderNext(); return; } if(tray.length===0||tray.every(p=>p.used)) tray=[makePiece(),makePiece(),makePiece()] }
+function makePiece(shape, color, scale){
+  const p = document.createElement('div');
+  p.className = 'bfmini-piece';
+  p.dataset.tint = String(PALETTE.indexOf(color));  // 0..5 based on your palette
+
+  const w = shape[0].length, h = shape.length;
+  p.style.gridTemplateColumns = `repeat(${w}, 1fr)`;
+  p._shape = shape;
+
+  // color vars
+  p.dataset.fill      = color.fill;
+  p.dataset.stroke    = color.stroke;
+  p.dataset.glow      = color.glow;
+  p.dataset.glowInset = color.glowInset;
+  p.style.setProperty('--fill', color.fill);
+  p.style.setProperty('--stroke', color.stroke);
+  p.style.setProperty('--glow', color.glow);
+  p.style.setProperty('--glow-inset', color.glowInset);
+
+  // NEW: per-piece size
+  const s = (typeof scale === 'number' ? scale : 0.8); // fallback to 0.8
+  p.dataset.scale = String(s);
+  p.style.setProperty('--piece-scale', s);
+
+  for (let r=0; r<h; r++){
+    for (let c=0; c<w; c++){
+      if (shape[r][c]) {
+        const cell = document.createElement('div');
+        cell.className = 'cell';
+        p.appendChild(cell);
+      } else {
+        const spacer = document.createElement('div');
+        spacer.style.width='0'; spacer.style.height='0';
+        p.appendChild(spacer);
+      }
+    }
+  }
+  enableDrag(p);
+  return p;
+}
+
 function renderTray(){
   if(currentMode==='tetris'){ tRenderNext(); return; }
   const el=$('tray'); el.innerHTML='';
@@ -1698,6 +2251,729 @@ if ('serviceWorker' in navigator) {
   addEventListener('orientationchange', setVH);
 })();
 </script>
+<!-- Put this just above </body> -->
+<script>
+  // Make sure a global function exists for the Settings button
+  window.openSettings = window.openSettings || function () {
+    alert('6 7');
+  };
+</script>
+<script>
+(function(){
+  const wrap   = document.getElementById('homeMiniDemo');
+  const mini   = document.getElementById('miniBoardClone');
+  const cvs    = document.getElementById('homeMiniCanvas');
+  if (!wrap || !mini || !cvs) return;
+
+  const ctx = cvs.getContext('2d');
+
+  // 1) Copy skin from your real board if we can find one
+  (function copySkin(){
+    const real = document.querySelector('#game .board, .app .board'); // try to find any live board
+    if (!real) return;
+    const cs = getComputedStyle(real);
+    ['background','boxShadow','borderRadius'].forEach(p=> mini.style[p] = cs[p]);
+    ['--cell','--gap','--pad','--cols'].forEach(v=>{
+      const val = cs.getPropertyValue(v);
+      if (val) mini.style.setProperty(v, val.trim());
+    });
+  })();
+
+  // 2) Build a DOM grid that matches your board’s shape
+  const COLS = parseInt(getComputedStyle(mini).getPropertyValue('--cols')) || 8;
+  const GAP  = parseInt(getComputedStyle(mini).getPropertyValue('--gap'))  || 6;
+  const PAD  = parseInt(getComputedStyle(mini).getPropertyValue('--pad'))  || 8;
+
+  mini.style.display = 'grid';
+  mini.style.gridTemplateColumns = `repeat(${COLS}, 1fr)`;
+  mini.style.gap = `${GAP}px`;
+  mini.style.padding = `${PAD}px`;
+
+  // create cells so your .board/.cell CSS renders identically to Classic
+  const frag = document.createDocumentFragment();
+  const cells = COLS * COLS;  // square banner
+  for (let i=0; i<cells; i++){
+    const d = document.createElement('div');
+    d.className = 'cell';
+    frag.appendChild(d);
+  }
+  mini.innerHTML = ''; mini.appendChild(frag);
+
+  // 3) Fit the canvas and animate a ghost piece aligned to the DOM grid
+  let W=0,H=0, cellPx=0, raf=null;
+  const fall = { x: 0, y: -2.5, speed: 0.016 };
+
+  function readCellSize(){
+    const one = mini.querySelector('.cell');
+    if (!one) return 40;
+    const cs = getComputedStyle(one);
+    return Math.round(parseFloat(cs.width));
+  }
+
+  function fit(){
+    const r = wrap.getBoundingClientRect();
+    const dpr = window.devicePixelRatio || 1;
+    cvs.width  = Math.max(320, Math.floor(r.width  * dpr));
+    cvs.height = Math.max(160, Math.floor(r.height * dpr));
+    ctx.setTransform(dpr,0,0,dpr,0,0);
+    W = r.width; H = r.height;
+    cellPx = readCellSize();
+  }
+
+  function gridOrigin(){
+    const pad = PAD;
+    const gridW = mini.clientWidth  - pad*2;
+    const gridH = mini.clientHeight - pad*2;
+    const startX = Math.round((W - gridW)/2 + pad);
+    const startY = Math.round((H - gridH)/2 + pad);
+    return { startX, startY };
+  }
+
+  function drawGhost(origin){
+    const { startX, startY } = origin;
+    const gap = GAP;
+    const px = startX + fall.x*(cellPx+gap);
+    const py = startY + fall.y*(cellPx+gap);
+
+    ctx.save();
+    ctx.globalCompositeOperation = 'lighter';
+    for (let r=0; r<2; r++){
+      for (let c=0; c<2; c++){
+        const fx = px + c*(cellPx+gap);
+        const fy = py + r*(cellPx+gap);
+        ctx.fillStyle   = 'rgba(57,255,20,0.12)';
+        ctx.strokeStyle = 'rgba(57,255,20,0.20)';
+        ctx.lineWidth = 2;
+        ctx.fillRect(fx, fy, cellPx, cellPx);
+        ctx.strokeRect(fx+1, fy+1, cellPx-2, cellPx-2);
+      }
+    }
+    ctx.restore();
+
+    // update fall
+    fall.y += fall.speed * (H/220);
+    if (startY + (fall.y+2)*(cellPx+gap) > startY + COLS*(cellPx+gap)){
+      fall.y = -2.5;
+      fall.x = Math.floor(Math.random()*(COLS-1));
+    }
+  }
+
+  function loop(){
+    ctx.clearRect(0,0,W,H);   // DOM renders the grid; canvas draws only the ghost
+    drawGhost(gridOrigin());
+    raf = requestAnimationFrame(loop);
+  }
+
+  new ResizeObserver(fit).observe(wrap);
+  fit(); loop();
+
+  // Pause when Home is hidden
+  const mo = new MutationObserver(()=>{
+    const home = document.getElementById('home');
+    const hidden = home?.classList.contains('hidden');
+    if (hidden && raf){ cancelAnimationFrame(raf); raf=null; }
+    else if (!hidden && !raf){ fit(); loop(); }
+  });
+  mo.observe(document.body, {subtree:true, attributes:true, attributeFilter:['class']});
+})(); // <-- Add missing closing brace here
+</script>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const board = document.getElementById('miniBoardClone');
+  const tray  = document.getElementById('bfTray');
+  // Build slots if not present in the HTML
+// Build 3 fixed slots if they aren't in the HTML
+(function ensureTraySlots(){
+  if (!tray) return;
+  if (!tray.querySelector('.slot')){
+    for (let i = 0; i < 3; i++){
+      const s = document.createElement('div');
+      s.className = 'slot';
+      s.dataset.slot = String(i);
+      tray.appendChild(s);
+    }
+  }
+})();
+
+
+  if (!board || !tray) return;
+
+  // --- Z-INDEX SAFETY: grid above tray so placed cells show ---
+  board.style.position = 'relative';
+  board.style.zIndex = '3';
+  const banner = document.getElementById('homeMiniDemo');
+  if (banner) { banner.style.position = 'relative'; banner.style.zIndex = '2'; }
+  tray.style.position = 'relative';
+  tray.style.zIndex = '1';
+
+  // --- Ensure grid cells exist (some older code used to create them) ---
+  function ensureGridCells(){
+    const current = board.querySelectorAll('.cell');
+    if (current.length) return Array.from(current);
+
+    const cs   = getComputedStyle(board);
+    const COLS = parseInt(cs.getPropertyValue('--cols')) || 8;
+    const ROWS = parseInt(cs.getPropertyValue('--rows')) || COLS;
+  
+    board.style.display = 'grid';
+    board.style.gridTemplateColumns = `repeat(${COLS}, calc(var(--cell,40) * 1px))`;
+
+    const frag = document.createDocumentFragment();
+    for (let r=0; r<ROWS; r++){
+      for (let c=0; c<COLS; c++){
+        const d = document.createElement('div');
+        d.className = 'cell';
+        d.dataset.r = r; d.dataset.c = c;
+        frag.appendChild(d);
+      }
+    }
+    board.appendChild(frag);
+    return Array.from(board.querySelectorAll('.cell'));
+  }
+
+  const cellEls = ensureGridCells();
+  if (!cellEls.length) return;
+
+  // --- Board metrics from the REAL DOM ---
+  const cs   = getComputedStyle(board);
+  const GAP  = parseFloat(cs.getPropertyValue('gap'))     || 6;
+  const PAD  = parseFloat(cs.getPropertyValue('padding')) || 8;
+  const COLS = parseInt(cs.getPropertyValue('--cols'))    || Math.round(Math.sqrt(cellEls.length));
+  const ROWS = Math.round(cellEls.length / COLS);
+  const CELL = (()=>{ const one = cellEls[0]; return one ? parseFloat(getComputedStyle(one).width) : 38; })();
+  const idx  = (r,c)=> r*COLS + c;
+
+  // === DEV FREEZE (set to true while editing to keep fixed shapes/colors) ===
+  const FREEZE_TRAY = false;
+  const FIXED_SHAPES = [
+    [ [1,1],[1,1] ], // O2
+    [ [1,1,1] ],     // I3
+    [ [1],[1],[1] ], // I3 vertical
+  ];
+
+  // --- Palette & helpers (colors per piece) ---
+function rgbaFromHex(hex, a){
+  const h = hex.replace('#','').trim();
+  const n = h.length===3 ? h.split('').map(s=>s+s).join('') : h;
+  const r = parseInt(n.slice(0,2),16), g = parseInt(n.slice(2,4),16), b = parseInt(n.slice(4,6),16);
+  return `rgba(${r},${g},${b},${a})`;
+}
+function grad(fillStart, fillEnd){
+  const stroke = rgbaFromHex(fillStart, .45);
+  const glow   = rgbaFromHex(fillStart, .35);
+  const glowIn = rgbaFromHex(fillStart, .45);
+  return {
+    fill: `linear-gradient(180deg, ${fillStart}, ${fillEnd})`,
+    stroke: stroke,
+    glow: glow,
+    glowInset: glowIn
+  };
+}
+
+const PALETTE = [
+  grad('#7bf5ff', '#00B5E5'),   // hf-cyan
+  grad('#FF31F4', '#9F0BDB'),   // hf-pink
+  grad('#FEA019', '#CD7317'),   // hf-orange
+  grad('#ff0000', '#CB040A'),   // hf-red
+  grad('#7A5CFF', '#7c82ff'),   // hf-violet
+  grad('#9AFF00', '#4bb630'),   // hf-green
+
+];
+
+let colorQueue = [];
+function shuffledPalette(){ return [...PALETTE].sort(()=>Math.random()-0.5); }
+function nextColor(){ if (!colorQueue.length) colorQueue = shuffledPalette(); return colorQueue.pop(); }
+
+  // --- Shapes (pool) ---
+  const SHAPES = [
+    [[1,1],[1,1]], [[1,1,1]], [[1],[1],[1]],
+    [[1,1,0],[0,1,1]], [[0,1,1],[1,1,0]],
+    [[1,1,1],[0,1,0]], [[1,0],[1,1]], [[0,1],[1,1]],
+  ];
+
+  // --- Auto scale so long pieces stay comfy ---
+  function autoScaleForShape(shape){
+    const w = shape[0].length, h = shape.length;
+    const longest = Math.max(w, h);
+    if (longest >= 5) return 0.7;
+    if (longest >= 4) return 0.75;
+    return 0.9;
+  }
+
+  // --- State from current board (0/1) ---
+  const S = Array.from({length: ROWS}, (_,r)=> Array.from({length: COLS}, (_,c)=>
+    cellEls[idx(r,c)].classList.contains('filled') ? 1 : 0
+  ));
+
+  // --- Piece factory (color + per-piece scale) ---
+  function makePiece(shape, color, scale){
+    const p = document.createElement('div');
+    p.className = 'bfmini-piece';
+    p.dataset.tint = String(PALETTE.indexOf(color));  // 0..5 based on your palette
+
+    const w = shape[0].length, h = shape.length;
+    p.style.gridTemplateColumns = `repeat(${w}, 1fr)`;
+    p._shape = shape;
+
+    // color vars
+    p.dataset.fill      = color.fill;
+    p.dataset.stroke    = color.stroke;
+    p.dataset.glow      = color.glow;
+    p.dataset.glowInset = color.glowInset;
+    p.style.setProperty('--fill', color.fill);
+    p.style.setProperty('--stroke', color.stroke);
+    p.style.setProperty('--glow', color.glow);
+    p.style.setProperty('--glow-inset', color.glowInset);
+
+    // per-piece scale
+    const s = (typeof scale === 'number' ? scale : 0.8);
+    p.dataset.scale = String(s);
+    p.style.setProperty('--piece-scale', s);
+
+    // build cells inside the piece
+    for (let r=0; r<h; r++){
+      for (let c=0; c<w; c++){
+        if (shape[r][c]) {
+          const cell = document.createElement('div');
+          cell.className = 'cell';
+          p.appendChild(cell);
+        } else {
+          const spacer = document.createElement('div');
+          spacer.style.width='0'; spacer.style.height='0';
+          p.appendChild(spacer);
+        }
+      }
+    }
+    enableDrag(p);
+    return p;
+  }
+
+  // --- Placement helpers ---
+  function canPlace(shape, R, C){
+    for (let r=0; r<shape.length; r++){
+      for (let c=0; c<shape[0].length; c++){
+        if (!shape[r][c]) continue;
+        const rr = R+r, cc = C+c;
+        if (rr<0||cc<0||rr>=ROWS||cc>=COLS) return false;
+        if (S[rr][cc]===1) return false;
+      }
+    }
+    return true;
+  }
+
+function place(shape, R, C, colorArg){
+  const color = colorArg || place._currentColor || nextColor(); // ← use the piece color, or queued palette
+  for (let r=0; r<shape.length; r++){
+    for (let c=0; c<shape[0].length; c++){
+      if (!shape[r][c]) continue;
+      const rr = R + r, cc = C + c;
+      S[rr][cc] = 1;
+      const cell = cellEls[idx(rr,cc)];
+      cell.classList.remove('hover-ok','hover-bad');
+      cell.style.setProperty('--fill', color.fill);
+      cell.style.setProperty('--stroke', color.stroke);
+      cell.style.setProperty('--glow', color.glow);
+      cell.style.setProperty('--glow-inset', color.glowInset);
+      cell.classList.add('filled');
+    }
+  }
+  place._currentColor = null; // optional: clear after use
+}
+
+
+  function clearHover(){ cellEls.forEach(d=> d.classList.remove('hover-ok','hover-bad')); }
+
+  function snap(clientX, clientY){
+    const rect = board.getBoundingClientRect();
+    const startX = rect.left + PAD;
+    const startY = rect.top  + PAD;
+    const relX = clientX - startX;
+    const relY = clientY - startY;
+    if (relX<0 || relY<0) return null;
+    const step = CELL + GAP;
+    const c = Math.floor(relX / step);
+    const r = Math.floor(relY / step);
+    if (c<0||r<0||c>=COLS||r>=ROWS) return null;
+    return {r,c};
+  }
+
+  function enableDrag(piece){
+    let dragging=false, hover=null;
+
+    piece.addEventListener('pointerdown', e=>{
+      dragging=true; piece.setPointerCapture(e.pointerId);
+      piece.classList.add('dragging'); clearHover();
+
+      // capture the piece’s color for place()
+      place._currentColor = {
+        fill:      piece.dataset.fill,
+        stroke:    piece.dataset.stroke,
+        glow:      piece.dataset.glow,
+        glowInset: piece.dataset.glowInset
+      };
+    });
+
+    piece.addEventListener('pointermove', e=>{
+      if (!dragging) return;
+      const hit = snap(e.clientX, e.clientY);
+      const shape = piece._shape; clearHover();
+      if (hit){
+        hover=hit;
+        const ok = canPlace(shape, hit.r, hit.c);
+  // --- preview: color-matched, semi-transparent ---
+clearHover(); // always clear the old preview first
+if (ok){
+  const fill   = piece.style.getPropertyValue('--fill')   || piece.dataset.fill;
+  const stroke = piece.style.getPropertyValue('--stroke') || piece.dataset.stroke;
+
+  for (let r=0; r<shape.length; r++){
+    for (let c=0; c<shape[0].length; c++){
+      if (!shape[r][c]) continue;
+      const rr = r0 + r, cc = c0 + c;
+      if (rr<0||cc<0||rr>=ROWS||cc>=COLS) continue;
+
+      const cell = cellEls[idx(rr,cc)];
+      cell.style.setProperty('--fill',   fill);
+      cell.style.setProperty('--stroke', stroke);
+      cell.classList.add('preview');   // CSS controls opacity/outline
+    }}}}})// --- end preview ---
+
+    piece.addEventListener('pointerup', e=>{
+      if (!dragging) return;
+      dragging=false; piece.releasePointerCapture(e.pointerId);
+      piece.classList.remove('dragging'); clearHover();
+      const shape = piece._shape;
+      if (hover && canPlace(shape, hover.r, hover.c)){
+        place(shape, hover.r, hover.c);
+        piece.remove();
+        if (!FREEZE_TRAY && tray.querySelectorAll('.slot > .bfmini-piece').length === 0) {
+  refillTray();  // refill only when all pieces have been used
+}
+
+
+      }
+      hover=null;
+    });
+  }
+  
+
+  
+ function refillTray(){
+  const slots = Array.from(tray.querySelectorAll('.slot'));
+
+  slots.forEach((slot, i) => {
+    // If the slot already has a piece, leave it alone (keeps position!)
+    if (slot.firstElementChild) return;
+
+    // Choose the next shape/color/scale (respect your FREEZE_TRAY if present)
+    let shape, color, scale;
+    if (typeof FREEZE_TRAY !== 'undefined' && FREEZE_TRAY){
+      const FIXED_COLORS = [PALETTE[0], PALETTE[3], PALETTE[5]];
+      const FIXED_SCALES = [0.9, 1.0, 0.8];
+      const FIXED_SHAPES_SAFE = Array.isArray(FIXED_SHAPES) && FIXED_SHAPES.length ? FIXED_SHAPES : [
+        [[1,1],[1,1]], [[1,1,1]], [[1],[1],[1]]
+      ];
+      shape = FIXED_SHAPES_SAFE[i % FIXED_SHAPES_SAFE.length];
+      color = FIXED_COLORS[i % FIXED_COLORS.length];
+      scale = FIXED_SCALES[i % FIXED_SCALES.length];
+    } else {
+      shape = SHAPES[(Math.random()*SHAPES.length)|0];
+      color = nextColor();
+      scale = (typeof autoScaleForShape === 'function') ? autoScaleForShape(shape) : 0.85;
+    }
+
+    const piece = makePiece(shape, color, scale);
+    piece.dataset.slot = slot.dataset.slot; // remember where it lives
+    slot.appendChild(piece);
+  });
+}
+
+  // Render the tray once
+  refillTray();
+
+  // Toggle here
+ // === AUTOPLAY BOT (must sit right after: refillTray(); ) ===
+(() => {
+  // ---- config ----
+  const AUTOPLAY = true;          // leave true to run
+  const MOVE_MS  = 1800;          // drag duration
+  const STEP_GAP = 600;           // pause between moves
+  const SHOW_SNAP_PREVIEW = true;
+
+  // ---- safety: ensure we see board/tray from outer scope ----
+  if (!window || !board || !tray) {
+    console.warn('[AutoPlay] missing board/tray – move this block inside DOMContentLoaded and keep it AFTER refillTray().');
+    return;
+  }
+
+  // prevent double starts
+  if (window.__bfAutoRunning) {
+    console.log('[AutoPlay] already running, skipping re-init.');
+    return;
+  }
+  window.__bfAutoRunning = false;
+
+  // expose manual controls
+  function startAuto(){ if (!window.__bfAutoRunning){ window.__bfAutoRunning = true; console.log('[AutoPlay] start'); setTimeout(autoStep, 400); } }
+  function stopAuto(){  window.__bfAutoRunning = false; console.log('[AutoPlay] stop'); }
+  window.bfAuto = { start: startAuto, stop: stopAuto };
+
+  // ---------- helpers (unchanged logic) ----------
+  function previewHover(shape, base, ok){
+    clearHover();
+    if (!ok || !base) return;
+    for (let r=0; r<shape.length; r++){
+      for (let c=0; c<shape[0].length; c++){
+        if (!shape[r][c]) continue;
+        const rr = base.r + r, cc = base.c + c;
+        if (rr<0||cc<0||rr>=ROWS||cc>=COLS) continue;
+        cellEls[idx(rr,cc)].classList.add('hover-ok'); // green only
+      }
+    }
+  }
+
+  function rowsColsCompletedIf(shape, R, C){
+    const filledRows = new Set(), filledCols = new Set();
+    const covers = (sr, sc) => (sr>=0 && sc>=0 && sr<shape.length && sc<shape[0].length && !!shape[sr][sc]);
+    for (let r=0; r<shape.length; r++){
+      for (let c=0; c<shape[0].length; c++){
+        if (!shape[r][c]) continue;
+        const rr = R + r, cc = C + c;
+        if (rr<0||cc<0||rr>=ROWS||cc>=COLS) continue;
+        if (!filledRows.has(rr)){
+          let full = true; for (let x=0; x<COLS; x++) full = full && (S[rr][x]===1 || covers(rr-R, x-C));
+          if (full) filledRows.add(rr);
+        }
+        if (!filledCols.has(cc)){
+          let full = true; for (let y=0; y<ROWS; y++) full = full && (S[y][cc]===1 || covers(y-R, cc-C));
+          if (full) filledCols.add(cc);
+        }
+      }
+    }
+    return { rows: filledRows, cols: filledCols, count: filledRows.size + filledCols.size };
+  }
+
+  function scorePlacement(shape, R, C){
+    const { count } = rowsColsCompletedIf(shape, R, C);
+    const lineScore = count * 100;
+    const midR=(ROWS-1)/2, midC=(COLS-1)/2;
+    const centerScore = -(Math.abs(R-midR)+Math.abs(C-midC));
+    let adj=0;
+    for (let r=0;r<shape.length;r++){
+      for (let c=0;c<shape[0].length;c++){
+        if (!shape[r][c]) continue;
+        const rr=R+r, cc=C+c, N=[[-1,0],[1,0],[0,-1],[0,1]];
+        for (const [dr,dc] of N){
+          const r2=rr+dr, c2=cc+dc;
+          if (r2<0||c2<0||r2>=ROWS||c2>=COLS) continue;
+          if (S[r2][c2]===1) adj++;
+        }
+      }
+    }
+    return lineScore + centerScore + adj*2;
+  }
+
+  function pickBestMove(){
+    let best=null;
+   const pieces = Array.from(tray.querySelectorAll('.slot > .bfmini-piece'));
+    for (let i=0;i<pieces.length;i++){
+      const piece = pieces[i], shape = piece._shape;
+      for (let R=0; R<ROWS; R++){
+        for (let C=0; C<COLS; C++){
+          if (!canPlace(shape,R,C)) continue;
+          const sc = scorePlacement(shape,R,C);
+          if (!best || sc>best.score) best = { piece, shape, R, C, score: sc, index: i };
+        }
+      }
+    }
+    return best;
+  }
+
+  function boardPopReset(done){
+  clearHover?.(); // if you have this helper
+  board.classList.add('resetting');
+
+  // fade out only the filled cells
+  for (let r=0;r<ROWS;r++){
+    for (let c=0;c<COLS;c++){
+      if (S[r][c]===1) cellEls[idx(r,c)].classList.add('reset-fade');
+    }
+  }
+
+  // after the pop, wipe state and styles
+  setTimeout(() => {
+    for (let r=0;r<ROWS;r++){
+      for (let c=0;c<COLS;c++){
+        S[r][c] = 0;
+        const cell = cellEls[idx(r,c)];
+        cell.className = cell.className
+          .replace(/\bfilled\b/g,'')
+          .replace(/\bhover-ok\b/g,'')
+          .replace(/\bhover-bad\b/g,'')
+          .replace(/\bclearing\b/g,'')
+          .replace(/\breset-fade\b/g,'');
+        cell.style.removeProperty('--fill');
+        cell.style.removeProperty('--stroke');
+        cell.style.removeProperty('--glow');
+        cell.style.removeProperty('--glow-inset');
+      }
+    }
+    board.classList.remove('resetting');
+    if (typeof done === 'function') done();
+  }, 320); // match bfBoardPop duration
+}
+
+
+  function clearFullLines(){
+    const fullRows=[], fullCols=[];
+    for (let r=0;r<ROWS;r++) if (S[r].every(v=>v===1)) fullRows.push(r);
+    for (let c=0;c<COLS;c++){
+      let ok=true; for (let r=0;r<ROWS;r++){ if (S[r][c]===0){ok=false;break;} }
+      if (ok) fullCols.push(c);
+    }
+    if (!fullRows.length && !fullCols.length) return 0;
+
+// mark ONLY the filled cells in those complete rows/cols
+for (const r of fullRows){
+  for (let c=0; c<COLS; c++){
+    if (S[r][c] === 1) cellEls[idx(r,c)].classList.add('clearing');
+  }
+}
+for (const c of fullCols){
+  for (let r=0; r<ROWS; r++){
+    if (S[r][c] === 1) cellEls[idx(r,c)].classList.add('clearing');
+  }
+}
+
+setTimeout(() => {
+  // clear only filled cells; leave empty grid cells untouched
+  for (const r of fullRows){
+    for (let c=0; c<COLS; c++){
+      if (S[r][c] !== 1) continue;
+      S[r][c] = 0;
+      const cell = cellEls[idx(r,c)];
+      cell.classList.remove('filled','clearing');
+      cell.style.removeProperty('--fill');
+      cell.style.removeProperty('--stroke');
+      cell.style.removeProperty('--glow');
+      cell.style.removeProperty('--glow-inset');
+    }
+  }
+  for (const c of fullCols){
+    for (let r=0; r<ROWS; r++){
+      if (S[r][c] !== 1) continue;
+      S[r][c] = 0;
+      const cell = cellEls[idx(r,c)];
+      cell.classList.remove('filled','clearing');
+      cell.style.removeProperty('--fill');
+      cell.style.removeProperty('--stroke');
+      cell.style.removeProperty('--glow');
+      cell.style.removeProperty('--glow-inset');
+    }
+  }
+}, 240); // keep matching your CSS animation time
+
+    return fullRows.length + fullCols.length;
+  }
+
+  function animateDragAndPlace(piece, R, C, done){
+    // hand off exact piece colors for placement
+    place._currentColor = {
+      fill:      piece.style.getPropertyValue('--fill')       || piece.dataset.fill,
+      stroke:    piece.style.getPropertyValue('--stroke')     || piece.dataset.stroke,
+      glow:      piece.style.getPropertyValue('--glow')       || piece.dataset.glow,
+      glowInset: piece.style.getPropertyValue('--glow-inset') || piece.dataset.glowInset
+    };
+
+    const tCell = cellEls[idx(R,C)];
+    const tRect = tCell.getBoundingClientRect();
+    const pRect = piece.getBoundingClientRect();
+
+    const clone = piece.cloneNode(true);
+    clone.style.position='fixed';
+    clone.style.left=pRect.left+'px';
+    clone.style.top=pRect.top+'px';
+    clone.style.width=pRect.width+'px';
+    clone.style.height=pRect.height+'px';
+    clone.style.zIndex='9999';
+    clone.style.pointerEvents='none';
+
+    // make clone match board grid exactly
+    clone.style.padding='0'; clone.style.background='transparent'; clone.style.outline='none';
+    clone.style.setProperty('--piece-scale', 1);
+    clone.style.gap = (GAP)+'px';
+    clone.querySelectorAll('.cell').forEach(c=>{ c.style.width=CELL+'px'; c.style.height=CELL+'px'; });
+
+    document.body.appendChild(clone);
+    piece.style.visibility='hidden';
+
+    const startX=pRect.left, startY=pRect.top, endX=tRect.left, endY=tRect.top;
+    const dx=endX-startX, dy=endY-startY;
+    const t0 = performance.now();
+
+    function frame(now){
+      const t=Math.min(1,(now-t0)/MOVE_MS);
+      const ease = t<.5 ? 2*t*t : -1+(4-2*t)*t;
+      const curX=startX+dx*ease, curY=startY+dy*ease;
+      clone.style.left=curX+'px'; clone.style.top=curY+'px';
+
+      if (SHOW_SNAP_PREVIEW){
+        const rect=board.getBoundingClientRect();
+        const sx=rect.left+PAD, sy=rect.top+PAD;
+        const relX=curX-sx, relY=curY-sy;
+        if (relX>=0 && relY>=0){
+          const step=CELL+GAP, c0=Math.floor(relX/step), r0=Math.floor(relY/step);
+          if (c0>=0 && r0>=0 && c0<COLS && r0<ROWS){
+            const ok=canPlace(piece._shape, r0, c0);
+            previewHover(piece._shape, {r:r0,c:c0}, ok);
+          } else { clearHover(); }
+        } else { clearHover(); }
+      }
+
+      if (t<1){ requestAnimationFrame(frame); }
+      else{
+        clearHover(); clone.remove(); piece.style.visibility='';
+        place(piece._shape, R, C); piece.remove();
+        if (typeof done==='function') done();
+      }
+    }
+    requestAnimationFrame(frame);
+  }
+
+  function autoStep(){
+    if (!window.__bfAutoRunning) return;
+    if (!tray || tray.children.length===0){ refillTray(); setTimeout(autoStep, STEP_GAP); return; }
+const move = pickBestMove();
+if (!move){
+  // No legal placements: pop + reset board, then new set of tray pieces
+  boardPopReset(() => {
+    // remove ONLY the pieces, keep the 3 slots
+    tray.querySelectorAll('.slot > .bfmini-piece').forEach(el => el.remove());
+    refillTray();
+    setTimeout(autoStep, STEP_GAP);
+  });
+  return;
+}
+
+    animateDragAndPlace(move.piece, move.R, move.C, ()=>{
+     clearFullLines();
+if (tray.querySelectorAll('.slot > .bfmini-piece').length === 0) {
+  refillTray();  // only when all three are gone
+}
+setTimeout(autoStep, STEP_GAP);
+    });
+  }
+  // kick it off once
+  if (AUTOPLAY) startAuto();
+})();
+
+});
+</script>
+
+
+
+
 
 </body>
 </html>
