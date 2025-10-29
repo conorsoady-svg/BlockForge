@@ -748,9 +748,16 @@ button, input, select, textarea { font: inherit; }
 #homeMiniDemo.mini-stage{ position: relative; z-index: 2; }
 #miniBoardClone.board{ position: relative; z-index: 3; }
 
-#bfTray .bfmini-piece{
-  position: absolute;          /* move each piece wherever you want */
+/* GAME screen keeps absolute pieces (if you use it there) */
+#game #bfTray .bfmini-piece{ position: absolute; }
+
+/* MODE page (#home): pieces should participate in grid layout */
+#home #bfTray .bfmini-piece{
+  position: static;           /* ← stops overlapping / makes gap work */
+  transform: none !important; /* ignore any scale/translate from JS */
+  margin-top: -30px;          /* keep your vertical nudge, edit here */
 }
+
 
 
 
@@ -838,7 +845,7 @@ button, input, select, textarea { font: inherit; }
 #bfTray.bfmini-tray{
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 14px;
+  gap: 16px;
   align-items: stretch;
   justify-items: stretch;
   margin: 12px auto 0;
@@ -873,10 +880,6 @@ button, input, select, textarea { font: inherit; }
   place-items: center;
 }
 
-/* Nudge each shape: left/right = first/second/third */
-#bfTray .slot[data-slot="0"] > .bfmini-piece { transform: translate( 200px, -30px); }
-#bfTray .slot[data-slot="1"] > .bfmini-piece { transform: translate( 4px, -30px); }
-#bfTray .slot[data-slot="2"] > .bfmini-piece { transform: translate( -200px, -30px); }
 
 /* default */
 #bfTray .bfmini-piece{ box-shadow: none; border-radius: 12px; }
@@ -1095,6 +1098,120 @@ button, input, select, textarea { font: inherit; }
 @media (max-width: 380px){
   #offline .bfmini-tray{ gap: 10px; }
   #offline .bfmini-tray .slot{ min-height: 84px; }
+}
+
+/* Make the tray a 3-column grid with consistent gaps */
+#bfTray{
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0,1fr));
+  gap: clamp(12px, 3vw, 24px);
+  justify-items: center;   /* center within each column */
+  align-items: start;
+}
+
+/* Each slot centers its child; no transforms needed */
+#bfTray .slot{
+  display: grid;
+  place-items: center;
+  min-height: clamp(72px, 18vw, 120px); /* keeps a nice box for the piece */
+}
+
+/* Neutralize any leftover translate/scale on home tray pieces */
+#bfTray .bfmini-piece{
+  transform: none !important;    /* prevent stacking with JS transforms */
+  margin-top: -30px;             /* keep your vertical nudge, not with transform */
+}
+
+/* If you want left/center/right anchoring per slot (optional) */
+#bfTray .slot[data-slot="0"]{ justify-self: start; }
+#bfTray .slot[data-slot="1"]{ justify-self: center; }
+#bfTray .slot[data-slot="2"]{ justify-self: end; }
+
+
+/* MODE (second page) — force a predictable tray layout */
+#offline :is(#bfTray, #bfTrayHome){
+  display: grid !important;
+  grid-template-columns: repeat(3, minmax(0,1fr)) !important;
+  /* ← CHANGE THIS to adjust spacing between the three pieces */
+  gap: clamp(12px, 3vw, 28px) !important;
+  justify-items: center !important;
+  align-items: start !important;
+}
+
+/* Center each slot’s content; provide a consistent box height */
+#offline :is(#bfTray, #bfTrayHome) .slot{
+  display: grid !important;
+  place-items: center !important;
+  min-height: clamp(80px, 18vw, 120px) !important;
+}
+
+/* Neutralize any translate/scale applied by earlier CSS/JS on these pieces */
+#offline :is(#bfTray, #bfTrayHome) .bfmini-piece{
+  transform: none !important;          /* kills translate/scale drift */
+  /* vertical tweak instead of translateY: change this if needed */
+  margin-top: -30px !important;
+}
+
+/* (optional) control left/center/right anchoring per column */
+#offline :is(#bfTray, #bfTrayHome) .slot[data-slot="0"]{ justify-self: start !important; }
+#offline :is(#bfTray, #bfTrayHome) .slot[data-slot="1"]{ justify-self: center !important; }
+#offline :is(#bfTray, #bfTrayHome) .slot[data-slot="2"]{ justify-self: end !important; }
+
+/* Cell size + internal gap inside each piece (keeps shape proportions) */
+#offline :is(#bfTray, #bfTrayHome) .bfmini-piece{ --cell: clamp(1px, 5.2vw, 8px); --gap: clamp(40px, 1.2vw, 80px); }
+#offline :is(#bfTray, #bfTrayHome) .bfmini-piece .cell{
+  width: var(--cell) !important;
+  height: var(--cell) !important;
+  border-radius: 8px;
+}
+
+/* MODE page tray: 3 equal columns + adjustable spacing */
+#home #bfTray{
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0,1fr));
+  gap: 250px;                  /* ← change this to move pieces apart */
+  justify-items: center;
+  align-items: start;
+}
+
+/* each slot centers its child; consistent height so it doesn't jump */
+#home #bfTray .slot{
+  display: grid;
+  place-items: center;
+  min-height: 110px;          /* tweak if you want more/less height */
+}
+
+/* optional: anchor left/center/right by column */
+#home #bfTray .slot[data-slot="0"]{ justify-self: start; }
+#home #bfTray .slot[data-slot="1"]{ justify-self: center; }
+#home #bfTray .slot[data-slot="2"]{ justify-self: end; }
+
+/* --- Mode tray: keep 3 fixed columns so positions never shift --- */
+:is(#home, #offline) #bfTray,
+:is(#home, #offline) #bfTrayHome{
+  /* fixed-width tracks; they don't shrink when a slot is empty */
+  --slot-w: clamp(96px, 22vw, 140px);          /* <-- adjust width per column */
+  display: grid !important;
+  grid-template-columns: var(--slot-w) var(--slot-w) var(--slot-w) !important;
+  justify-content: center !important;          /* group centered as a whole */
+  column-gap: clamp(8px, 2.5vw, 24px) !important; /* <-- adjust spacing between columns */
+  align-items: start !important;
+}
+
+/* each slot uses the same fixed width box */
+:is(#home, #offline) #bfTray .slot,
+:is(#home, #offline) #bfTrayHome .slot{
+  width: var(--slot-w) !important;
+  display: grid !important;
+  place-items: center !important;
+  min-height: clamp(80px, 18vw, 120px) !important;
+}
+
+/* neutralize any translate/scale that fights layout on the mode page tray */
+:is(#home, #offline) #bfTray .bfmini-piece,
+:is(#home, #offline) #bfTrayHome .bfmini-piece{
+  transform: none !important;
+  margin-top: -30px;                              /* vertical tweak if you want */
 }
 
 
