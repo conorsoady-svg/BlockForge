@@ -874,9 +874,9 @@ button, input, select, textarea { font: inherit; }
 }
 
 /* Nudge each shape: left/right = first/second/third */
-#bfTray .slot[data-slot="0"] > .bfmini-piece { transform: translate( 300px, -30px); }
+#bfTray .slot[data-slot="0"] > .bfmini-piece { transform: translate( 325px, -30px); }
 #bfTray .slot[data-slot="1"] > .bfmini-piece { transform: translate( 4px, -30px); }
-#bfTray .slot[data-slot="2"] > .bfmini-piece { transform: translate( -300px, -30px); }
+#bfTray .slot[data-slot="2"] > .bfmini-piece { transform: translate( -325px, -30px); }
 
 /* default */
 #bfTray .bfmini-piece{ box-shadow: none; border-radius: 12px; }
@@ -1047,6 +1047,54 @@ button, input, select, textarea { font: inherit; }
 #offline #tetrisBtn  *, #offline #tetrisBtn::before,  #offline #tetrisBtn::after,
 #offline #versusBtn  *, #offline #versusBtn::before,  #offline #versusBtn::after{
   pointer-events: none !important;
+}
+
+/* === Consistent tray layout across devices (Mode/second page) === */
+#offline .bfmini-tray{
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0,1fr));
+  gap: clamp(8px, 2vw, 18px);
+  align-items: center;
+  justify-items: center;
+  max-width: min(560px, 92vw);
+  margin: 12px auto 0;
+  padding: 0 clamp(4px, 2vw, 12px);
+  box-sizing: border-box;
+}
+
+/* each slot keeps a consistent box to center pieces in */
+#offline .bfmini-tray .slot{
+  display: grid;
+  place-items: center;
+  min-height: clamp(72px, 18vw, 120px);
+}
+
+/* pieces are built from cells, not scaled via transform */
+#offline .bfmini-tray .bfmini-piece{
+  /* cell size + gap are responsive; no transform-scaling needed */
+  --cell: clamp(18px, 5.2vw, 28px);
+  --gap:  clamp(4px, 1.2vw, 8px);
+  display: grid;
+  grid-auto-rows: var(--cell);
+  gap: var(--gap);
+  transform: none !important;   /* neutralize JS scaling differences */
+}
+
+/* each cell = square with your bevel; will be identical across DPRs */
+#offline .bfmini-tray .bfmini-piece .cell{
+  width: var(--cell);
+  height: var(--cell);
+  border-radius: 8px;
+  box-shadow:
+    0 0 1px rgba(255,255,255,.35),
+    inset 0 2px 0 rgba(255,255,255,.6),
+    inset 0 -3px 0 rgba(0,0,0,.35);
+}
+
+/* (optional) tighten spacing on very small phones */
+@media (max-width: 380px){
+  #offline .bfmini-tray{ gap: 10px; }
+  #offline .bfmini-tray .slot{ min-height: 84px; }
 }
 
 
