@@ -82,6 +82,9 @@ button:active{ transform:translateY(1px); }
   background:linear-gradient(#264bc5, #002c6e); color:#ffffff;
   border:1px solid rgba(0,224,212,.35);
   box-shadow:0 0 0px rgba(0,224,212,.35), 0 0 2px rgba(0,224,212,.6) inset;
+font-size: 20px;
+font-style: italic;
+font-weight: bold;
 }
 
 /* Online = purple */
@@ -89,6 +92,9 @@ button:active{ transform:translateY(1px); }
   background:linear-gradient(#f89500, #583d00); color:#ffffff;
   border:1px solid rgba(167,125,255,.35);
   box-shadow:0 0 0px rgba(167,125,255,.35), 0 0 2px rgba(167,125,255,.6) inset;
+  font-size: 20px;
+  font-style: italic;
+  font-weight: bold;
 }
 
 /* Theme = amber */
@@ -96,6 +102,9 @@ button:active{ transform:translateY(1px); }
   background:linear-gradient(#ff0000, #470202); color:#ffffff;
   border:1px solid rgba(255,178,71,.35);
   box-shadow:0 0 0px rgba(255,178,71,.35), 0 0 2px rgba(255,178,71,.6) inset;
+  font-size: 20px;
+  font-style: italic;
+  font-weight: bold;
 }
 
 .app{
@@ -131,8 +140,8 @@ button:active{ transform:translateY(1px); }
 #homeSettingsBtn{
   position: fixed !important;
   z-index: 2000;
-  top:  max(env(safe-area-inset-top), 6px) !important;
-  right:max(env(safe-area-inset-right), 6px) !important;
+  top:  max(env(safe-area-inset-top), 10px) !important;
+  right:max(env(safe-area-inset-right), 10px) !important;
   left: auto !important;
   transform: none !important;
   background: transparent !important;
@@ -143,8 +152,8 @@ button:active{ transform:translateY(1px); }
   color: #00ffea;
 }
 #homeSettingsBtn svg{
-  width: clamp(60px, 4vw, 60px);
-  height: clamp(60px, 4vw, 60px);
+  width: clamp(80px, 4vw, 60px);
+  height: clamp(80px, 4vw, 60px);
   fill: currentColor;
 }
 #homeSettingsBtn:active{ transform: none !important; }
@@ -167,12 +176,12 @@ button:active{ transform:translateY(1px); }
   right: clamp(200px, 5vw, 200px);
 }
 #homeOnlineBtn  {
-  top:   clamp(660px, 18dvh, 158px);
+  top:   clamp(640px, 18dvh, 158px);
   right: clamp(200px, 5vw, 200px);
 }
 /* Center Theme using the same clamped width */
 #homeThemeBtn   {
-  top:  clamp(760px, 18dvh, 158px);
+  top:  clamp(720px, 18dvh, 158px);
   left: calc(200px, 5vw, 200px);
 }
 
@@ -693,7 +702,11 @@ button, input, select, textarea { font: inherit; }
   outline: none;
 }
 
-.board .cell.hover-ok{ background:#08362e; outline:2px dashed rgba(0,224,212,.85); }
+.board .cell.hover-ok{  background: var(--fill, #04ff19); /* ← one-liner: uses the hovered piece’s color; falls back to green */
+  border-radius:8px;
+  box-shadow: 0 0 1px rgba(255, 255, 255, 0.35),
+              inset 0 2px 0 rgba(255, 255, 255, 0.60),
+              inset 0 -3px 0 rgba(0, 0, 0, 0.35); }
 
 /* Kill the floating canvas overlay, keep DOM happy */
 #homeMiniCanvas { display: none !important; }
@@ -861,9 +874,9 @@ button, input, select, textarea { font: inherit; }
 }
 
 /* Nudge each shape: left/right = first/second/third */
-#bfTray .slot[data-slot="0"] > .bfmini-piece { transform: translate( 40px, -30px); }
+#bfTray .slot[data-slot="0"] > .bfmini-piece { transform: translate( 400px, -30px); }
 #bfTray .slot[data-slot="1"] > .bfmini-piece { transform: translate( 4px, -30px); }
-#bfTray .slot[data-slot="2"] > .bfmini-piece { transform: translate( -40px, -30px); }
+#bfTray .slot[data-slot="2"] > .bfmini-piece { transform: translate( -400px, -30px); }
 
 /* default */
 #bfTray .bfmini-piece{ box-shadow: none; border-radius: 12px; }
@@ -924,6 +937,118 @@ button, input, select, textarea { font: inherit; }
   box-shadow: none;               /* optional: keep preview clean */
 }
 
+/* make preview/hover cells paint from the --fill variable */
+.board .cell.preview,
+.board .cell.hover-ok{
+  background: var(--fill) !important; /* pull from JS-set variable */
+  opacity: .35;                        /* ghosty */
+  outline: 1px dashed var(--stroke, rgba(255,255,255,.25));
+  border-radius:8px;
+  box-shadow: 0 0 1px rgba(255, 255, 255, 0.35),
+              inset 0 2px 0 rgba(255, 255, 255, 0.60),
+              inset 0 -3px 0 rgba(0, 0, 0, 0.35); }
+
+/* Force an explicit width even inside a flex row */
+#homeOfflineBtn{
+  display: inline-flex;              /* so width applies */
+  justify-content: center;
+  align-items: center;
+  box-sizing: border-box;
+  width: 280px;                      /* <- change me */
+  min-width: 260px;
+  flex: 0 0 320px;                   /* ignore flex auto-sizing */
+}
+/* Force an explicit width even inside a flex row */
+#homeOnlineBtn{
+  display: inline-flex;              /* so width applies */
+  justify-content: center;
+  align-items: center;
+  box-sizing: border-box;
+  width: 280px;                      /* <- change me */
+  min-width: 260px;
+  flex: 0 0 320px;                   /* ignore flex auto-sizing */
+}
+/* Force an explicit width even inside a flex row */
+#homeThemeBtn{
+  display: inline-flex;              /* so width applies */
+  justify-content: center;
+  align-items: center;
+  box-sizing: border-box;
+  width: 280px;                      /* <- change me */
+  min-width: 260px;
+  flex: 0 0 320px;                   /* ignore flex auto-sizing */
+}
+
+/* Disable all mouse/touch on tray pieces while autoplay is on */
+.auto-play #bfTray .bfmini-piece{
+  pointer-events: none;
+  cursor: default;
+  touch-action: none;
+}
+#bfTray .bfmini-piece{ pointer-events: none; cursor: default; touch-action: none; }
+
+/* MODE page only (second screen) */
+#offline { position: relative; isolation: isolate; }
+
+/* Let clicks pass through the tray that overlays the buttons */
+#offline #bfTray {
+  pointer-events: none !important;   /* tray stays visible but won't intercept */
+  position: relative;
+  z-index: 1;
+}
+
+/* Ensure the three buttons are above everything and fully clickable */
+#offline #classicBtn,
+#offline #tetrisBtn,
+#offline #versusBtn{
+  position: relative !important;
+  z-index: 10 !important;
+  pointer-events: auto !important;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: normal;
+  box-sizing: border-box;
+}
+
+/* Prevent any inner spans/pseudo elements from grabbing the click */
+#offline #classicBtn *, #offline #classicBtn::before, #offline #classicBtn::after,
+#offline #tetrisBtn  *, #offline #tetrisBtn::before,  #offline #tetrisBtn::after,
+#offline #versusBtn  *, #offline #versusBtn::before,  #offline #versusBtn::after{
+  pointer-events: none !important;
+}
+/* MODE / second page only */
+#offline{ position: relative; isolation: isolate; }
+
+/* Let clicks pass through the tray + its slots on the Mode page */
+#offline :is(#bfTray, #bfTrayHome),
+#offline :is(#bfTray, #bfTrayHome) .slot,
+#offline :is(#bfTray, #bfTrayHome) .bfmini-piece{
+  pointer-events: none !important;   /* still visible; just not clickable */
+  position: relative;
+  z-index: 1;                        /* keep it below the buttons */
+}
+
+/* Ensure the three buttons sit above everything and are fully clickable */
+#offline #classicBtn,
+#offline #tetrisBtn,
+#offline #versusBtn{
+  position: relative !important;
+  z-index: 1000 !important;
+  pointer-events: auto !important;
+  display: inline-flex !important;
+  align-items: center; justify-content: center;
+  line-height: normal !important;
+  box-sizing: border-box;
+}
+
+/* Children/pseudo-elements of the buttons won't steal clicks */
+#offline #classicBtn *, #offline #classicBtn::before, #offline #classicBtn::after,
+#offline #tetrisBtn  *, #offline #tetrisBtn::before,  #offline #tetrisBtn::after,
+#offline #versusBtn  *, #offline #versusBtn::before,  #offline #versusBtn::after{
+  pointer-events: none !important;
+}
+
 
 </style>
 </head>
@@ -948,7 +1073,7 @@ button, input, select, textarea { font: inherit; }
   <!-- transparent overlay for the falling block -->
   <canvas id="homeMiniCanvas"></canvas>
 </div>
-<div id="bfTray" class="bfmini-tray">
+<div id="bfTray" class="bfmini-tray" style="pointer-events:none; z-index:1; position:relative;">
   <div class="slot" data-slot="0"></div>
   <div class="slot" data-slot="1"></div>
   <div class="slot" data-slot="2"></div>
@@ -966,11 +1091,15 @@ button, input, select, textarea { font: inherit; }
     <button id="homeThemeBtn"   onclick="toggleTheme()">Versus</button>
     <!-- inside: <div id="homeLayout" class="home-layout"> ... -->
 <button id="homeSettingsBtn" class="icon-btn" onclick="openSettings()" aria-label="Settings" title="Settings">
-  <!-- Gear icon -->
-  <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">
-    <path d="M12 8.5a3.5 3.5 0 110 7 3.5 3.5 0 010-7zm9 3.5l-1.9.5a7.7 7.7 0 00-.6 1.6l1.1 1.6-1.9 1.9-1.6-1.1c-.5.25-1.05.45-1.6.6L12 20l-.5-1.9a7.7 7.7 0 01-1.6-.6l-1.6 1.1-1.9-1.9 1.1-1.6a7.7 7.7 0 01-.6-1.6L4 12l1.9-.5c.14-.55.34-1.1.6-1.6L5.9 8.3 7.8 6.4l1.6 1.1c.5-.26 1.05-.46 1.6-.6L12 4l.5 1.9c.55.14 1.1.34 1.6.6l1.6-1.1 1.9 1.9-1.1 1.6c.26.5.46 1.05.6 1.6L21 12z"/>
-  </svg>
+  <img
+    src="icons/settings.png"
+    alt=""
+    width="40" height="40"
+    decoding="async" loading="eager"
+    draggable="false"
+  />
 </button>
+
 
   </div>
 </div>
@@ -2582,7 +2711,16 @@ function place(shape, R, C, colorArg){
 }
 
 
-  function clearHover(){ cellEls.forEach(d=> d.classList.remove('hover-ok','hover-bad')); }
+function clearHover(){
+  const els = board.querySelectorAll('.cell.preview, .cell.hover-ok, .cell.hover-bad');
+  els.forEach(el => {
+    el.classList.remove('preview','hover-ok','hover-bad');
+    // remove temp preview colors so next pass recolors cleanly
+    el.style.removeProperty('--fill');
+    el.style.removeProperty('--stroke');
+  });
+}
+
 
   function snap(clientX, clientY){
     const rect = board.getBoundingClientRect();
@@ -2598,64 +2736,87 @@ function place(shape, R, C, colorArg){
     return {r,c};
   }
 
-  function enableDrag(piece){
-    let dragging=false, hover=null;
+function enableDrag(piece){
+  let dragging = false;
 
-    piece.addEventListener('pointerdown', e=>{
-      dragging=true; piece.setPointerCapture(e.pointerId);
-      piece.classList.add('dragging'); clearHover();
+  piece.addEventListener('pointerdown', (e) => {
+    dragging = true;
+    piece.setPointerCapture?.(e.pointerId);
+  });
 
-      // capture the piece’s color for place()
+  piece.addEventListener('pointermove', (e) => {
+    if (!dragging) return;
+
+    // Snap computation
+    const rect = board.getBoundingClientRect();
+    const step = CELL + GAP;
+    const sx = rect.left + PAD, sy = rect.top + PAD;
+
+    const relX = e.clientX - sx;
+    const relY = e.clientY - sy;
+
+    const c0 = Math.floor(relX / step);
+    const r0 = Math.floor(relY / step);
+
+    const shape = piece._shape;
+    const ok = (c0>=0 && r0>=0 && c0<COLS && r0<ROWS) && canPlace(shape, r0, c0);
+
+    // --- color-matched, semi-transparent preview ---
+    clearHover();
+    if (ok){
+      const fill   = piece.style.getPropertyValue('--fill')   || piece.dataset.fill;
+      const stroke = piece.style.getPropertyValue('--stroke') || piece.dataset.stroke;
+
+      for (let r=0; r<shape.length; r++){
+        for (let c=0; c<shape[0].length; c++){
+          if (!shape[r][c]) continue;
+          const rr = r0 + r, cc = c0 + c;
+          if (rr<0 || cc<0 || rr>=ROWS || cc>=COLS) continue;
+
+          const cell = cellEls[idx(rr,cc)];
+          cell.style.setProperty('--fill',   fill);    // <-- key line
+          cell.style.setProperty('--stroke', stroke);  // dashed outline color
+          cell.classList.add('preview');               // CSS gives the ghost look
+        }
+      }
+    }
+    // --- end preview ---
+  });
+
+  piece.addEventListener('pointerup', (e) => {
+    if (!dragging) return;
+    dragging = false;
+
+    // Final snap (recompute target)
+    const rect = board.getBoundingClientRect();
+    const step = CELL + GAP;
+    const sx = rect.left + PAD, sy = rect.top + PAD;
+    const c0 = Math.floor((e.clientX - sx) / step);
+    const r0 = Math.floor((e.clientY - sy) / step);
+
+    const shape = piece._shape;
+
+    clearHover();
+
+    if ((c0>=0 && r0>=0 && c0<COLS && r0<ROWS) && canPlace(shape, r0, c0)){
+      // pass the piece’s colors into place()
       place._currentColor = {
-        fill:      piece.dataset.fill,
-        stroke:    piece.dataset.stroke,
-        glow:      piece.dataset.glow,
-        glowInset: piece.dataset.glowInset
+        fill:      piece.style.getPropertyValue('--fill')       || piece.dataset.fill,
+        stroke:    piece.style.getPropertyValue('--stroke')     || piece.dataset.stroke,
+        glow:      piece.style.getPropertyValue('--glow')       || piece.dataset.glow,
+        glowInset: piece.style.getPropertyValue('--glow-inset') || piece.dataset.glowInset
       };
-    });
+      place(shape, r0, c0);
+      piece.remove();
 
-    piece.addEventListener('pointermove', e=>{
-      if (!dragging) return;
-      const hit = snap(e.clientX, e.clientY);
-      const shape = piece._shape; clearHover();
-      if (hit){
-        hover=hit;
-        const ok = canPlace(shape, hit.r, hit.c);
-  // --- preview: color-matched, semi-transparent ---
-clearHover(); // always clear the old preview first
-if (ok){
-  const fill   = piece.style.getPropertyValue('--fill')   || piece.dataset.fill;
-  const stroke = piece.style.getPropertyValue('--stroke') || piece.dataset.stroke;
-
-  for (let r=0; r<shape.length; r++){
-    for (let c=0; c<shape[0].length; c++){
-      if (!shape[r][c]) continue;
-      const rr = r0 + r, cc = c0 + c;
-      if (rr<0||cc<0||rr>=ROWS||cc>=COLS) continue;
-
-      const cell = cellEls[idx(rr,cc)];
-      cell.style.setProperty('--fill',   fill);
-      cell.style.setProperty('--stroke', stroke);
-      cell.classList.add('preview');   // CSS controls opacity/outline
-    }}}}})// --- end preview ---
-
-    piece.addEventListener('pointerup', e=>{
-      if (!dragging) return;
-      dragging=false; piece.releasePointerCapture(e.pointerId);
-      piece.classList.remove('dragging'); clearHover();
-      const shape = piece._shape;
-      if (hover && canPlace(shape, hover.r, hover.c)){
-        place(shape, hover.r, hover.c);
-        piece.remove();
-        if (!FREEZE_TRAY && tray.querySelectorAll('.slot > .bfmini-piece').length === 0) {
-  refillTray();  // refill only when all pieces have been used
+      // only refill when all three slots are used up
+      if (tray.querySelectorAll('.slot > .bfmini-piece').length === 0){
+        refillTray();
+      }
+    }
+  });
 }
 
-
-      }
-      hover=null;
-    });
-  }
   
 
   
@@ -2918,18 +3079,41 @@ setTimeout(() => {
       const curX=startX+dx*ease, curY=startY+dy*ease;
       clone.style.left=curX+'px'; clone.style.top=curY+'px';
 
-      if (SHOW_SNAP_PREVIEW){
-        const rect=board.getBoundingClientRect();
-        const sx=rect.left+PAD, sy=rect.top+PAD;
-        const relX=curX-sx, relY=curY-sy;
-        if (relX>=0 && relY>=0){
-          const step=CELL+GAP, c0=Math.floor(relX/step), r0=Math.floor(relY/step);
-          if (c0>=0 && r0>=0 && c0<COLS && r0<ROWS){
-            const ok=canPlace(piece._shape, r0, c0);
-            previewHover(piece._shape, {r:r0,c:c0}, ok);
-          } else { clearHover(); }
-        } else { clearHover(); }
+if (SHOW_SNAP_PREVIEW){
+  clearHover();
+
+  const rect = board.getBoundingClientRect();
+  const sx = rect.left + PAD, sy = rect.top + PAD;
+  const relX = curX - sx,     relY = curY - sy;
+  const step = CELL + GAP;
+
+  if (relX >= 0 && relY >= 0){
+    const c0 = Math.floor(relX / step);
+    const r0 = Math.floor(relY / step);
+
+    if (c0>=0 && r0>=0 && c0<COLS && r0<ROWS){
+      const ok = canPlace(piece._shape, r0, c0);
+      if (ok){
+        const fill   = piece.style.getPropertyValue('--fill')   || piece.dataset.fill;
+        const stroke = piece.style.getPropertyValue('--stroke') || piece.dataset.stroke;
+
+        for (let r=0; r<piece._shape.length; r++){
+          for (let c=0; c<piece._shape[0].length; c++){
+            if (!piece._shape[r][c]) continue;
+            const rr = r0 + r, cc = c0 + c;
+            if (rr<0||cc<0||rr>=ROWS||cc>=COLS) continue;
+
+            const cell = cellEls[idx(rr,cc)];
+            cell.style.setProperty('--fill',   fill);
+            cell.style.setProperty('--stroke', stroke);
+            cell.classList.add('preview'); // CSS paints from --fill
+          }
+        }
       }
+    }
+  }
+}
+
 
       if (t<1){ requestAnimationFrame(frame); }
       else{
@@ -2940,6 +3124,8 @@ setTimeout(() => {
     }
     requestAnimationFrame(frame);
   }
+
+
 
   function autoStep(){
     if (!window.__bfAutoRunning) return;
