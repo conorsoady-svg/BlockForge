@@ -2,7 +2,9 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta
+  name="viewport"
+  content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover"/>
 <meta name="format-detection" content="telephone=no" />
 <title>Block Forge — Full Game (Neon, Mobile, Demo AI)</title>
  <link rel="manifest" href="manifest.webmanifest?v=4">
@@ -1215,6 +1217,18 @@ column-gap: 2px !important;
   margin-top: -30px;                              /* vertical tweak if you want */
 }
 
+/* Lock page scrolling & overscroll bounce */
+html, body {
+  height: 100%;
+  overflow: hidden;              /* no scrollbars */
+  overscroll-behavior: none;     /* no pull-to-refresh/bounce */
+}
+
+/* Your app wrapper (adjust selector to your root if different) */
+#home, #offline, #game {
+  touch-action: none;            /* no browser panning/zoom gestures */
+}
+
 
 </style>
 </head>
@@ -1349,6 +1363,37 @@ const randi=n=>Math.floor(Math.random()*n);
 const cellSize=()=>{ const b=$('board'); const v=b?parseInt(getComputedStyle(b).getPropertyValue('--cell'),10):NaN; return Number.isFinite(v)&&v>0?v:parseInt(getComputedStyle(document.documentElement).getPropertyValue('--cell'),10); };
 const pad=()=>parseInt(getComputedStyle(document.documentElement).getPropertyValue('--pad'));
 const gap=()=>parseInt(getComputedStyle(document.documentElement).getPropertyValue('--gap'));
+
+// --- Disable wheel/trackpad scroll (desktop) ---
+window.addEventListener('wheel', (e) => {
+  e.preventDefault();
+}, { passive: false });
+
+// --- Disable touch scrolling (mobile) ---
+window.addEventListener('touchmove', (e) => {
+  e.preventDefault();
+}, { passive: false });
+
+// --- iOS Safari: block pinch zoom ---
+window.addEventListener('gesturestart', (e) => {
+  e.preventDefault();
+});
+
+// --- iOS: block double-tap zoom ---
+let __lastTouchEnd = 0;
+window.addEventListener('touchend', (e) => {
+  const now = Date.now();
+  if (now - __lastTouchEnd <= 300) {
+    e.preventDefault();
+  }
+  __lastTouchEnd = now;
+}, { passive: false });
+
+// --- Desktop: block double-click zoom (some browsers/extensions) ---
+window.addEventListener('dblclick', (e) => {
+  e.preventDefault();
+});
+
 
 
 // Ctrl+Alt+R -> clear SW caches and hard-reload (dev only)
