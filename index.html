@@ -1364,6 +1364,33 @@ const cellSize=()=>{ const b=$('board'); const v=b?parseInt(getComputedStyle(b).
 const pad=()=>parseInt(getComputedStyle(document.documentElement).getPropertyValue('--pad'));
 const gap=()=>parseInt(getComputedStyle(document.documentElement).getPropertyValue('--gap'));
 
+// Fullscreen helper (Chrome/Android, most browsers)
+function goFullscreen() {
+  const el = document.documentElement;
+  const req = el.requestFullscreen || el.webkitRequestFullscreen || el.msRequestFullscreen;
+  if (req && !document.fullscreenElement) {
+    req.call(el).catch(()=>{ /* ignore */ });
+  }
+}
+
+// Trigger on the FIRST user tap anywhere
+window.addEventListener('pointerdown', function onFirstTap() {
+  goFullscreen();
+  // remove after first successful gesture so it won't re-fire
+  window.removeEventListener('pointerdown', onFirstTap);
+}, { once: true });
+
+// (Optional) if user exits fullscreen, re-arm on next tap
+document.addEventListener('fullscreenchange', () => {
+  if (!document.fullscreenElement) {
+    window.addEventListener('pointerdown', function onTap() {
+      goFullscreen();
+      window.removeEventListener('pointerdown', onTap);
+    }, { once: true });
+  }
+});
+
+
 // --- Disable wheel/trackpad scroll (desktop) ---
 window.addEventListener('wheel', (e) => {
   e.preventDefault();
