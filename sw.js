@@ -1,5 +1,5 @@
 /* sw.js — update-prompt style */
-const CACHE = "bf-static-v34";
+const CACHE = "bf-static-v35";
 
 /* Optional: very small precache (safe files only) */
 self.addEventListener("install", (event) => {
@@ -7,9 +7,9 @@ self.addEventListener("install", (event) => {
   event.waitUntil(
     caches.open(CACHE).then((c) =>
       c.addAll([
-        "/",                // root
-        "/index.html",      // or your main html file name
-        "/manifest.webmanifest",
+        "",                // root
+        "index.html",      // or your main html file name
+        "manifest.webmanifest",
       ].map((u) => new URL(u, self.registration.scope).toString())
       ).catch(() => {})
     )
