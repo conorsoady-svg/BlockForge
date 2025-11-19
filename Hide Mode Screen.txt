@@ -1,0 +1,11 @@
+/* TEMP: hide Mode/Home during dev */
+#home { display: none !important; }
+
+and
+
+<script>
+// TEMP dev boot
+window.addEventListener('load', () => { openClassicGrid(); });
+</script>
+
+delete these to show mode screen

@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
@@ -6,7 +6,7 @@
   name="viewport"
   content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover"/>
 <meta name="format-detection" content="telephone=no" />
-<title>Block Forge — Full Game (Neon, Mobile, Demo AI)</title>
+<title>Block Forge Full Game (Neon, Mobile, Demo AI)</title>
  <link rel="manifest" href="./manifest.webmanifest">
 <link rel="icon" type="image/png" sizes="192x192" href="./icons/192x192.png">
 <link rel="apple-touch-icon" href="./icons/192x192.png">
@@ -19,6 +19,7 @@
 html,body{height:100%;-webkit-text-size-adjust:100%}
 body{margin:0;background: radial-gradient(circle farthest-corner at 50% 50%, #010724 70%, #3A5292 150%); background-attachment: fixed; background-size: 100dvw 100dvh; background-repeat: no-repeat; background-position: center;color:#54FF10;text-align:center;font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;overscroll-behavior-y:none;-webkit-user-select:none;user-select:none}
 .hidden{display:none!important}
+
 
 /* --- Update toast (PWA) --- */
 #updateToast {
@@ -59,7 +60,7 @@ body{margin:0;background: radial-gradient(circle farthest-corner at 50% 50%, #01
 button{
   margin:6px;
   padding:15px 20px;
-  font-size:16px;              /* ← fix */
+  font-size:16px;              /* â† fix */
   border:none;
   border-radius:12px;
   background:#111827;
@@ -69,15 +70,6 @@ button{
   transition:background .2s, box-shadow .2s, transform .06s;
 }
 button:active{ transform:translateY(1px); }
-
-/* Move Classic down a bit */
-#offline #classicBtn{ margin-top:20px; }
-
-/* Nudge Tetris to the right */
-#offline #tetrisBtn{ margin-left:24px; }
-
-/* Pull Online closer to Tetris and down slightly */
-#offline #onlineBtn{ margin-left:12px; margin-top:6px; }
 
 /* Offline = teal */
 #homeOfflineBtn{
@@ -289,7 +281,7 @@ font-weight: bold;
 #tetrisControls{display:none;gap:8px;justify-content:center;margin:8px 0}
 #tetrisControls button{min-width:64px}
 
-/* ===== Neon portrait home — reference match ===== */
+/* ===== Neon portrait home â€” reference match ===== */
 :root{ --hf-green:#65ff57; --hf-cyan1:#7bf5ff; --hf-cyan2:#22d6ff; }
 
 #homeOverlay{
@@ -356,7 +348,7 @@ font-weight: bold;
   font-family: 'Microsoft Sans Serif';
 }
 
-/* compact 8×12 grid */
+/* compact 8Ã—12 grid */
 .hf-grid{
   --hfCell: clamp(50px, 5.2vw, 30px);
   position:absolute; left:50%; top:60%; transform:translate(-50%,-50%);
@@ -559,7 +551,7 @@ button, input, select, textarea { font: inherit; }
   background: #0c121b;
   padding: env(safe-area-inset-top) env(safe-area-inset-right)
            env(safe-area-inset-bottom) env(safe-area-inset-left);
-}*/
+}
 
 /* THE GAME AREA with locked aspect;
    - Sized by HEIGHT (not vw) so gutters don't squish it
@@ -597,7 +589,7 @@ button, input, select, textarea { font: inherit; }
   background: transparent;
   filter: none;
   opacity: 1;
-  /* was: overflow:hidden;  ← remove it so box-shadow isn't clipped */
+  /* was: overflow:hidden;  â† remove it so box-shadow isn't clipped */
   overflow: visible;
   z-index: 1;
 }
@@ -621,9 +613,9 @@ button, input, select, textarea { font: inherit; }
 /* Mini grid spacing (between squares) */
 #home .mini-stage #miniBoardClone{
   position: absolute;
-  --gap: 2;      /* ← gap in px (no unit in the var) */
+  --gap: 2;      /* â† gap in px (no unit in the var) */
   --pad: 3; 
-   z-index: 2;     /* ← padding around the whole grid (px) */
+   z-index: 2;     /* â† padding around the whole grid (px) */
   /* if you want to hard-override, add: gap: 10px !important; padding: 8px !important; */
 }
 
@@ -639,7 +631,7 @@ button, input, select, textarea { font: inherit; }
 }
 
 .bfmini-piece.dragging{ opacity:.75; cursor: grabbing; }
-.bfmini-piece:active{ transform:none; } /* don’t inherit global press shift */
+.bfmini-piece:active{ transform:none; } /* donâ€™t inherit global press shift */
 
 /* Each tray piece can have its own scale */
 .bfmini-piece .cell{
@@ -704,7 +696,7 @@ button, input, select, textarea { font: inherit; }
   outline: none;
 }
 
-.board .cell.hover-ok{  background: var(--fill, #04ff19); /* ← one-liner: uses the hovered piece’s color; falls back to green */
+.board .cell.hover-ok{  background: var(--fill, #04ff19); /* â† one-liner: uses the hovered pieceâ€™s color; falls back to green */
   border-radius:8px;
   box-shadow: 0 0 1px rgba(255, 255, 255, 0.35),
               inset 0 2px 0 rgba(255, 255, 255, 0.60),
@@ -712,6 +704,7 @@ button, input, select, textarea { font: inherit; }
 
 /* Kill the floating canvas overlay, keep DOM happy */
 #homeMiniCanvas { display: none !important; }
+.board .cell{ overflow: visible; }
 
 /* Filled board cells use per-piece vars */
 .board .cell.filled{
@@ -743,7 +736,7 @@ button, input, select, textarea { font: inherit; }
   margin: 12px auto 0;
   max-width: min(560px, 92vw);
   position: relative;
-  z-index: 1;              /* ← tray below grid */
+  z-index: 1;              /* â† tray below grid */
 }
 
 /* Grid above tray so placed cells are visible */
@@ -755,7 +748,7 @@ button, input, select, textarea { font: inherit; }
 
 /* MODE page (#home): pieces should participate in grid layout */
 #home #bfTray .bfmini-piece{
-  position: static;           /* ← stops overlapping / makes gap work */
+  position: static;           /* â† stops overlapping / makes gap work */
   transform: none !important; /* ignore any scale/translate from JS */
   margin-top: -30px;          /* keep your vertical nudge, edit here */
 }
@@ -806,7 +799,7 @@ button, input, select, textarea { font: inherit; }
   border-radius: inherit;
   pointer-events: none;
 
-  /* bright hairline at top → fade → subtle dark at bottom */
+  /* bright hairline at top â†’ fade â†’ subtle dark at bottom */
   background:
     linear-gradient(
       to bottom,
@@ -833,7 +826,7 @@ button, input, select, textarea { font: inherit; }
   grid-auto-rows: calc(var(--cell, 40) * 1px);
 }
 
-/* Use a fade-only clear on BOARD cells (no scale → no layout jitter) */
+/* Use a fade-only clear on BOARD cells (no scale â†’ no layout jitter) */
 .board .cell.filled.clearing{
   animation: bfClearFade 240ms ease-out forwards;
 }
@@ -952,6 +945,24 @@ button, input, select, textarea { font: inherit; }
   box-shadow: 0 0 1px rgba(255, 255, 255, 0.35),
               inset 0 2px 0 rgba(255, 255, 255, 0.60),
               inset 0 -3px 0 rgba(0, 0, 0, 0.35); }
+/* Lifted preview overlay that does NOT move the real cell */
+.board .cell.hover-ok,
+.board .cell.hover-bad { position: relative; pointer-events: none; }
+
+.board .cell.hover-ok::after,
+.board .cell.hover-bad::after{
+  content: "";
+  position: absolute;
+  inset: 0;                    /* same size as the cell */
+  border-radius: 8px;
+  background: var(--fill, transparent);
+  outline: 1px dashed var(--stroke, rgba(255,255,255,.25));
+  opacity: .35;
+  box-shadow: 0 0 1px rgba(255,255,255,.35),
+              inset 0 2px 0 rgba(255,255,255,.60),
+              inset 0 -3px 0 rgba(0,0,0,.35);  /* â† lift the PREVIEW (tweak value to taste) */
+  pointer-events: none;          /* never block touches/mouse */
+}
 
 /* Force an explicit width even inside a flex row */
 #homeOfflineBtn{
@@ -991,30 +1002,6 @@ button, input, select, textarea { font: inherit; }
   touch-action: none;
 }
 #bfTray .bfmini-piece{ pointer-events: none; cursor: default; touch-action: none; }
-
-/* MODE page only (second screen) */
-#offline { position: relative; isolation: isolate; }
-
-/* Let clicks pass through the tray that overlays the buttons */
-#offline #bfTray {
-  pointer-events: none !important;   /* tray stays visible but won't intercept */
-  position: relative;
-  z-index: 1;
-}
-
-/* Ensure the three buttons are above everything and fully clickable */
-#offline #classicBtn,
-#offline #tetrisBtn,
-#offline #versusBtn{
-  position: relative !important;
-  z-index: 10 !important;
-  pointer-events: auto !important;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  line-height: normal;
-  box-sizing: border-box;
-}
 
 /* Prevent any inner spans/pseudo elements from grabbing the click */
 #offline #classicBtn *, #offline #classicBtn::before, #offline #classicBtn::after,
@@ -1130,17 +1117,17 @@ button, input, select, textarea { font: inherit; }
 #bfTray .slot[data-slot="2"]{ justify-self: end; }
 
 
-/* MODE (second page) — force a predictable tray layout */
+/* MODE (second page) â€” force a predictable tray layout */
 #offline :is(#bfTray, #bfTrayHome){
   display: grid !important;
   grid-template-columns: repeat(3, minmax(0,1fr)) !important;
-  /* ← CHANGE THIS to adjust spacing between the three pieces */
+  /* â† CHANGE THIS to adjust spacing between the three pieces */
   gap: clamp(12px, 3vw, 28px) !important;
   justify-items: center !important;
   align-items: start !important;
 }
 
-/* Center each slot’s content; provide a consistent box height */
+/* Center each slotâ€™s content; provide a consistent box height */
 #offline :is(#bfTray, #bfTrayHome) .slot{
   display: grid !important;
   place-items: center !important;
@@ -1171,7 +1158,7 @@ button, input, select, textarea { font: inherit; }
 #home #bfTray{
   display: grid;
   grid-template-columns: repeat(3, minmax(0,1fr));
-  gap: 250px;                  /* ← change this to move pieces apart */
+  gap: 250px;                  /* â† change this to move pieces apart */
   justify-items: center;
   align-items: start;
 }
@@ -1189,21 +1176,20 @@ button, input, select, textarea { font: inherit; }
 #home #bfTray .slot[data-slot="2"]{ justify-self: end; }
 
 /* --- Mode tray: keep 3 fixed columns so positions never shift --- */
-:is(#home, #offline) #bfTray,
-:is(#home, #offline) #bfTrayHome{
+#home #bfTray,
+#home #bfTrayHome{
   /* fixed-width tracks; they don't shrink when a slot is empty */
-  --slot-w: clamp(96px, 22vw, 140px);          /* <-- adjust width per column */
+  --slot-w: clamp(96px, 22vw, 140px);     /* <-- adjust width per column */
   display: grid !important;
   grid-template-columns: var(--slot-w) var(--slot-w) var(--slot-w) !important;
-  justify-content: center !important;          /* group centered as a whole */
-column-gap: 40px !important;
- /* <-- adjust spacing between columns */
+  justify-content: center !important;     /* group centered as a whole */
+  column-gap: 40px !important;            /* adjust spacing between columns */
   align-items: start !important;
 }
 
 /* each slot uses the same fixed width box */
-:is(#home, #offline) #bfTray .slot,
-:is(#home, #offline) #bfTrayHome .slot{
+#home #bfTray .slot,
+#home #bfTrayHome .slot{
   width: var(--slot-w) !important;
   display: grid !important;
   place-items: center !important;
@@ -1211,8 +1197,8 @@ column-gap: 40px !important;
 }
 
 /* neutralize any translate/scale that fights layout on the mode page tray */
-:is(#home, #offline) #bfTray .bfmini-piece,
-:is(#home, #offline) #bfTrayHome .bfmini-piece{
+#home #bfTray .bfmini-piece,
+#home #bfTrayHome .bfmini-piece{
   transform: none !important;
   margin-top: -30px;                              /* vertical tweak if you want */
 }
@@ -1225,14 +1211,225 @@ html, body {
 }
 
 /* Your app wrapper (adjust selector to your root if different) */
-#home, #offline, #game {
-  touch-action: none;            /* no browser panning/zoom gestures */
+#home, #game { touch-action: none; }
+
+/* Classic grid-only screen layout */
+/* Classic grid-only screen layout */
+#screen-classic-grid{
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+
+  /* This is the overlay background */
+  background: radial-gradient(circle farthest-corner at 50% 50%, #010724 70%, #3A5292 150%);
+  background-size: 100vw 100vh;
+  background-repeat: no-repeat;
+  background-position: center;
+  /* Center grid + tray vertically */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 24px;
+}
+
+/* Frame similar to your mode/demo board */
+/* Classic grid wrapper – no extra panel, just centering */
+.classic-grid-wrap{
+  width: min(92vw, 560px);
+  max-width: 560px;
+
+  /* just use it as a centering box */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
 }
 
 
+/* The 8Ã—8 grid */
+.classic-grid{
+  width: 100%; height: 100%;
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);
+  grid-template-rows: repeat(8, 1fr);
+  gap: 6px;
+  padding: 12px;
+  border-radius: 16px;
+  background: var(--panel, #101726);
+  box-shadow: 0 0 0 1px rgba(255,255,255,.04) inset,
+              0 0 32px -8px rgba(0,255,200,.18) inset;
+}
+
+/* Empty cells (same beveled/soft look as your mode grid) */
+.classic-grid .cg{
+  border-radius: 10px;
+  background:
+    radial-gradient(140% 140% at 30% 30%, rgba(255,255,255,.06), transparent 55%),
+    color-mix(in oklab, var(--panel, #0f1626) 85%, black);
+  box-shadow:
+    0 1px 0 rgba(255,255,255,.04) inset,
+    0 -1px 0 rgba(0,0,0,.25) inset;
+}
+
+/* TEMP: hide Mode/Home during dev */
+
+
+
+/* Constrain mini demo children to the Home stage */
+#homeMiniDemo { position: relative; }
+
+#homeMiniCanvas {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  display: block;
+}
+
+/* Center by default (already) */
+#screen-classic-grid { display:grid; place-items:center; }
+
+
+/* Move the whole grid vertically (negative = up, positive = down) */
+#classicGridWrap { 
+  align-self: center;           /* start | center | end */
+  justify-self: center;         /* start | center | end */
+  transform: translate(0, 45px);  /* X, Y â€” e.g., up 24px */
+}
+
+/* Examples:
+   Move left:  transform: translate(-20px, 0);
+   Move right: transform: translate(20px, 0);
+   Pin to top center instead of center: */
+#screen-classic-grid.pin-top { place-items: start center; }
+
+/* If you want fixed coordinates instead of centering, do this instead: */
+/*
+#screen-classic-grid { position: relative; }
+#classicGridWrap {
+  position: absolute; top: 40px; left: 50%; transform: translateX(-50%);
+}
+*/
+
+/* Container layout for the 3 choices on the Classic page */
+
+
+/* Make the Classic screen center its column wrapper */
+#screen-classic-grid { display:grid; place-items:center; }
+
+/* Classic tray layout (matches Mode tray) */
+#screen-classic-grid #bfTrayClassic{
+  --slot-w: clamp(96px, 22vw, 140px);
+  display: grid !important;
+  grid-template-columns: var(--slot-w) var(--slot-w) var(--slot-w) !important;
+  justify-content: center !important;
+  column-gap: 40px !important;
+  align-items: start !important;
+  margin-top: 0; /* the column wrapper already has gap */
+}
+
+/* Center the mini piece inside each slot; cancel demo transforms */
+#screen-classic-grid #bfTrayClassic .bfmini-piece{
+  display: grid;
+  place-items: center;
+  transform: none !important;
+  margin-top: -30px;
+}
+
+/* Classic tray: keep centering box but no card look */
+#screen-classic-grid #bfTrayClassic .slot{
+  width: var(--slot-w);
+  min-height: 84px;
+  display: grid;
+  place-items: center;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+/* Classic tray: use the SAME inner spacing as Mode */
+#screen-classic-grid #bfTrayClassic .bfmini-piece{
+  display: grid;
+  place-items: center;
+  gap: 2px !important;        /* <- match your Mode value */
+  transform: none !important;
+  margin-top: -30px;         /* same vertical nudge as Mode */
+}
+
+/* Classic tray: keep mini cell size identical to Mode */
+#screen-classic-grid #bfTrayClassic .bfmini-piece .cell{
+  width:  calc(var(--cell, 40) * 0.5px) !important;
+  height: calc(var(--cell, 40) * 0.5px) !important;
+}
+
+/* Classic tray â€“ corner radius of each little square */
+#screen-classic-grid #bfTrayClassic .bfmini-piece .cell{
+  border-radius: 4px !important;   /* â† set your number here */
+}
+
+/* Classic tray: move each piece individually */
+#screen-classic-grid #bfTrayClassic .slot:nth-child(1) .bfmini-piece { 
+  transform: translate(65px, 6px) !important;   /* left, down */
+}
+
+#screen-classic-grid #bfTrayClassic .slot:nth-child(2) .bfmini-piece { 
+  transform: translate(0, 6px) !important;        /* centered (baseline) */
+}
+
+#screen-classic-grid #bfTrayClassic .slot:nth-child(3) .bfmini-piece { 
+  transform: translate(-65px, 6px) !important;  /* right, up */
+}
+
+/* Force pointer events on Classic tray only */
+#screen-classic-grid #bfTrayClassic,
+#screen-classic-grid #bfTrayClassic *{
+  pointer-events: auto !important;
+}
+
+/* Lock Classic board to 8Ã—8 tracks so it never visually shrinks */
+#screen-classic-grid #classicBoard{
+  --cols: 8;
+  --rows: 8;
+  display: grid;
+  grid-template-columns: repeat(var(--cols), 1fr);
+  grid-template-rows: repeat(var(--rows), 1fr); /* â† key line */
+}
+
+/* Make sure clearing cells still occupy space (no collapse) */
+#screen-classic-grid .cell.clearing{
+  display: block !important;
+  visibility: visible !important;
+  /* keep layout even if you animate opacity/transform */
+}
+
+/* Classic drag ghost: follows the finger, sized to grid cells */
+#screen-classic-grid .drag-ghost{
+  position: fixed;
+  left: 0; top: 0;
+  transform: translate(-50%,-50%);
+  z-index: 9999;
+  pointer-events: none;
+  display: grid;
+  gap: var(--gap, 6px);
+}
+#screen-classic-grid .drag-ghost .ghost-cell{
+  width: var(--cell);
+  height: var(--cell);
+  border-radius: 8px;
+  background: var(--fill, #333);
+  box-shadow:
+    0 0 1px rgba(255,255,255,.35),
+    inset 0 2px 0 rgba(255,255,255,.60),
+    inset 0 -3px 0 rgba(0,0,0,.35);
+}
+
 </style>
 </head>
-<body>
+
+
 <!-- Background demo -->
 <!--<div id="demoStage" class="stage">
   <div id="demoWrap" class="board-wrap">
@@ -1266,8 +1463,8 @@ html, body {
 
   <!-- Positioning wrapper for first-page buttons -->
   <div id="homeLayout" class="home-layout">
-    <button id="homeOfflineBtn" onclick="showOffline()">Classic</button>
-    <button id="homeOnlineBtn"  onclick="showOnline()">Tetris</button>
+    <button id="homeOfflineBtn" onclick="openClassicGrid()">Classic</button>
+    <button id="homeOnlineBtn" onclick="startMode('tetris')">Tetris</button>
     <button id="homeThemeBtn"   onclick="toggleTheme()">Versus</button>
     <!-- inside: <div id="homeLayout" class="home-layout"> ... -->
 <button id="homeSettingsBtn" class="icon-btn" onclick="openSettings()" aria-label="Settings" title="Settings">
@@ -1280,36 +1477,7 @@ html, body {
   />
 </button>
 
-
   </div>
-</div>
-
-
-<div id="offline" class="app center hidden">
-  <h1>Offline Modes</h1>
-  <div class="sub">Choose a mode</div>
-
-  <!-- Positioning canvas just for second-page buttons -->
-  <div id="offLayout" class="off-layout">
-    <!-- Mode buttons -->
-    <button id="btnClassic" onclick="startMode('classic')">▶ Classic</button>
-    <!-- (Optional) keep Adventure; remove this line if you don't want it -->
-    <button id="btnAdventure" onclick="startMode('adventure')">▶ Adventure</button>
-    <button id="btnTetris"  onclick="startMode('tetris')">▶ Tetris</button>
-
-    <!-- Utility buttons duplicated on the second page -->
-    <button id="btnOffline" onclick="showOffline()">Offline</button>
-    <button id="btnOnline"  onclick="showOnline()">Online</button>
-    <button id="btnTheme"   onclick="toggleTheme()">Theme</button>
-
-    <!-- Keep Home accessible too -->
-    <button id="btnHome2"   onclick="showHome()">⬅ Home</button>
-  </div>
-</div>
-
-<div id="online" class="app center hidden">
-  <h1>Online Modes</h1>
-  <button onclick="showHome()">⬅ Home</button>
 </div>
 
 <!-- Overlays -->
@@ -1342,1209 +1510,35 @@ html, body {
   <div class="slot" data-slot="1"></div>
   <div class="slot" data-slot="2"></div>
 </div>
+<!-- Classic grid-only screen -->
+<div id="screen-classic-grid" class="app hidden">
+  <div class="classic-grid-wrap" id="classicGridWrap">
+    <!-- 8×8 board; JS will fill in .cell divs -->
+    <div id="classicBoard" class="board"></div>
+  </div>
+
+  <!-- Classic tray under the grid -->
+  <div id="bfTrayClassic" class="bfmini-tray">
+    <div class="slot" data-slot="0"></div>
+    <div class="slot" data-slot="1"></div>
+    <div class="slot" data-slot="2"></div>
+  </div>
+</div>
 
 
   </div>
   <div id="tray"></div>
   <div id="tetrisControls">
-    <button onclick="tKey('Left')">◀</button>
-    <button onclick="tKey('Rotate')">⟲</button>
-    <button onclick="tKey('Right')">▶</button>
-    <button onclick="tKey('Down')">▼</button>
-    <button onclick="tKey('Drop')">⤓</button>
+    <button onclick="tKey('Left')">â—€</button>
+    <button onclick="tKey('Rotate')">âŸ²</button>
+    <button onclick="tKey('Right')">â–¶</button>
+    <button onclick="tKey('Down')">â–¼</button>
+    <button onclick="tKey('Drop')">â¤“</button>
   </div>
-  <button onclick="showBackMenu()">⬅ Back</button>
+  <button onclick="showBackMenu()">â¬… Back</button>
 </div>
 
-<script>
-/* ---------- Shorthands ---------- */
-const $=id=>document.getElementById(id);
-const randi=n=>Math.floor(Math.random()*n);
-const cellSize=()=>{ const b=$('board'); const v=b?parseInt(getComputedStyle(b).getPropertyValue('--cell'),10):NaN; return Number.isFinite(v)&&v>0?v:parseInt(getComputedStyle(document.documentElement).getPropertyValue('--cell'),10); };
-const pad=()=>parseInt(getComputedStyle(document.documentElement).getPropertyValue('--pad'));
-const gap=()=>parseInt(getComputedStyle(document.documentElement).getPropertyValue('--gap'));
-
-// Fullscreen helper (Chrome/Android, most browsers)
-function goFullscreen() {
-  const el = document.documentElement;
-  const req = el.requestFullscreen || el.webkitRequestFullscreen || el.msRequestFullscreen;
-  if (req && !document.fullscreenElement) {
-    req.call(el).catch(()=>{ /* ignore */ });
-  }
-}
-
-// Trigger on the FIRST user tap anywhere
-window.addEventListener('pointerdown', function onFirstTap() {
-  goFullscreen();
-  // remove after first successful gesture so it won't re-fire
-  window.removeEventListener('pointerdown', onFirstTap);
-}, { once: true });
-
-// (Optional) if user exits fullscreen, re-arm on next tap
-document.addEventListener('fullscreenchange', () => {
-  if (!document.fullscreenElement) {
-    window.addEventListener('pointerdown', function onTap() {
-      goFullscreen();
-      window.removeEventListener('pointerdown', onTap);
-    }, { once: true });
-  }
-});
-
-
-// --- Disable wheel/trackpad scroll (desktop) ---
-window.addEventListener('wheel', (e) => {
-  e.preventDefault();
-}, { passive: false });
-
-// --- Disable touch scrolling (mobile) ---
-window.addEventListener('touchmove', (e) => {
-  e.preventDefault();
-}, { passive: false });
-
-// --- iOS Safari: block pinch zoom ---
-window.addEventListener('gesturestart', (e) => {
-  e.preventDefault();
-});
-
-// --- iOS: block double-tap zoom ---
-let __lastTouchEnd = 0;
-window.addEventListener('touchend', (e) => {
-  const now = Date.now();
-  if (now - __lastTouchEnd <= 300) {
-    e.preventDefault();
-  }
-  __lastTouchEnd = now;
-}, { passive: false });
-
-// --- Desktop: block double-click zoom (some browsers/extensions) ---
-window.addEventListener('dblclick', (e) => {
-  e.preventDefault();
-});
-
-
-
-// Ctrl+Alt+R -> clear SW caches and hard-reload (dev only)
-document.addEventListener('keydown', (e) => {
-  if (e.ctrlKey && e.altKey && (e.key === 'r' || e.key === 'R')) {
-    navigator.serviceWorker?.controller?.postMessage({ type: 'CLEAR_CACHES' });
-    setTimeout(() => location.reload(true), 80);
-  }
-});
-
-
-
-/* Disable SW + caches on localhost so changes show instantly */
-if (/(^localhost$|^127\.0\.0\.1$)/.test(location.hostname)) {
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.getRegistrations()
-      .then(rs => rs.forEach(r => r.unregister()));
-  }
-  if ('caches' in window) {
-    caches.keys().then(keys => keys.forEach(k => caches.delete(k)));
-  }
-}
-
-/* iOS viewport nudge */
-(function(){
-  const setVh=()=>document.documentElement.style.setProperty('--vh', window.innerHeight*0.01+'px');
-  window.addEventListener('resize', setVh, {passive:true});
-  setVh();
-})();
-
-// Hard clear for Classic: zeros grid + cleans DOM + re-renders
-function classicHardClear(lines) {
-  const rows = lines?.rows || [];
-  const cols = lines?.cols || [];
-  const n = grid.length;
-
-  // A) zero out DATA on the same grid Classic uses
-  for (const r of rows) for (let c = 0; c < n; c++) grid[r][c] = 0;
-  for (const c of cols) for (let r = 0; r < n; r++) grid[r][c] = 0;
-
-  // B) clean up the DOM (classes/attrs) so visuals match data immediately
-  const boardEl =
-    document.querySelector('#board') ||           // try id=board
-    document.querySelector('.classic-grid') ||    // try class=classic-grid
-    document;                                     // fallback (still works)
-  
-  // clear row cells
-  for (const r of rows) {
-    for (let c = 0; c < n; c++) {
-      const el = boardEl.querySelector(`[data-r="${r}"][data-c="${c}"]`);
-      if (el) {
-        el.classList.remove('clearing', 'row', 'col', 'filled', 'placed', 'block');
-        el.removeAttribute('data-filled');
-        el.style.removeProperty('--cDelay');
-      }
-    }
-  }
-  // clear col cells
-  for (const c of cols) {
-    for (let r = 0; r < n; r++) {
-      const el = boardEl.querySelector(`[data-r="${r}"][data-c="${c}"]`);
-      if (el) {
-        el.classList.remove('clearing', 'row', 'col', 'filled', 'placed', 'block');
-        el.removeAttribute('data-filled');
-        el.style.removeProperty('--cDelay');
-      }
-    }
-  }
-
-  // C) re-render from data (forces UI ↔ data sync)
-  try { renderBoard(); } catch {}
-}
-
-
-function clearTetrisOverrides(){
-  $('boardWrap')?.classList.remove('tetris');
-  $('game')?.classList.remove('tetris');
-  $('board')?.style.removeProperty('--cell');
-  document.documentElement.style.removeProperty('--cell');
-}
-
-/* Fit Tetris board only */
-function fitTetrisToViewport(){
-  if (currentMode !== 'tetris') return;
-  const boardEl = $('board'); if (!boardEl) return;
-  const cols = width, rows = height, padPx = pad(), gapPx = gap();
-  const trayH = $('tray') ? $('tray').offsetHeight : 0;
-  const ctrlsEl = $('tetrisControls');
-  const ctrlsH  = (ctrlsEl && ctrlsEl.style.display !== 'none') ? ctrlsEl.offsetHeight : 0;
-  const headerH = 56;
-  const vh = window.innerHeight, vw = window.innerWidth;
-  const availH = Math.max(220, vh - trayH - ctrlsH - headerH - 16);
-  const availW = Math.max(260, vw - 32);
-  const cellFromH = Math.floor((availH - 2*padPx - (rows-1)*gapPx) / rows);
-  const cellFromW = Math.floor((availW - 2*padPx - (cols-1)*gapPx) / cols);
-  const size = Math.max(12, Math.min(cellFromH, cellFromW, 40));
-  boardEl.style.setProperty('--cell', String(size));
-  document.documentElement.style.removeProperty('--cell');
-  sizePreviewLayer();
-  renderBoard();
-}
-
-/* Score animation */
-function animNumberOn(id, to, ms=600){
-  const el = $(id); if(!el) return;
-  const from = parseInt(el.textContent||'0',10) || 0;
-  if(from === to){ el.textContent = String(to); return; }
-  const t0 = performance.now();
-  const ease = t=> t<.5 ? (4*t*t*t) : (1 - Math.pow(-2*t+2,3)/2);
-  function tick(ts){
-    const u = Math.min(1,(ts - t0)/ms);
-    el.textContent = String(Math.round(from + (to - from) * ease(u)));
-    if(u < 1) requestAnimationFrame(tick);
-  }
-  requestAnimationFrame(tick);
-}
-
-/* ---------- UI feedback helpers ---------- */
-function pulseScore(){ const el=$('score'); if(!el) return; el.classList.remove('score-pulse'); void el.offsetWidth; el.classList.add('score-pulse'); }
-function showToast(text){ const hud=$('hudLayer'); if(!hud) return; const t=document.createElement('div'); t.className='toast'; t.textContent=text; hud.appendChild(t); setTimeout(()=>t.remove(), 750); }
-function showComboBanner(mult){ const b=$('comboBanner'); if(!b) return; b.textContent=`Combo x${mult.toFixed(2)}`; if(!b.classList.contains('show')) b.classList.add('show'); b.classList.remove('bump'); void b.offsetWidth; b.classList.add('bump'); }
-function floatPoints(text){ const hud=$('hudLayer'); if(!hud) return; const el=document.createElement('div'); el.className='float-score'; el.textContent=text; hud.appendChild(el); setTimeout(()=>el.remove(), 900); }
-function hideComboBanner(){ const b=$('comboBanner'); if(b) b.classList.remove('show'); }
-function uiPiecePlaced(cells){ if(cells>0){ floatPoints('+'+cells); pulseScore(); } }
-function uiLinesCleared(lines, bonus){ if(lines<=0) return; const label=(lines===1?'Line':'Lines'); floatPoints(`${lines} ${label}! +${bonus}`); pulseScore(); }
-
-/* ---------- Game data ---------- */
-const COLORS=['#00e5ff','#ff3bff','#39ff14','#ffd166','#b784f5','#ff9f1c'];
-const SHAPES=[[[1]],[[1,1]],[[1],[1]],[[1,1,1]],[[1],[1],[1]],[[1,1],[1,1]],[[1,1,1],[0,1,0]],[[1,1,0],[0,1,1]],[[0,1,1],[1,1,0]]];
-const copyShape=s=>s.map(r=>r.slice());
-const randColor=()=>COLORS[randi(COLORS.length)];
-
-let width=8,height=8,grid=[],score=0,tray=[],dragging=null,hoverCell=null,currentMode=null;
-/* Ghost: 0 Off, 1 Outline, 2 Solid */
-let ghostMode = 1;
-/* Scoring / combo */
-let comboLevel = 0, rackPieceUses = 0, rackCleared = false;
-const CLEAR_MULTI = [0, 1.00, 1.80, 2.60, 3.20];
-const COMBO_GROWTH = 1.25;
-
-function cellsInShape(shape){ let n=0; for(let r=0;r<shape.length;r++)for(let c=0;c<shape[0].length;c++) if(shape[r][c]) n++; return n; }
-function cellsClearedFrom(lines){ const rows=lines.rows.length, cols=lines.cols.length; if(!rows && !cols) return 0; return rows*width + cols*height - (rows*cols); }
-function scoreForClear(lines){
-  const linesCleared = (lines.rows?.length||0) + (lines.cols?.length||0);
-  if(!linesCleared) return 0;
-  const cellsCleared = cellsClearedFrom(lines);
-  const multiIndex = Math.min(linesCleared, CLEAR_MULTI.length-1);
-  const simultaneousMulti = CLEAR_MULTI[multiIndex];
-  const comboBoost = Math.pow(COMBO_GROWTH, comboLevel);
-  const perCell = 5;
-  return Math.round(cellsCleared * perCell * simultaneousMulti * comboBoost);
-}
-function afterPlacementUpdateRack(didClear){
-  if (currentMode === 'tetris') return;
-  rackPieceUses++; if(didClear) rackCleared=true;
-  if (rackPieceUses >= 3){
-    const old = comboLevel;
-    comboLevel = rackCleared ? (comboLevel+1) : 0;
-    if (comboLevel>0){
-      showComboBanner(Math.pow(COMBO_GROWTH, comboLevel));
-      const b=$('comboBanner'); if(b){ b.classList.remove('levelUp'); void b.offsetWidth; b.classList.add('levelUp'); }
-    } else if (old>0){ hideComboBanner(); }
-    rackPieceUses=0; rackCleared=false;
-  }
-}
-
-let gameOverQueued=false, isPaused=false;
-function pauseGame(){ if(isPaused) return; isPaused=true; if(currentMode==='tetris' && tDropTimer){ clearInterval(tDropTimer); tDropTimer=null; } }
-function resumeGame(){ if(!isPaused) return; isPaused=false; if(currentMode==='tetris' && !tDropTimer) tScheduleDrop(); }
-function updateGhostBtn(){ const txt=['Off','Outline','Solid'][ghostMode]||'Outline'; const btn=$('ghostToggle'); if(btn) btn.textContent='Ghost: '+txt; }
-function toggleGhostMode(){ ghostMode=(ghostMode+1)%3; updateGhostBtn(); tRenderGhost(); }
-
-/* ---------- Tetris ---------- */
-const TCOLORS={I:'#00e5ff',O:'#ffd166',T:'#b784f5',S:'#39ff14',Z:'#ff3bff',J:'#1ea7ff',L:'#ff9f1c'};
-const TETROMINOES={I:[[1,1,1,1]],O:[[1,1],[1,1]],T:[[1,1,1],[0,1,0]],S:[[0,1,1],[1,1,0]],Z:[[1,1,0],[0,1,1]],J:[[1,0,0],[1,1,1]],L:[[0,0,1],[1,1,1]]};
-let tActive=null,tX=0,tY=0,tRot=0,tDropTimer=null,tDropMs=900,tNext=null,tLines=0,tBag=[];
-function tMatrixRotate(m){const h=m.length,w=m[0].length,r=Array.from({length:w},()=>Array(h).fill(0));for(let y=0;y<h;y++)for(let x=0;x<w;x++)r[x][h-1-y]=m[y][x];return r}
-function tGetShape(name,rot){let m=TETROMINOES[name];for(let i=0;i<(rot%4+4)%4;i++)m=tMatrixRotate(m);return m}
-function tShuffle(a){for(let i=a.length-1;i>0;i--){const j=randi(i+1);[a[i],a[j]]=[a[j],a[i]]}return a}
-function tRefillBag(){ tBag=tShuffle(['I','O','T','S','Z','J','L']) }
-function tDrawFromBag(){ if(!tBag.length) tRefillBag(); return tBag.shift() }
-/* SRS kicks */
-const SRS_JLSTZ={'0>1':[[0,0],[-1,0],[-1,1],[0,-2],[-1,-2]],'1>0':[[0,0],[1,0],[1,-1],[0,2],[1,2]],'1>2':[[0,0],[1,0],[1,-1],[0,2],[1,2]],'2>1':[[0,0],[-1,0],[-1,1],[0,-2],[-1,-2]],'2>3':[[0,0],[1,0],[1,1],[0,-2],[1,-2]],'3>2':[[0,0],[-1,0],[-1,-1],[0,2],[-1,2]],'3>0':[[0,0],[-1,0],[-1,-1],[0,2],[-1,2]],'0>3':[[0,0],[1,0],[1,1],[0,-2],[1,-2]]}
-const SRS_I={'0>1':[[0,0],[-2,0],[1,0],[-2,-1],[1,2]],'1>0':[[0,0],[2,0],[-1,0],[2,1],[-1,-2]],'1>2':[[0,0],[-1,0],[2,0],[-1,2],[2,-1]],'2>1':[[0,0],[1,0],[-2,0],[1,-2],[-2,1]],'2>3':[[0,0],[2,0],[-1,0],[2,1],[-1,-2]],'3>2':[[0,0],[-2,0],[1,0],[-2,-1],[1,2]],'3>0':[[0,0],[1,0],[-2,0],[1,-2],[-2,1]],'0>3':[[0,0],[-1,0],[2,0],[-1,2],[2,-1]]}
-function srsKicks(name,from,to){const k=`${from}>${to}`;if(name==='I')return SRS_I[k]||[[0,0]];if(name==='O')return [[0,0]];return SRS_JLSTZ[k]||[[0,0]]}
-
-function tNewPiece(){
-  if(tNext==null) tNext=tDrawFromBag();
-  tActive=tNext; tRot=0;
-  tX=Math.floor((width - tGetShape(tActive,0)[0].length)/2); tY=0;
-  tNext=tDrawFromBag();
-  if(tCollide(tX,tY,tActive,tRot)){ gameOverWithWave(); tStop(); return;}
-  renderBoard(); tRenderNext();
-}
-function tCollide(nx,ny,name,rot){
-  const s=tGetShape(name,rot);
-  for(let y=0;y<s.length;y++)for(let x=0;x<s[0].length;x++){
-    if(!s[y][x]) continue;
-    const gx=nx+x, gy=ny+y;
-    if(gx<0||gx>=width||gy>=height) return true;
-    if(gy>=0 && grid[gy][gx]) return true;
-  }
-  return false;
-}
-function tMerge(){const s=tGetShape(tActive,tRot);for(let y=0;y<s.length;y++)for(let x=0;x<s[0].length;x++)if(s[y][x]){const gy=tY+y,gx=tX+x;if(gy>=0)grid[gy][gx]=TCOLORS[tActive]}};
-function tClearLines(){
-  let cleared=0;
-  for(let y=height-1;y>=0;){
-    if(grid[y].every(v=>!!v)){grid.splice(y,1);grid.unshift(Array(width).fill(0));cleared++} else y--;
-  }
-  if(cleared){
-    tLines+=cleared;
-    const gain=[0,100,300,500,800][cleared]||cleared*200;
-    score+=gain; updateScore();
-    if(tLines>=10){tLines-=10; tDropMs=Math.max(120,tDropMs-80); tScheduleDrop()}
-    renderBoard();
-  }
-}
-function tTick(){ if(!tActive) return; if(!tCollide(tX,tY+1,tActive,tRot)){ tY++; } else { tMerge(); tClearLines(); tNewPiece(); } renderBoard() }
-function tScheduleDrop(){ if(tDropTimer) clearInterval(tDropTimer); tDropTimer=setInterval(tTick,tDropMs) }
-function tStart(){ $('tetrisControls').style.display='flex'; tDropMs=900; tLines=0; tBag=[]; tRefillBag(); tNext=tDrawFromBag(); tNewPiece(); tScheduleDrop(); document.addEventListener('keydown',tKeydown) }
-function tStop(){ $('tetrisControls').style.display='none'; if(tDropTimer){clearInterval(tDropTimer); tDropTimer=null} document.removeEventListener('keydown',tKeydown); $('preview').innerHTML=''}
-
-function tKeydown(e){
-  const k=e.key;
-  if(['ArrowLeft','ArrowRight','ArrowDown','ArrowUp',' ','z','Z','x','X'].includes(k)) e.preventDefault();
-  if(k==='ArrowLeft') tMove(-1);
-  if(k==='ArrowRight') tMove(1);
-  if(k==='ArrowDown') tSoft();
-  if(k===' '||k==='ArrowUp') tHard();
-  if(k==='z'||k==='Z') tRotate(-1);
-  if (isPaused) return;
-  if(k==='x'||k==='X') tRotate(1);
-  renderBoard();
-}
-function tKey(btn){ if(btn==='Left') tMove(-1); if(btn==='Right') tMove(1); if(btn==='Down') tSoft(); if(btn==='Drop') tHard(); if (isPaused) return; if(btn==='Rotate') tRotate(1); renderBoard() }
-function tMove(dx){ if(!tCollide(tX+dx,tY,tActive,tRot)) { tX+=dx; tRenderGhost(); } }
-function tSoft(){ if(!tCollide(tX,tY+1,tActive,tRot)){ tY++; score+=1; updateScore(); tRenderGhost(); } }
-function tHard(){ let dy=0; while(!tCollide(tX,tY+dy+1,tActive,tRot)) dy++; tY+=dy; score+=2*dy; updateScore(); tTick() }
-function tRotate(dir){
-  const from=tRot,to=(tRot+dir+4)%4,kicks=srsKicks(tActive,from,to);
-  for(const [dx,dy] of kicks){
-    const nx=tX+dx, ny=tY+dy;
-    if(!tCollide(nx,ny,tActive,to)){ tX=nx; tY=ny; tRot=to; tRenderGhost(); return; }
-  }
-}
-function tRenderNext(){
-  const el=$('tray'); el.innerHTML=''; if(!tNext) return;
-  const s=tGetShape(tNext,0);
-  const table=document.createElement('table'); table.cellSpacing=0;
-  for(let r=0;r<s.length;r++){
-    const tr=document.createElement('tr');
-    for(let c=0;c<s[0].length;c++){
-      const td=document.createElement('td');
-      td.style.width=td.style.height=Math.floor(cellSize()*0.5)+'px';
-      if(s[r][c]){ td.className='block'; td.style.backgroundColor=TCOLORS[tNext]; }
-      tr.appendChild(td);
-    }
-    tr.style.lineHeight=0; table.appendChild(tr);
-  }
-  const wrap=document.createElement('div'); wrap.className='piece slot'; wrap.appendChild(table); el.appendChild(wrap);
-  fitTetrisToViewport();
-}
-
-/* Ghost */
-function tRenderGhost(){
-  const layer=$('preview');
-  if (currentMode!=='tetris' || !tActive || ghostMode===0){ if(layer) layer.innerHTML=''; return; }
-  let gy=tY; while(!tCollide(tX,gy+1,tActive,tRot)) gy++;
-  if (gy===tY){ layer.innerHTML=''; return; }
-  layer.classList.remove('valid','invalid'); layer.innerHTML='';
-  const s=cellSize(), p=pad(), g=gap();
-  const shape=tGetShape(tActive,tRot), color=TCOLORS[tActive];
-  for(let r=0;r<shape.length;r++)for(let c=0;c<shape[0].length;c++){
-    if(!shape[r][c]) continue;
-    const pb=document.createElement('div');
-    pb.className='preview-block';
-    pb.style.width  = s + 'px';
-    pb.style.height = s + 'px';
-    pb.style.left=(p+(tX+c)*(s+g))+'px';
-    pb.style.top =(p+(gy+r)*(s+g))+'px';
-    if(ghostMode===1){
-      pb.style.backgroundColor='transparent';
-      pb.style.opacity='1';
-      pb.style.boxShadow='none';
-      pb.style.border='2px solid '+color;
-    }else{
-      pb.style.backgroundColor=color;
-      pb.style.opacity='.35';
-    }
-    layer.appendChild(pb);
-  }
-}
-
-/* Core helpers */
-function setBoardDimensions(cols,rows){ width=cols;height=rows; $('board').style.setProperty('--cols', String(cols)); }
-function hideAll(){['home','offline','online','game'].forEach(x=>$(x).classList.add('hidden'))}
-
-function showHome(){ tStop(); startDemo(); hideAll(); $('home').classList.remove('hidden'); clearTetrisOverrides(); }
-function showOffline(){ tStop(); startDemo(); hideAll(); $('offline').classList.remove('hidden'); clearTetrisOverrides(); }
-function showOnline(){ tStop(); startDemo(); hideAll(); $('online').classList.remove('hidden'); clearTetrisOverrides(); }
-
-function toggleTheme(){ document.body.classList.toggle('light') }
-
-/* Start modes */
-function startMode(mode){
-  currentMode = mode;
-  tStop(); stopDemo();
-  hideAll(); $('game').classList.remove('hidden');
-
-  if (mode==='classic' || mode==='adventure'){
-    clearTetrisOverrides();
-    setBoardDimensions(8,8);
-    resetGame();
-    $('preview').innerHTML='';
-    return;
-  }
-  if (mode==='tetris'){
-    clearTetrisOverrides();
-    setBoardDimensions(10,20);
-    resetGame(); tStart(); sizePreviewLayer();
-    $('boardWrap').classList.add('tetris');
-    $('game').classList.add('tetris');
-    fitTetrisToViewport();
-    return;
-  }
-}
-
-function retryGame(){ hideGameOverOverlay(); startMode(currentMode) }
-function goHome(){ hideGameOverOverlay(); showHome() }
-function showBackMenu(){ pauseGame(); $('backMenu').classList.remove('hidden'); updateGhostBtn(); }
-function hideBackMenu(){ $('backMenu').classList.add('hidden'); resumeGame(); }
-function showGameOverOverlay(){ $('overlay').classList.remove('hidden') }
-function hideGameOverOverlay(){ $('overlay').classList.add('hidden') }
-
-/* Render & gameplay */
-function resetGame(){ grid=Array.from({length:height},()=>Array(width).fill(0)); score=0; updateScore(false); refillTray(); renderBoard(); renderTray(); sizePreviewLayer(); requestAnimationFrame(()=>boardWave('in')) }
-function updateScore(animate=true){ if(animate) animNumberOn('score', score, 400); else $('score').textContent=String(score) }
-function renderBoard(){
-  const b=$('board'); b.innerHTML='';
-  for(let y=0;y<height;y++)for(let x=0;x<width;x++){
-    const d=document.createElement('div');const v=grid[y][x];
-    d.className='cell '+(v?'block':''); if(v) d.style.backgroundColor=v;
-    b.appendChild(d);
-  }
-  if(currentMode==='tetris'){
-    tRenderGhost();
-    if(tActive){
-      const s=tGetShape(tActive,tRot);
-      for(let r=0;r<s.length;r++)for(let c=0;c<s[0].length;c++){
-        if(!s[r][c]) continue; const gy=tY+r,gx=tX+c;
-        if(gy>=0 && gy<height && gx>=0 && gx<width){
-          const idx=gy*width+gx, cell=b.children[idx];
-          if(cell){ cell.classList.add('block'); cell.style.backgroundColor=TCOLORS[tActive]; cell.style.outline='2px dashed rgba(255,255,255,.22)'; cell.style.outlineOffset='-3px'; }
-        }
-      }
-    }
-  }
-}
-
-function makePiece(shape, color, scale){
-  const p = document.createElement('div');
-  p.className = 'bfmini-piece';
-  p.dataset.tint = String(PALETTE.indexOf(color));  // 0..5 based on your palette
-
-  const w = shape[0].length, h = shape.length;
-  p.style.gridTemplateColumns = `repeat(${w}, 1fr)`;
-  p._shape = shape;
-
-  // color vars
-  p.dataset.fill      = color.fill;
-  p.dataset.stroke    = color.stroke;
-  p.dataset.glow      = color.glow;
-  p.dataset.glowInset = color.glowInset;
-  p.style.setProperty('--fill', color.fill);
-  p.style.setProperty('--stroke', color.stroke);
-  p.style.setProperty('--glow', color.glow);
-  p.style.setProperty('--glow-inset', color.glowInset);
-
-  // NEW: per-piece size
-  const s = (typeof scale === 'number' ? scale : 0.8); // fallback to 0.8
-  p.dataset.scale = String(s);
-  p.style.setProperty('--piece-scale', s);
-
-  for (let r=0; r<h; r++){
-    for (let c=0; c<w; c++){
-      if (shape[r][c]) {
-        const cell = document.createElement('div');
-        cell.className = 'cell';
-        p.appendChild(cell);
-      } else {
-        const spacer = document.createElement('div');
-        spacer.style.width='0'; spacer.style.height='0';
-        p.appendChild(spacer);
-      }
-    }
-  }
-  enableDrag(p);
-  return p;
-}
-
-function renderTray(){
-  if(currentMode==='tetris'){ tRenderNext(); return; }
-  const el=$('tray'); el.innerHTML='';
-  for(let i=0;i<3;i++){
-    const p=tray[i]; const card=document.createElement('div'); card.className='piece slot';
-    const sizeHalf=Math.floor(cellSize()*0.5);
-    if(p&&!p.used){
-      const t=document.createElement('table'); t.cellSpacing=0;
-      p.shape.forEach(row=>{
-        const tr=document.createElement('tr');
-        row.forEach(v=>{
-          const td=document.createElement('td');
-          td.style.width=td.style.height=sizeHalf+'px';
-          if(v){ td.className='block'; td.style.backgroundColor=p.color }
-          tr.appendChild(td);
-        });
-        tr.style.lineHeight=0; t.appendChild(tr);
-      });
-      card.appendChild(t);
-      card.addEventListener('pointerdown',e=>{e.preventDefault();startDrag(p,e.clientX,e.clientY)},{passive:false});
-      card.addEventListener('touchstart',e=>{if(!e.touches||!e.touches[0])return;e.preventDefault();const t=e.touches[0];startDrag(p,t.clientX,t.clientY)},{passive:false});
-    }else{
-      card.classList.add('placeholder'); card.style.minWidth='120px'; card.style.minHeight='120px';
-      const ghost=document.createElement('div'); ghost.style.width=ghost.style.height=sizeHalf+'px'; ghost.style.opacity='0'; card.appendChild(ghost);
-    }
-    el.appendChild(card);
-  }
-}
-
-function sizePreviewLayer(){
-  const board = $('board');
-  const layer = $('preview');
-  const wrap  = $('boardWrap');
-  if(!board || !layer || !wrap) return;
-  layer.style.width  = board.clientWidth + 'px';
-  layer.style.height = board.clientHeight + 'px';
-  layer.style.left = board.offsetLeft + 'px';
-  layer.style.top  = board.offsetTop  + 'px';
-}
-
-/* Drag logic (non-Tetris) */
-function clearPreview(){const layer=$('preview');layer.classList.remove('valid','invalid');layer.innerHTML=''}
-function drawPreview(piece,ax,ay){
-  if(currentMode==='tetris') return;
-  const layer=$('preview'); clearPreview(); if(ax==null||ay==null) return;
-  const valid=canPlace(piece.shape,ax,ay); layer.classList.add(valid?'valid':'invalid');
-  const s=cellSize(),p=pad(),g=gap();
-  for(let r=0;r<piece.shape.length;r++)for(let c=0;c<piece.shape[0].length;c++){
-    if(!piece.shape[r][c])continue;
-    const pb=document.createElement('div'); pb.className='preview-block';
-    pb.style.left=(p+(ax+c)*(s+g))+'px'; pb.style.top=(p+(ay+r)*(s+g))+'px';
-    pb.style.backgroundColor=piece.color; layer.appendChild(pb);
-  }
-}
-function canPlace(shape,x,y){
-  for(let r=0;r<shape.length;r++)for(let c=0;c<shape[0].length;c++){
-    if(!shape[r][c])continue; const yy=y+r,xx=x+c;
-    if(xx<0||yy<0||xx>=width||yy>=height) return false;
-    if(grid[yy][xx]) return false;
-  } return true;
-}
-function applyPiece(piece,x,y){
-  const placed=[]; for(let r=0;r<piece.shape.length;r++)for(let c=0;c<piece.shape[0].length;c++){
-    if(!piece.shape[r][c])continue; grid[y+r][x+c]=piece.color; placed.push({x:x+c,y:y+r});
-  } return placed;
-}
-function detectFullLines(){
-  const rows=[],cols=[];
-  for(let y=0;y<height;y++){ if(grid[y].every(v=>!!v)) rows.push(y) }
-  for(let x=0;x<width;x++){ let full=true; for(let y=0;y<height;y++){ if(!grid[y][x]){full=false;break} } if(full) cols.push(x) }
-  return {rows,cols}
-}
-function animatePlacedCells(cells){ if(currentMode==='tetris') return; const b=$('board'); cells.forEach(({x,y})=>{const idx=y*width+x; const cell=b.children[idx]; if(cell){ cell.style.animation='pop .26s ease'; setTimeout(()=>{cell.style.animation=''},280) }}) }
-
-
-
-function getAudioCtx() {
-  if (__audioCtx) return __audioCtx;
-  const AC = window.AudioContext || window.webkitAudioContext;
-  if (!AC) return null; // no WebAudio support
-  __audioCtx = new AC();
-  return __audioCtx;
-}
-
-// Unlock audio on first user gesture (mobile needs this)
-function __unlockAudio() {
-  const ctx = getAudioCtx();
-  if (!ctx) return;
-  if (ctx.state === 'suspended') ctx.resume();
-  // Tiny silent tick to satisfy some browsers
-  try {
-    const b = ctx.createBuffer(1, 1, 22050);
-    const s = ctx.createBufferSource();
-    s.buffer = b; s.connect(ctx.destination); s.start(0);
-  } catch {}
-  audioOK = true;
-  document.removeEventListener('pointerdown', __unlockAudio);
-  document.removeEventListener('touchstart', __unlockAudio);
-  document.removeEventListener('click', __unlockAudio);
-}
-document.addEventListener('pointerdown', __unlockAudio, { once: true });
-document.addEventListener('touchstart', __unlockAudio, { once: true });
-document.addEventListener('click', __unlockAudio, { once: true });
-
-function playClearSound(){
-  const ctx = getAudioCtx();
-if (!ctx) return; // skip until audio context exists
-
- // skip until user taps/clicks
-
-  const o = ctx.createOscillator();
-  const g = ctx.createGain();
-
-  o.type = 'triangle';
-  const t = ctx.currentTime;
-
-  o.frequency.setValueAtTime(660, t);
-  o.frequency.exponentialRampToValueAtTime(990, t + 0.08);
-
-  g.gain.setValueAtTime(0.0001, t);
-  g.gain.exponentialRampToValueAtTime(0.25, t + 0.01);
-  g.gain.exponentialRampToValueAtTime(0.0001, t + 0.18);
-
-  o.connect(g).connect(ctx.destination);
-  o.start(t);
-  o.stop(t + 0.2);
-}
-
-function animateAndClear(lines){
-  if (currentMode === 'tetris') return Promise.resolve(0);
-  const { rows, cols } = lines;
-  if (!rows.length && !cols.length) return Promise.resolve(0);
-
-  const b = $('board'); // classic board element
-  for (let y = 0; y < height; y++) for (let x = 0; x < width; x++) {
-    const isRow = rows.includes(y), isCol = cols.includes(x);
-    if (isRow || isCol) {
-      const idx = y * width + x;
-      const cell = b.children[idx];
-      if (cell && grid[y][x]) {
-        cell.style.animation = 'jumpOut .2s ease both';
-        cell.style.setProperty('--cDelay', '140ms');
-        cell.classList.add('clearing', isRow ? 'row' : 'col');
-      }
-    }
-  }
-
-  try { playClearSound(); } catch (_) {}
-
-  // read CSS var and fall back if missing
-  const cssMs = parseInt(getComputedStyle(document.documentElement)
-                   .getPropertyValue('--clear-ms')) || 420;
-  const delay = cssMs + 160;
-
-  return new Promise(res => setTimeout(() => {
-    // 1) ZERO DATA IN-PLACE (don’t replace row arrays)
-    for (const y of rows) for (let x = 0; x < width; x++) grid[y][x] = 0;
-    for (const x of cols) for (let y = 0; y < height; y++) grid[y][x] = 0;
-
-    // 2) RE-RENDER FROM DATA
-    renderBoard();
-
-    // 3) BELT & BRACES: strip any lingering classes/attrs from cleared cells
-    //    (prevents visuals staying filled if renderBoard missed anything)
-    const boardEl = $('board') || document;
-    for (const y of rows) for (let x = 0; x < width; x++) {
-      const idx = y * width + x;
-      const el = boardEl.children[idx];
-      if (el) {
-        el.classList.remove('clearing','row','col','filled','placed','block');
-        el.removeAttribute?.('data-filled');
-        el.style.removeProperty?.('--cDelay');
-      }
-    }
-    for (const x of cols) for (let y = 0; y < height; y++) {
-      const idx = y * width + x;
-      const el = boardEl.children[idx];
-      if (el) {
-        el.classList.remove('clearing','row','col','filled','placed','block');
-        el.removeAttribute?.('data-filled');
-        el.style.removeProperty?.('--cDelay');
-      }
-    }
-
-    res(rows.length + cols.length);
-  }, delay));
-}
-
-
-function startDrag(piece,cx,cy){
-  if(currentMode==='tetris') return;
-  dragging={piece};
-  document.addEventListener('pointermove',onDragMove,{passive:false});
-  document.addEventListener('touchmove',onTouchMove,{passive:false});
-  const end=e=>{onDragEnd(e);cleanup()};
-  const cancel=()=>{dragging=null;clearPreview();cleanup()};
-  function cleanup(){
-    document.removeEventListener('pointermove',onDragMove);
-    document.removeEventListener('touchmove',onTouchMove);
-    document.removeEventListener('pointerup',end);
-    document.removeEventListener('pointercancel',cancel);
-    document.removeEventListener('touchend',end);
-    document.removeEventListener('touchcancel',cancel);
-  }
-  document.addEventListener('pointerup',end,{once:true});
-  document.addEventListener('pointercancel',cancel,{once:true});
-  document.addEventListener('touchend',end,{once:true});
-  document.addEventListener('touchcancel',cancel,{once:true});
-  onDragMove({clientX:cx,clientY:cy,preventDefault(){}});
-}
-function onTouchMove(e){ if(!dragging)return; if(!e.touches||!e.touches[0])return; e.preventDefault(); const t=e.touches[0]; onDragMove({clientX:t.clientX,clientY:t.clientY,preventDefault(){}}) }
-function onDragMove(e){
-  if(!dragging)return; if(e&&e.preventDefault) e.preventDefault();
-  const rect=$('board').getBoundingClientRect(), s=cellSize(),p=pad(),g=gap();
-  const inside=e.clientX>=rect.left+p&&e.clientX<rect.right-p&&e.clientY>=rect.top+p&&e.clientY<rect.bottom-p;
-  if(!inside){hoverCell=null;clearPreview();return}
-  const x=Math.floor((e.clientX-rect.left-p)/(s+g));
-  const y=Math.floor((e.clientY-rect.top -p)/(s+g));
-  hoverCell={x,y}; drawPreview(dragging.piece,x,y);
-}
-async function onDragEnd(e){
-  if(!dragging){ clearPreview(); return; }
-  const p = dragging.piece; dragging = null;
-  if(!hoverCell){ clearPreview(); return; }
-  const { x, y } = hoverCell;
-  if (!canPlace(p.shape, x, y)) { clearPreview(); return; }
-
-  /* 1) Place */
-  const placed = applyPiece(p, x, y);
-  p.used = true;
-
-  /* 2) Base score */
-  const placedCells = cellsInShape(p.shape);
-  score += placedCells;
-  uiPiecePlaced(placedCells);
-  renderBoard();
-  animatePlacedCells(placed);
-
-  /* 3) Clear detection + bonus */
-  const lines = detectFullLines();
-  const clearedCount = (lines.rows.length + lines.cols.length);
-  if (clearedCount > 0) {
-    await animateAndClear(lines);
-    renderBoard();
-    const bonus = scoreForClear(lines);
-    score += bonus;
-
-    const linesCleared = clearedCount;
-    const simMultiIndex = Math.min(linesCleared, CLEAR_MULTI.length-1);
-    const simMulti = CLEAR_MULTI[simMultiIndex];
-    const comboMulti = Math.pow(COMBO_GROWTH, comboLevel);
-    let tag = `+${bonus}`;
-    if (linesCleared > 1) tag += ` (x${simMulti.toFixed(2)})`;
-    if (comboLevel > 0)   tag += ` (combo x${comboMulti.toFixed(2)})`;
-    floatPoints(tag);
-  }
-
-  /* 4) Combo bookkeeping */
-  afterPlacementUpdateRack(clearedCount > 0);
-
-  /* 5) Refill / check moves */
-  if (currentMode && (currentMode === 'classic' || currentMode === 'adventure')) {
-    refillTray(); renderTray(); updateScore(); ensureMovesOrGameOver();
-  } else {
-    refillTray(); renderTray(); updateScore();
-  }
-  clearPreview();
-}
-function hasAnyValidMove(){
-  const pieces = tray.filter(p => !p.used);
-  if (pieces.length === 0) return true;
-  for (const piece of pieces){
-    for (let y=0; y<height; y++){
-      for (let x=0; x<width; x++){
-        if (canPlace(piece.shape, x, y)) return true;
-      }
-    }
-  }
-  return false;
-}
-function ensureMovesOrGameOver(){
-  if(currentMode==='classic'||currentMode==='adventure'){
-    const anyUnused=tray.some(p=>!p.used);
-    if(anyUnused && !hasAnyValidMove()){ setTimeout(()=>gameOverWithWave(),200) }
-  }
-}
-
-/* Waves / Game over */
-function boardWave(type){
-  const cells=[...$('board').children], base=type==='out'?520:420, step=38, jumpOffset=type==='in'?140:100;
-  cells.forEach((cell,i)=>{const x=i%width,y=(i/width)|0,d=(x+y)*step;cell.style.animation='';
-    if(type==='in'){cell.style.animation=`waveIn .42s ease both ${d}ms, jumpOut .2s ease both ${d+jumpOffset}ms`;}
-    else{cell.style.animation=`waveOut .52s ease both ${d}ms, jumpOut .2s ease both ${d+jumpOffset}ms`;}
-  });
-  const total=(width+height)*step+base+jumpOffset+260;
-  return new Promise(res=>setTimeout(()=>{cells.forEach(c=>c.style.animation='');res()},total))
-}
-async function gameOverWithWave(){ if(gameOverQueued) return; gameOverQueued=true; await boardWave('out'); showGameOverOverlay(); tStop(); gameOverQueued=false }
-
-/* expose for inline onclick */
-Object.assign(window,{showHome,showOffline,showOnline,startMode,retryGame,goHome,toggleTheme,showBackMenu,hideBackMenu,tKey})
-
-/* ===== Background Demo ===== */
-var dGrid=[],dScore=0,dPlacing=false,dTray=[];var demoRunning=false,dTick=null;const dW=8,dH=8
-function dMakePiece(){return{shape:copyShape(SHAPES[randi(SHAPES.length)]),color:randColor(),used:false}}
-function dRefillTray(){if(dTray.length===0||dTray.every(p=>p.used))dTray=[dMakePiece(),dMakePiece(),dMakePiece()]}
-function dRenderTray(){const el=$('demoTray');el.innerHTML='';for(let i=0;i<3;i++){const p=dTray[i];const card=document.createElement('div');card.className='piece slot';const sizeHalf=Math.floor(cellSize()*0.5);if(p&&!p.used){const t=document.createElement('table');t.cellSpacing=0;p.shape.forEach(row=>{const tr=document.createElement('tr');row.forEach(v=>{const td=document.createElement('td');td.style.width=td.style.height=sizeHalf+'px';if(v){td.className='block';td.style.backgroundColor=p.color}tr.appendChild(td)});tr.style.lineHeight=0;t.appendChild(tr)});card.appendChild(t)}else{card.classList.add('placeholder');card.style.minWidth='120px';card.style.minHeight='120px';const ghost=document.createElement('div');ghost.style.width=ghost.style.height=sizeHalf+'px';ghost.style.opacity='0';card.appendChild(ghost)}el.appendChild(card)}}
-function resetDemo(){dGrid=Array.from({length:dH},()=>Array(dW).fill(0));dScore=0;$('demoBoard').style.setProperty('--cols','8');$('demoScore').textContent='0';dTray=[];dRefillTray();dRenderTray();renderDemoBoard();sizeDemoPreviewFixed()}
-function renderDemoBoard(){const b=$('demoBoard');b.innerHTML='';for(let y=0;y<dH;y++){for(let x=0;x<dW;x++){const d=document.createElement('div');const v=dGrid[y][x];d.className='cell '+(v?'block':'');if(v)d.style.backgroundColor=v;b.appendChild(d)}}}
-function sizeDemoPreviewFixed(){const board=$('demoBoard');const layer=$('demoPreview');const r=board.getBoundingClientRect();layer.style.width=r.width+'px';layer.style.height=r.height+'px';layer.style.left=board.offsetLeft+'px';layer.style.top=board.offsetTop+'px'}
-function dCanPlace(shape,x,y){for(let r=0;r<shape.length;r++){for(let c=0;c<shape[0].length;c++){if(!shape[r][c])continue;const yy=y+r,xx=x+c;if(xx<0||yy<0||xx>=dW||yy>=dH)return false;if(dGrid[yy][xx])return false}}return true}
-function dCloneGrid(g){return g.map(row=>row.slice())}
-function dDetect(g){const rows=[],cols=[];for(let y=0;y<dH;y++)if(g[y].every(v=>!!v))rows.push(y);for(let x=0;x<dW;x++){let full=true;for(let y=0;y<dH;y++){if(!g[y][x]){full=false;break}}if(full)cols.push(x)}return{rows,cols}}
-function dClearOn(g,rows,cols){rows.forEach(y=>{g[y]=Array(dW).fill(0)});cols.forEach(x=>{for(let y=0;y<dH;y++)g[y][x]=0})}
-function dAdjacencyScore(g,shape,x,y){let s=0;for(let r=0;r<shape.length;r++){for(let c=0;c<shape[0].length;c++){if(!shape[r][c])continue;const yy=y+r,xx=x+c;[[1,0],[-1,0],[0,1],[0,-1]].forEach(([dy,dx])=>{const ny=yy+dy,nx=xx+dx;if(ny>=0&&ny<dH&&nx>=0&&nx<dW&&g[ny][nx])s++})}}return s}
-function dCenterDistance(shape,x,y){const cx=(dW-1)/2,cy=(dH-1)/2;let ax=0,ay=0,n=0;for(let r=0;r<shape.length;r++){for(let c=0;c<shape[0].length;c++){if(!shape[r][c])continue;ax+=x+c;ay+=y+r;n++}}if(!n)return 0;ax/=n;ay/=n;const dx=ax-cx,dy=ay-cy;return Math.hypot(dx,dy)}
-function dMobility(g){const shapes=[SHAPES[0],SHAPES[3],SHAPES[5],SHAPES[6]];let count=0;for(const s of shapes){for(let y=0;y<dH;y++){for(let x=0;x<dW;x++){let ok=true;for(let r=0;r<s.length;r++){for(let c=0;c<s[0].length;c++){if(!s[r][c])continue;const yy=y+r,xx=x+c;if(xx<0||yy<0||xx>=dW||yy>=dH||g[yy][xx]){ok=false;break}}if(!ok)break}if(ok){count++;if(count>50)return count}}}}return count}
-function dEvalPlacement(piece,x,y){if(!dCanPlace(piece.shape,x,y))return null;const g=dCloneGrid(dGrid);for(let r=0;r<piece.shape.length;r++){for(let c=0;c<piece.shape[0].length;c++){if(piece.shape[r][c])g[y+r][x+c]=1}}const det=dDetect(g);const clears=det.rows.length+det.cols.length;if(clears)dClearOn(g,det.rows,det.cols);const adj=dAdjacencyScore(g,piece.shape,x,y);const center=dCenterDistance(piece.shape,x,y);const mob=dMobility(g);const score=clears*1000+adj*3+mob*0.6-center*0.4;return{score,clears,adj,center,mob,x,y}}
-function dChooseBest(){dRefillTray();let best=null,bestIdx=-1;for(let i=0;i<dTray.length;i++){const p=dTray[i];if(p.used)continue;for(let y=0;y<dH;y++){for(let x=0;x<dW;x++){const ev=dEvalPlacement(p,x,y);if(ev&&(!best||ev.score>best.score)){best=ev;bestIdx=i}}}}return best?{idx:bestIdx,move:best}:null}
-function dDrawPreview(shape,color,x,y){const layer=$('demoPreview');layer.innerHTML='';const p=pad(),g=gap(),s=cellSize();layer.classList.remove('valid','invalid');layer.classList.add('valid');for(let r=0;r<shape.length;r++){for(let c=0;c<shape[0].length;c++){if(!shape[r][c])continue;const pb=document.createElement('div');pb.className='preview-block';pb.style.left=(p+(x+c)*(s+g))+'px';pb.style.top=(p+(y+r)*(s+g))+'px';pb.style.backgroundColor=color;pb.style.animation='demoDrag .6s ease';layer.appendChild(pb)}}}
-function dAnimatePlacedCells(cells){const b=$('demoBoard');cells.forEach(({x,y})=>{const idx=y*dW+x;const cell=b.children[idx];if(cell){cell.style.animation='pop .26s ease';setTimeout(()=>{cell.style.animation=''},280)}})}
-function dAnimateAndClear(lines){const{rows,cols}=lines;if(rows.length===0&&cols.length===0)return Promise.resolve(0);const b=$('demoBoard');for(let y=0;y<dH;y++){for(let x=0;x<dW;x++){const isRow=rows.includes(y),isCol=cols.includes(x);if(isRow||isCol){const idx=y*dW+x;const cell=b.children[idx];if(cell&&dGrid[y][x]){cell.classList.add('clearing',isRow?'row':'col')}}}}try{playClearSound()}catch(_){}const delay=parseInt(getComputedStyle(document.documentElement).getPropertyValue('--clear-ms'))+160;return new Promise(res=>{setTimeout(()=>{rows.forEach(y=>{dGrid[y]=Array(dW).fill(0)});cols.forEach(x=>{for(let y=0;y<dH;y++)dGrid[y][x]=0});renderDemoBoard();res(rows.length+cols.length)},delay)})}
-function dThinkingSequenceSmooth(piece,move){return new Promise(resolve=>{const layer=$('demoPreview');layer.innerHTML='';const s=cellSize(), p=pad(), g=gap();const startY = p + (dH + 2) * (s + g);const startX = p + Math.floor(dW/2) * (s + g);const targetLefts=[], targetTops=[], blocks=[];for(let r=0;r<piece.shape.length;r++){for(let c=0;c<piece.shape[0].length;c++){if(!piece.shape[r][c]) continue;const left = p + (move.x + c) * (s + g);const top  = p + (move.y + r) * (s + g);const pb=document.createElement('div');pb.className='preview-block';pb.style.backgroundColor=piece.color;pb.style.left=startX+'px';pb.style.top=startY+'px';layer.appendChild(pb);targetLefts.push(left); targetTops.push(top); blocks.push(pb);}}const ease = t=>t<.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2;const duration = 650 + Math.random()*180;let t0=null, hold=120+Math.random()*140;function tick(ts){if(!t0){ t0=ts; return requestAnimationFrame(tick);}const dt=ts-t0;if(dt<hold) return requestAnimationFrame(tick);const u=Math.min(1,(dt-hold)/duration);const e=ease(u);for(let i=0;i<blocks.length;i++){const bx= startX + (targetLefts[i]-startX)*e;const by= startY + (targetTops[i]-startY)*e;blocks[i].style.left = bx+'px';blocks[i].style.top  = by+'px';}if(u<1) requestAnimationFrame(tick); else setTimeout(resolve,120);}requestAnimationFrame(tick);})}
-async function dStep(){if(dPlacing||!demoRunning)return;dPlacing=true;dRefillTray();dRenderTray();const pick=dChooseBest();if(!pick){resetDemo();dPlacing=false;return}const piece=dTray[pick.idx];const m=pick.move;await dThinkingSequenceSmooth(piece,m);for(let r=0;r<piece.shape.length;r++){for(let c=0;c<piece.shape[0].length;c++){if(piece.shape[r][c])dGrid[m.y+r][m.x+c]=piece.color}}renderDemoBoard();const placed=[];for(let r=0;r<piece.shape.length;r++){for(let c=0;c<piece.shape[0].length;c++){if(piece.shape[r][c])placed.push({x:m.x+c,y:m.y+r})}}dAnimatePlacedCells(placed);const det=dDetect(dGrid);const cleared=det.rows.length+det.cols.length;if(cleared){await dAnimateAndClear(det);dScore+=cleared*100;animNumberOn('demoScore', dScore, 500)}$('demoPreview').innerHTML='';piece.used=true;if(dTray.every(p=>p.used))dTray=[];dPlacing=false}
-function dLoop(){if(!demoRunning)return;Promise.resolve(dStep()).finally(()=>{if(!demoRunning)return;dTick=setTimeout(dLoop,850)})}
-function startDemo(){if(demoRunning)return;demoRunning=true;resetDemo();$('demoStage').classList.remove('hidden');dLoop()}
-function stopDemo(){demoRunning=false;if(dTick){clearTimeout(dTick);dTick=null}$('demoStage').classList.add('hidden');$('demoPreview').innerHTML=''}
-
-/* ---------------- Self Tests ---------------- */
-function runSelfTests(){
-  const results=[]; const pass=(name)=>results.push({test:name, pass:true}); const fail=(name,msg)=>results.push({test:name, pass:false, msg});
-  try{ const fns=['showHome','showOffline','showOnline','startMode','retryGame','goHome','toggleTheme']; const ok=fns.every(k=>typeof window[k]==='function'); ok?pass('globals'):fail('globals','Missing:'+fns.filter(k=>typeof window[k]!=='function').join(',')); }catch(e){ fail('globals', e.message) }
-  try{ let ok=true; for(const k of Object.keys(TETROMINOES)){ for(let r=0;r<4;r++){ const m=tGetShape(k,r); const cnt=m.flat().reduce((a,b)=>a+(b?1:0),0); if(cnt!==4) ok=false; } } ok?pass('tetromino counts'):fail('tetromino counts','not 4') }catch(e){ fail('tetromino counts', e.message)}
-  try{ tRefillBag(); const set=new Set(tBag); (tBag.length===7 && set.size===7) ? pass('7-bag size & uniqueness') : fail('7-bag size & uniqueness', JSON.stringify(tBag)); }catch(e){ fail('7-bag', e.message) }
-  try{ setBoardDimensions(10,20); grid=Array.from({length:height},()=>Array(width).fill(0)); tActive='J'; tRot=0; tX=0; tY=0; const before=tCollide(tX,tY,tActive,1); tRotate(1); const after=!tCollide(tX,tY,tActive,tRot); (before && after) ? pass('SRS wall kick J 0>1 at wall') : fail('SRS wall kick J 0>1 at wall', JSON.stringify({before,after,tX,tY,tRot})) }catch(e){ fail('SRS wall kick J', e.message)}
-  try{ setBoardDimensions(10,20); grid=Array.from({length:height},()=>Array(width).fill(0)); tActive='I'; tRot=0; tX=width-4; tY=0; const before=tCollide(tX,tY,tActive,1); tRotate(1); const after=!tCollide(tX,tY,tActive,tRot); (before && after) ? pass('SRS wall kick I 0>1 at wall') : fail('SRS wall kick I 0>1 at wall', JSON.stringify({before,after,tX,tY,tRot})) }catch(e){ fail('SRS wall kick I', e.message)}
-  console.log('%cBlock Forge self-tests', 'color:#39ff14;font-weight:700'); console.table(results);
-}
-
-/* Listeners */
-window.addEventListener('resize', ()=>{ sizePreviewLayer(); sizeDemoPreviewFixed(); fitTetrisToViewport(); }, {passive:true});
-// Build the framed grid + decorative blocks + mini cards to match the reference
-function initHomeArt(){
-  const grid = document.getElementById('hfGrid');
-  if (!grid || grid.dataset.built) return;
-
-  const COLS = 6, ROWS = 8;
-
-  // 1) dark grid cells
-  for (let i = 0; i < COLS*ROWS; i++){
-    const s = document.createElement('i');
-    s.className = 'hf-cell';
-    grid.appendChild(s);
-  }
-
-  // 2) center dark '+' cluster (like the mock)
-  const ghost = (c,r) => {
-    const g = document.createElement('i');
-    g.className = 'hf-ghost';
-    g.style.gridColumn = String(c);
-    g.style.gridRow    = String(r);
-    grid.appendChild(g);
-  };
-  // plus centered roughly midframe
-  ghost(5,7); ghost(4,7); ghost(6,7); ghost(5,6); ghost(5,8);
-
-
-  // Other bright ghosts apart from the +
-  const ghost2 = (c,r) => {
-    const g = document.createElement('i');
-    g.className = 'hf-ghost2';
-    g.style.gridColumn = String(c);
-    g.style.gridRow    = String(r);
-    grid.appendChild(g);
-  };
-//locations
-ghost2(4,8); ghost2(4,9);
-
-const ghost3 = (c,r) => {
-    const g = document.createElement('i');
-    g.className = 'hf-ghost3';
-    g.style.gridColumn = String(c);
-    g.style.gridRow    = String(r);
-    grid.appendChild(g);
-  };
-//locations
-ghost3(4,10);
-
-const ghost4 = (c,r) => {
-    const g = document.createElement('i');
-    g.className = 'hf-ghost4';
-    g.style.gridColumn = String(c);
-    g.style.gridRow    = String(r);
-    grid.appendChild(g);
-  };
-//locations
-ghost4(3,10); ghost4(5,10);
-
-const ghost5 = (c,r) => {
-    const g = document.createElement('i');
-    g.className = 'hf-ghost5';
-    g.style.gridColumn = String(c);
-    g.style.gridRow    = String(r);
-    grid.appendChild(g);
-  };
-//locations
-ghost5(2,10);
-
-const ghost6 = (c,r) => {
-    const g = document.createElement('i');
-    g.className = 'hf-ghost6';
-    g.style.gridColumn = String(c);
-    g.style.gridRow    = String(r);
-    grid.appendChild(g);
-  };
-//locations
-ghost6(6,10);
-
-const ghost7 = (c,r) => {
-    const g = document.createElement('i');
-    g.className = 'hf-ghost7';
-    g.style.gridColumn = String(c);
-    g.style.gridRow    = String(r);
-    grid.appendChild(g);
-  };
-//locations
-ghost7(5,9);
-
-const ghost8 = (c,r) => {
-    const g = document.createElement('i');
-    g.className = 'hf-ghost8';
-    g.style.gridColumn = String(c);
-    g.style.gridRow    = String(r);
-    grid.appendChild(g);
-  };
-//locations
-ghost8(6,9);
-
-const ghost9 = (c,r) => {
-    const g = document.createElement('i');
-    g.className = 'hf-ghost9';
-    g.style.gridColumn = String(c);
-    g.style.gridRow    = String(r);
-    grid.appendChild(g);
-  };
-//locations
-ghost9(1,2);
-
-const ghost10 = (c,r) => {
-    const g = document.createElement('i');
-    g.className = 'hf-ghost10';
-    g.style.gridColumn = String(c);
-    g.style.gridRow    = String(r);
-    grid.appendChild(g);
-  };
-//locations
-ghost10(2,3); ghost10(2,4);
-
-const ghost11 = (c,r) => {
-    const g = document.createElement('i');
-    g.className = 'hf-ghost11';
-    g.style.gridColumn = String(c);
-    g.style.gridRow    = String(r);
-    grid.appendChild(g);
-  };
-//locations
-ghost11(1,1); ghost11(3,1); ghost11(4,1); ghost11(2,2); ghost11(3,2); ghost11(4,2); ghost11(3,3); ghost11(4,3); ghost11(5,2); ghost11(2,1); ghost11(3,4);
-  //3) colored blocks in fixed spots (pixel-matched layout)
-  const drop = (c,r,cls) => {
-    const b = document.createElement('b');
-    b.className = 'hf-block ' + cls;
-    b.style.gridColumn = String(c);
-    b.style.gridRow    = String(r);
-    grid.appendChild(b);
-  };
-
-  // cyan singles (left/top & mid-left)
-  drop(1,3,'hf-cyan');
-  drop(1,4,'hf-cyan');
-  drop(2,7,'hf-cyan');
-
-  // magenta vertical stacks on right (top & lower)
-  [4,5].forEach(r => drop(8,r,'hf-magenta'));
-  [8,9].forEach(r => drop(8,r,'hf-magenta'));
-  [10].forEach(r => drop(7,r,'hf-magenta'));
-
-  // bottom-left and bottom-right corner singles (magenta)
-  drop(1,12,'hf-magenta');
-  drop(8,12,'hf-magenta');
-  drop(1,10,'hf-magenta');
-  
-
-  // orange L near bottom-left
-  drop(2,9,'hf-orange');
-  drop(3,9,'hf-orange');
-  drop(3,8,'hf-orange');
-  
-
-  grid.dataset.built = '1';
-
-  // 4) mini cards — draw shapes
-  const cards = document.querySelectorAll('#homeOverlay .hf-card');
-  if (cards.length === 3){
-    // helper to place small blocks on a 4×3 mini grid
-    const mini = (el, coords, cls) => {
-      const m = document.createElement('div'); m.className = 'hf-mini';
-      // 4 cols × 3 rows grid space
-      const index = (x,y)=> y*4 + x;
-      for(let i=0;i<12;i++){
-        const d=document.createElement('i'); d.className='b'; m.appendChild(d);
-      }
-      coords.forEach(([x,y])=>{
-        const cell = m.children[index(x,y)];
-        if(cell) cell.classList.add(cls);
-      });
-      el.innerHTML=''; el.appendChild(m);
-    };
-    // Left card: magenta little L (3 blocks)
-    mini(cards[0], [[1,1],[2,0]], 'mag');
-    // Middle card: violet T (4 blocks)
-    mini(cards[1], [[1,2],[0,1],[1,1],[2,1]], 'vio');
-    // Right card: orange 3 horizontal
-    mini(cards[2], [[0,1],[1,1],[2,1]], 'orn');
-  }
-}
-
-// show/hide overlay (keeps your existing nav)
-function showHomeOverlay(){ document.getElementById('homeOverlay')?.classList.add('show'); }
-function hideHomeOverlay(){ document.getElementById('homeOverlay')?.classList.remove('show'); }
-
-window.addEventListener('DOMContentLoaded', ()=>{
-  showHome();
-  runSelfTests();
-  fitTetrisToViewport();
-
-  initHomeArt();
-  showHomeOverlay();
-  fitHomeOverlay();                      // <— NEW
-  requestAnimationFrame(fitHomeOverlay); // <— NEW (wait one frame for CSS to apply)
-  setTimeout(fitHomeOverlay, 250); // <— NEW (in case fonts/images load late)
-  document.getElementById('hfPlay')?.addEventListener('click', ()=>{
-    hideHomeOverlay();
-  });
-});
-
-window.addEventListener('resize', fitHomeOverlay, { passive:true });
-window.addEventListener('orientationchange', () => setTimeout(fitHomeOverlay, 50), { passive:true });
-document.fonts?.ready?.then?.(fitHomeOverlay);
-window.visualViewport?.addEventListener?.('resize', fitHomeOverlay, { passive: true });
-
-// Re-fit if the inside card reflows (only if the element exists)
-document.addEventListener('DOMContentLoaded', () => {
-  const phone = document.querySelector('#homeOverlay .hf-phone');
-  if (phone && 'ResizeObserver' in window) {
-    const ro = new ResizeObserver(() => fitHomeOverlay());
-    ro.observe(phone);
-  }
-});
-
-
-
-
-// Fit the portrait card into the real viewport (handles toolbars/URL bars)
-function fitHomeOverlay(){
-  const overlay = document.getElementById('homeOverlay');
-  const phone   = overlay?.querySelector('.hf-phone');
-  if (!overlay || !phone) return;
-
-  // Reset to natural size to measure
-  phone.style.transform = 'none';
-  phone.style.marginTop = phone.style.marginBottom = '0px';
-
-  // Prefer visualViewport (excludes browser UI), fall back to window
-  const vw = (window.visualViewport?.width  ?? window.innerWidth);
-  const vh = (window.visualViewport?.height ?? window.innerHeight);
-
-  // Padding budget so it never kisses the edges
-  const pad = 24;
-  const availW = Math.max(280, vw - pad * 2);
-  const availH = Math.max(360, vh - pad * 2);
-
-  const rect = phone.getBoundingClientRect();
-  const scale = Math.min(1, availW / rect.width, availH / rect.height);
-
-  phone.style.transform       = `scale(${scale})`;
-  phone.style.transformOrigin = 'top center';
-
-  // Center vertically after scaling
-  const usedH = rect.height * scale;
-  const margin = Math.max(0, (availH - usedH) / 2);
-  phone.style.marginTop    = `${margin}px`;
-  phone.style.marginBottom = `${margin}px`;
-}
-
-
-
-
-// If the demo didn't start for some reason on mobile, kick it on first tap.
-window.addEventListener('pointerdown', () => {
-  try { if (document.getElementById('home') && !document.getElementById('home').classList.contains('hidden')) {
-    // If home is visible, ensure demo is running
-    if (typeof startDemo === 'function') startDemo();
-  }} catch(e){}
-}, { once:true });
-
-// Debug helper: log which element is on top where you tap
-document.addEventListener('pointerdown', (e) => {
-  const el = document.elementFromPoint(e.clientX, e.clientY);
-  if (el) console.log('Tapped element:', el.tagName, el.id, el.className);
-}, { passive:true });
-
-
-
-/* ===== Service Worker: update prompt flow ===== */
-(function setupSWUpdatePrompt(){
-  if (!('serviceWorker' in navigator)) return;
-
-  let newWorkerWaiting = null;
-  let refreshing = false;
-
-  function showToast(){
-    const el = document.getElementById('updateToast');
-    if(!el) return;
-    el.classList.add('show');
-    const later = document.getElementById('updateLaterBtn');
-    const now   = document.getElementById('updateNowBtn');
-
-    // Hide only
-    later.onclick = () => el.classList.remove('show');
-
-    // Ask waiting worker to become active, then page will reload once
-    now.onclick = () => {
-      if (newWorkerWaiting) {
-        newWorkerWaiting.postMessage({ type: 'SKIP_WAITING' });
-      }
-    };
-  }
-
-  // When controller changes, the new SW took control -> safe to reload once
-  navigator.serviceWorker.addEventListener('controllerchange', () => {
-    if (refreshing) return;
-    refreshing = true;
-    // If you want to protect in-play sessions, you could persist state here first.
-    location.reload();
-  });
-
-  window.addEventListener('load', async () => {
-    try {
-      const reg = await navigator.serviceWorker.register('./sw.js', { scope: './' });
-      // If a new service worker is found
-      reg.addEventListener('updatefound', () => {
-        const installing = reg.installing;
-        if (!installing) return;
-
-        installing.addEventListener('statechange', () => {
-          // When the new SW is installed and we already have a controller,
-          // it means an update is ready (waiting) rather than first install.
-          if (installing.state === 'installed' && navigator.serviceWorker.controller) {
-            newWorkerWaiting = reg.waiting;
-            showToast();
-          }
-        });
-      });
-
-      // Also handle the case where the new worker is already waiting (fast check)
-      if (reg.waiting && navigator.serviceWorker.controller) {
-        newWorkerWaiting = reg.waiting;
-        showToast();
-      }
-    } catch (err) {
-      console.error('SW registration failed', err);
-    }
-  });
-})();
-
-
-/* Unlock audio once the user taps/clicks */
-let audioOK = false;
-window.addEventListener('pointerdown', () => { audioOK = true; }, { once:true });
-
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', async () => {
-    try {
-      // Register sw.js at the project root scope
-      const reg = await navigator.serviceWorker.register('./sw.js', { scope: './' });
-      console.log('[SW] Registered:', reg.scope);
-
-      // Periodically ask for updates while the page is open
-      setInterval(() => reg.update(), 30_000);
-
-      // If a new SW is found, tell it to activate right away
-      function enableInstantUpdates(swReg) {
-        if (!swReg) return;
-
-        // If a new worker is already waiting, tell it to take over
-        if (swReg.waiting) {
-          swReg.waiting.postMessage({ type: 'SKIP_WAITING' });
-        }
-
-        // When a new worker appears, skip waiting after it’s installed
-        swReg.addEventListener('updatefound', () => {
-          const installing = swReg.installing;
-          if (!installing) return;
-          installing.addEventListener('statechange', () => {
-            if (installing.state === 'installed' && navigator.serviceWorker.controller) {
-              installing.postMessage({ type: 'SKIP_WAITING' });
-            }
-          });
-        });
-      }
-      enableInstantUpdates(reg);
-
-   
-     
-
-    } catch (err) {
-      console.error('[SW] registration failed:', err);
-    }
-  });
-}
-
-
-</script>
+<!-- All scripts moved to separate files - see bottom of file -->
 <!-- ===== NEON HOME OVERLAY (first screen) ===== -->
 <!-- ===== NEON PORTRAIT HOME (exact mock) ===== -->
 <div id="homeOverlay" aria-hidden="true">
@@ -2556,7 +1550,7 @@ if ('serviceWorker' in navigator) {
         <span>BLOCK</span><br><span>FORGE</span>
       </h1>
 
-      <!-- mini 8×12 grid + decorative blocks (filled by JS) -->
+      <!-- mini 8Ã—12 grid + decorative blocks (filled by JS) -->
       <div id="hfGrid" class="hf-grid" aria-hidden="true"></div>
     </div>
 
@@ -2646,7 +1640,7 @@ if ('serviceWorker' in navigator) {
     });
   })();
 
-  // 2) Build a DOM grid that matches your board’s shape
+  // 2) Build a DOM grid that matches your board's shape
   const COLS = parseInt(getComputedStyle(mini).getPropertyValue('--cols')) || 8;
   const GAP  = parseInt(getComputedStyle(mini).getPropertyValue('--gap'))  || 6;
   const PAD  = parseInt(getComputedStyle(mini).getPropertyValue('--pad'))  || 8;
@@ -2742,7 +1736,7 @@ if ('serviceWorker' in navigator) {
     else if (!hidden && !raf){ fit(); loop(); }
   });
   mo.observe(document.body, {subtree:true, attributes:true, attributeFilter:['class']});
-})(); // <-- Add missing closing brace here
+})();
 </script>
 
 <script>
@@ -2811,593 +1805,58 @@ document.addEventListener('DOMContentLoaded', () => {
   const CELL = (()=>{ const one = cellEls[0]; return one ? parseFloat(getComputedStyle(one).width) : 38; })();
   const idx  = (r,c)=> r*COLS + c;
 
-  // === DEV FREEZE (set to true while editing to keep fixed shapes/colors) ===
-  const FREEZE_TRAY = false;
-  const FIXED_SHAPES = [
-    [ [1,1],[1,1] ], // O2
-    [ [1,1,1] ],     // I3
-    [ [1],[1],[1] ], // I3 vertical
-  ];
-
-  // --- Palette & helpers (colors per piece) ---
-function rgbaFromHex(hex, a){
-  const h = hex.replace('#','').trim();
-  const n = h.length===3 ? h.split('').map(s=>s+s).join('') : h;
-  const r = parseInt(n.slice(0,2),16), g = parseInt(n.slice(2,4),16), b = parseInt(n.slice(4,6),16);
-  return `rgba(${r},${g},${b},${a})`;
-}
-function grad(fillStart, fillEnd){
-  const stroke = rgbaFromHex(fillStart, .45);
-  const glow   = rgbaFromHex(fillStart, .35);
-  const glowIn = rgbaFromHex(fillStart, .45);
-  return {
-    fill: `linear-gradient(180deg, ${fillStart}, ${fillEnd})`,
-    stroke: stroke,
-    glow: glow,
-    glowInset: glowIn
-  };
-}
-
-const PALETTE = [
-  grad('#7bf5ff', '#00B5E5'),   // hf-cyan
-  grad('#FF31F4', '#9F0BDB'),   // hf-pink
-  grad('#FEA019', '#CD7317'),   // hf-orange
-  grad('#ff0000', '#CB040A'),   // hf-red
-  grad('#7A5CFF', '#7c82ff'),   // hf-violet
-  grad('#9AFF00', '#4bb630'),   // hf-green
-
-];
-
-let colorQueue = [];
-function shuffledPalette(){ return [...PALETTE].sort(()=>Math.random()-0.5); }
-function nextColor(){ if (!colorQueue.length) colorQueue = shuffledPalette(); return colorQueue.pop(); }
-
-  // --- Shapes (pool) ---
-  const SHAPES = [
-    [[1,1],[1,1]], [[1,1,1]], [[1],[1],[1]],
-    [[1,1,0],[0,1,1]], [[0,1,1],[1,1,0]],
-    [[1,1,1],[0,1,0]], [[1,0],[1,1]], [[0,1],[1,1]],
-  ];
-
-  // --- Auto scale so long pieces stay comfy ---
-  function autoScaleForShape(shape){
-    const w = shape[0].length, h = shape.length;
-    const longest = Math.max(w, h);
-    if (longest >= 5) return 0.7;
-    if (longest >= 4) return 0.75;
-    return 0.9;
-  }
-
-  // --- State from current board (0/1) ---
-  const S = Array.from({length: ROWS}, (_,r)=> Array.from({length: COLS}, (_,c)=>
-    cellEls[idx(r,c)].classList.contains('filled') ? 1 : 0
-  ));
-
-  // --- Piece factory (color + per-piece scale) ---
-  function makePiece(shape, color, scale){
-    const p = document.createElement('div');
-    p.className = 'bfmini-piece';
-    p.dataset.tint = String(PALETTE.indexOf(color));  // 0..5 based on your palette
-
-    const w = shape[0].length, h = shape.length;
-    p.style.gridTemplateColumns = `repeat(${w}, 1fr)`;
-    p._shape = shape;
-
-    // color vars
-    p.dataset.fill      = color.fill;
-    p.dataset.stroke    = color.stroke;
-    p.dataset.glow      = color.glow;
-    p.dataset.glowInset = color.glowInset;
-    p.style.setProperty('--fill', color.fill);
-    p.style.setProperty('--stroke', color.stroke);
-    p.style.setProperty('--glow', color.glow);
-    p.style.setProperty('--glow-inset', color.glowInset);
-
-    // per-piece scale
-    const s = (typeof scale === 'number' ? scale : 0.8);
-    p.dataset.scale = String(s);
-    p.style.setProperty('--piece-scale', s);
-
-    // build cells inside the piece
-    for (let r=0; r<h; r++){
-      for (let c=0; c<w; c++){
-        if (shape[r][c]) {
-          const cell = document.createElement('div');
-          cell.className = 'cell';
-          p.appendChild(cell);
-        } else {
-          const spacer = document.createElement('div');
-          spacer.style.width='0'; spacer.style.height='0';
-          p.appendChild(spacer);
-        }
-      }
-    }
-    enableDrag(p);
-    return p;
-  }
-
-  // --- Placement helpers ---
-  function canPlace(shape, R, C){
-    for (let r=0; r<shape.length; r++){
-      for (let c=0; c<shape[0].length; c++){
-        if (!shape[r][c]) continue;
-        const rr = R+r, cc = C+c;
-        if (rr<0||cc<0||rr>=ROWS||cc>=COLS) return false;
-        if (S[rr][cc]===1) return false;
-      }
-    }
-    return true;
-  }
-
-function place(shape, R, C, colorArg){
-  const color = colorArg || place._currentColor || nextColor(); // ← use the piece color, or queued palette
-  for (let r=0; r<shape.length; r++){
-    for (let c=0; c<shape[0].length; c++){
-      if (!shape[r][c]) continue;
-      const rr = R + r, cc = C + c;
-      S[rr][cc] = 1;
-      const cell = cellEls[idx(rr,cc)];
-      cell.classList.remove('hover-ok','hover-bad');
-      cell.style.setProperty('--fill', color.fill);
-      cell.style.setProperty('--stroke', color.stroke);
-      cell.style.setProperty('--glow', color.glow);
-      cell.style.setProperty('--glow-inset', color.glowInset);
-      cell.classList.add('filled');
-    }
-  }
-  place._currentColor = null; // optional: clear after use
-}
-
-
-function clearHover(){
-  const els = board.querySelectorAll('.cell.preview, .cell.hover-ok, .cell.hover-bad');
-  els.forEach(el => {
-    el.classList.remove('preview','hover-ok','hover-bad');
-    // remove temp preview colors so next pass recolors cleanly
-    el.style.removeProperty('--fill');
-    el.style.removeProperty('--stroke');
-  });
-}
-
-
-  function snap(clientX, clientY){
-    const rect = board.getBoundingClientRect();
-    const startX = rect.left + PAD;
-    const startY = rect.top  + PAD;
-    const relX = clientX - startX;
-    const relY = clientY - startY;
-    if (relX<0 || relY<0) return null;
-    const step = CELL + GAP;
-    const c = Math.floor(relX / step);
-    const r = Math.floor(relY / step);
-    if (c<0||r<0||c>=COLS||r>=ROWS) return null;
-    return {r,c};
-  }
-
-function enableDrag(piece){
-  let dragging = false;
-
-  piece.addEventListener('pointerdown', (e) => {
-    dragging = true;
-    piece.setPointerCapture?.(e.pointerId);
-  });
-
-  piece.addEventListener('pointermove', (e) => {
-    if (!dragging) return;
-
-    // Snap computation
-    const rect = board.getBoundingClientRect();
-    const step = CELL + GAP;
-    const sx = rect.left + PAD, sy = rect.top + PAD;
-
-    const relX = e.clientX - sx;
-    const relY = e.clientY - sy;
-
-    const c0 = Math.floor(relX / step);
-    const r0 = Math.floor(relY / step);
-
-    const shape = piece._shape;
-    const ok = (c0>=0 && r0>=0 && c0<COLS && r0<ROWS) && canPlace(shape, r0, c0);
-
-    // --- color-matched, semi-transparent preview ---
-    clearHover();
-    if (ok){
-      const fill   = piece.style.getPropertyValue('--fill')   || piece.dataset.fill;
-      const stroke = piece.style.getPropertyValue('--stroke') || piece.dataset.stroke;
-
-      for (let r=0; r<shape.length; r++){
-        for (let c=0; c<shape[0].length; c++){
-          if (!shape[r][c]) continue;
-          const rr = r0 + r, cc = c0 + c;
-          if (rr<0 || cc<0 || rr>=ROWS || cc>=COLS) continue;
-
-          const cell = cellEls[idx(rr,cc)];
-          cell.style.setProperty('--fill',   fill);    // <-- key line
-          cell.style.setProperty('--stroke', stroke);  // dashed outline color
-          cell.classList.add('preview');               // CSS gives the ghost look
-        }
-      }
-    }
-    // --- end preview ---
-  });
-
-  piece.addEventListener('pointerup', (e) => {
-    if (!dragging) return;
-    dragging = false;
-
-    // Final snap (recompute target)
-    const rect = board.getBoundingClientRect();
-    const step = CELL + GAP;
-    const sx = rect.left + PAD, sy = rect.top + PAD;
-    const c0 = Math.floor((e.clientX - sx) / step);
-    const r0 = Math.floor((e.clientY - sy) / step);
-
-    const shape = piece._shape;
-
-    clearHover();
-
-    if ((c0>=0 && r0>=0 && c0<COLS && r0<ROWS) && canPlace(shape, r0, c0)){
-      // pass the piece’s colors into place()
-      place._currentColor = {
-        fill:      piece.style.getPropertyValue('--fill')       || piece.dataset.fill,
-        stroke:    piece.style.getPropertyValue('--stroke')     || piece.dataset.stroke,
-        glow:      piece.style.getPropertyValue('--glow')       || piece.dataset.glow,
-        glowInset: piece.style.getPropertyValue('--glow-inset') || piece.dataset.glowInset
-      };
-      place(shape, r0, c0);
-      piece.remove();
-
-      // only refill when all three slots are used up
-      if (tray.querySelectorAll('.slot > .bfmini-piece').length === 0){
-        refillTray();
-      }
-    }
-  });
-}
-
-  
-
-  
- function refillTray(){
-  const slots = Array.from(tray.querySelectorAll('.slot'));
-
-  slots.forEach((slot, i) => {
-    // If the slot already has a piece, leave it alone (keeps position!)
-    if (slot.firstElementChild) return;
-
-    // Choose the next shape/color/scale (respect your FREEZE_TRAY if present)
-    let shape, color, scale;
-    if (typeof FREEZE_TRAY !== 'undefined' && FREEZE_TRAY){
-      const FIXED_COLORS = [PALETTE[0], PALETTE[3], PALETTE[5]];
-      const FIXED_SCALES = [0.9, 1.0, 0.8];
-      const FIXED_SHAPES_SAFE = Array.isArray(FIXED_SHAPES) && FIXED_SHAPES.length ? FIXED_SHAPES : [
-        [[1,1],[1,1]], [[1,1,1]], [[1],[1],[1]]
-      ];
-      shape = FIXED_SHAPES_SAFE[i % FIXED_SHAPES_SAFE.length];
-      color = FIXED_COLORS[i % FIXED_COLORS.length];
-      scale = FIXED_SCALES[i % FIXED_SCALES.length];
-    } else {
-      shape = SHAPES[(Math.random()*SHAPES.length)|0];
-      color = nextColor();
-      scale = (typeof autoScaleForShape === 'function') ? autoScaleForShape(shape) : 0.85;
-    }
-
-    const piece = makePiece(shape, color, scale);
-    piece.dataset.slot = slot.dataset.slot; // remember where it lives
-    slot.appendChild(piece);
-  });
-}
-
-  // Render the tray once
-  refillTray();
-
-  // Toggle here
- // === AUTOPLAY BOT (must sit right after: refillTray(); ) ===
-(() => {
-  // ---- config ----
-  const AUTOPLAY = true;          // leave true to run
-  const MOVE_MS  = 1800;          // drag duration
-  const STEP_GAP = 600;           // pause between moves
-  const SHOW_SNAP_PREVIEW = true;
-
-  // ---- safety: ensure we see board/tray from outer scope ----
-  if (!window || !board || !tray) {
-    console.warn('[AutoPlay] missing board/tray – move this block inside DOMContentLoaded and keep it AFTER refillTray().');
-    return;
-  }
-
-  // prevent double starts
-  if (window.__bfAutoRunning) {
-    console.log('[AutoPlay] already running, skipping re-init.');
-    return;
-  }
-  window.__bfAutoRunning = false;
-
-  // expose manual controls
-  function startAuto(){ if (!window.__bfAutoRunning){ window.__bfAutoRunning = true; console.log('[AutoPlay] start'); setTimeout(autoStep, 400); } }
-  function stopAuto(){  window.__bfAutoRunning = false; console.log('[AutoPlay] stop'); }
-  window.bfAuto = { start: startAuto, stop: stopAuto };
-
-  // ---------- helpers (unchanged logic) ----------
-  function previewHover(shape, base, ok){
-    clearHover();
-    if (!ok || !base) return;
-    for (let r=0; r<shape.length; r++){
-      for (let c=0; c<shape[0].length; c++){
-        if (!shape[r][c]) continue;
-        const rr = base.r + r, cc = base.c + c;
-        if (rr<0||cc<0||rr>=ROWS||cc>=COLS) continue;
-        cellEls[idx(rr,cc)].classList.add('hover-ok'); // green only
-      }
-    }
-  }
-
-  function rowsColsCompletedIf(shape, R, C){
-    const filledRows = new Set(), filledCols = new Set();
-    const covers = (sr, sc) => (sr>=0 && sc>=0 && sr<shape.length && sc<shape[0].length && !!shape[sr][sc]);
-    for (let r=0; r<shape.length; r++){
-      for (let c=0; c<shape[0].length; c++){
-        if (!shape[r][c]) continue;
-        const rr = R + r, cc = C + c;
-        if (rr<0||cc<0||rr>=ROWS||cc>=COLS) continue;
-        if (!filledRows.has(rr)){
-          let full = true; for (let x=0; x<COLS; x++) full = full && (S[rr][x]===1 || covers(rr-R, x-C));
-          if (full) filledRows.add(rr);
-        }
-        if (!filledCols.has(cc)){
-          let full = true; for (let y=0; y<ROWS; y++) full = full && (S[y][cc]===1 || covers(y-R, cc-C));
-          if (full) filledCols.add(cc);
-        }
-      }
-    }
-    return { rows: filledRows, cols: filledCols, count: filledRows.size + filledCols.size };
-  }
-
-  function scorePlacement(shape, R, C){
-    const { count } = rowsColsCompletedIf(shape, R, C);
-    const lineScore = count * 100;
-    const midR=(ROWS-1)/2, midC=(COLS-1)/2;
-    const centerScore = -(Math.abs(R-midR)+Math.abs(C-midC));
-    let adj=0;
-    for (let r=0;r<shape.length;r++){
-      for (let c=0;c<shape[0].length;c++){
-        if (!shape[r][c]) continue;
-        const rr=R+r, cc=C+c, N=[[-1,0],[1,0],[0,-1],[0,1]];
-        for (const [dr,dc] of N){
-          const r2=rr+dr, c2=cc+dc;
-          if (r2<0||c2<0||r2>=ROWS||c2>=COLS) continue;
-          if (S[r2][c2]===1) adj++;
-        }
-      }
-    }
-    return lineScore + centerScore + adj*2;
-  }
-
-  function pickBestMove(){
-    let best=null;
-   const pieces = Array.from(tray.querySelectorAll('.slot > .bfmini-piece'));
-    for (let i=0;i<pieces.length;i++){
-      const piece = pieces[i], shape = piece._shape;
-      for (let R=0; R<ROWS; R++){
-        for (let C=0; C<COLS; C++){
-          if (!canPlace(shape,R,C)) continue;
-          const sc = scorePlacement(shape,R,C);
-          if (!best || sc>best.score) best = { piece, shape, R, C, score: sc, index: i };
-        }
-      }
-    }
-    return best;
-  }
-
-  function boardPopReset(done){
-  clearHover?.(); // if you have this helper
-  board.classList.add('resetting');
-
-  // fade out only the filled cells
-  for (let r=0;r<ROWS;r++){
-    for (let c=0;c<COLS;c++){
-      if (S[r][c]===1) cellEls[idx(r,c)].classList.add('reset-fade');
-    }
-  }
-
-  // after the pop, wipe state and styles
-  setTimeout(() => {
-    for (let r=0;r<ROWS;r++){
-      for (let c=0;c<COLS;c++){
-        S[r][c] = 0;
-        const cell = cellEls[idx(r,c)];
-        cell.className = cell.className
-          .replace(/\bfilled\b/g,'')
-          .replace(/\bhover-ok\b/g,'')
-          .replace(/\bhover-bad\b/g,'')
-          .replace(/\bclearing\b/g,'')
-          .replace(/\breset-fade\b/g,'');
-        cell.style.removeProperty('--fill');
-        cell.style.removeProperty('--stroke');
-        cell.style.removeProperty('--glow');
-        cell.style.removeProperty('--glow-inset');
-      }
-    }
-    board.classList.remove('resetting');
-    if (typeof done === 'function') done();
-  }, 320); // match bfBoardPop duration
-}
-
-
-  function clearFullLines(){
-    const fullRows=[], fullCols=[];
-    for (let r=0;r<ROWS;r++) if (S[r].every(v=>v===1)) fullRows.push(r);
-    for (let c=0;c<COLS;c++){
-      let ok=true; for (let r=0;r<ROWS;r++){ if (S[r][c]===0){ok=false;break;} }
-      if (ok) fullCols.push(c);
-    }
-    if (!fullRows.length && !fullCols.length) return 0;
-
-// mark ONLY the filled cells in those complete rows/cols
-for (const r of fullRows){
-  for (let c=0; c<COLS; c++){
-    if (S[r][c] === 1) cellEls[idx(r,c)].classList.add('clearing');
-  }
-}
-for (const c of fullCols){
-  for (let r=0; r<ROWS; r++){
-    if (S[r][c] === 1) cellEls[idx(r,c)].classList.add('clearing');
-  }
-}
-
-setTimeout(() => {
-  // clear only filled cells; leave empty grid cells untouched
-  for (const r of fullRows){
-    for (let c=0; c<COLS; c++){
-      if (S[r][c] !== 1) continue;
-      S[r][c] = 0;
-      const cell = cellEls[idx(r,c)];
-      cell.classList.remove('filled','clearing');
-      cell.style.removeProperty('--fill');
-      cell.style.removeProperty('--stroke');
-      cell.style.removeProperty('--glow');
-      cell.style.removeProperty('--glow-inset');
-    }
-  }
-  for (const c of fullCols){
-    for (let r=0; r<ROWS; r++){
-      if (S[r][c] !== 1) continue;
-      S[r][c] = 0;
-      const cell = cellEls[idx(r,c)];
-      cell.classList.remove('filled','clearing');
-      cell.style.removeProperty('--fill');
-      cell.style.removeProperty('--stroke');
-      cell.style.removeProperty('--glow');
-      cell.style.removeProperty('--glow-inset');
-    }
-  }
-}, 240); // keep matching your CSS animation time
-
-    return fullRows.length + fullCols.length;
-  }
-
-  function animateDragAndPlace(piece, R, C, done){
-    // hand off exact piece colors for placement
-    place._currentColor = {
-      fill:      piece.style.getPropertyValue('--fill')       || piece.dataset.fill,
-      stroke:    piece.style.getPropertyValue('--stroke')     || piece.dataset.stroke,
-      glow:      piece.style.getPropertyValue('--glow')       || piece.dataset.glow,
-      glowInset: piece.style.getPropertyValue('--glow-inset') || piece.dataset.glowInset
-    };
-
-    const tCell = cellEls[idx(R,C)];
-    const tRect = tCell.getBoundingClientRect();
-    const pRect = piece.getBoundingClientRect();
-
-    const clone = piece.cloneNode(true);
-    clone.style.position='fixed';
-    clone.style.left=pRect.left+'px';
-    clone.style.top=pRect.top+'px';
-    clone.style.width=pRect.width+'px';
-    clone.style.height=pRect.height+'px';
-    clone.style.zIndex='9999';
-    clone.style.pointerEvents='none';
-
-    // make clone match board grid exactly
-    clone.style.padding='0'; clone.style.background='transparent'; clone.style.outline='none';
-    clone.style.setProperty('--piece-scale', 1);
-    clone.style.gap = (GAP)+'px';
-    clone.querySelectorAll('.cell').forEach(c=>{ c.style.width=CELL+'px'; c.style.height=CELL+'px'; });
-
-    document.body.appendChild(clone);
-    piece.style.visibility='hidden';
-
-    const startX=pRect.left, startY=pRect.top, endX=tRect.left, endY=tRect.top;
-    const dx=endX-startX, dy=endY-startY;
-    const t0 = performance.now();
-
-    function frame(now){
-      const t=Math.min(1,(now-t0)/MOVE_MS);
-      const ease = t<.5 ? 2*t*t : -1+(4-2*t)*t;
-      const curX=startX+dx*ease, curY=startY+dy*ease;
-      clone.style.left=curX+'px'; clone.style.top=curY+'px';
-
-if (SHOW_SNAP_PREVIEW){
-  clearHover();
-
-  const rect = board.getBoundingClientRect();
-  const sx = rect.left + PAD, sy = rect.top + PAD;
-  const relX = curX - sx,     relY = curY - sy;
-  const step = CELL + GAP;
-
-  if (relX >= 0 && relY >= 0){
-    const c0 = Math.floor(relX / step);
-    const r0 = Math.floor(relY / step);
-
-    if (c0>=0 && r0>=0 && c0<COLS && r0<ROWS){
-      const ok = canPlace(piece._shape, r0, c0);
-      if (ok){
-        const fill   = piece.style.getPropertyValue('--fill')   || piece.dataset.fill;
-        const stroke = piece.style.getPropertyValue('--stroke') || piece.dataset.stroke;
-
-        for (let r=0; r<piece._shape.length; r++){
-          for (let c=0; c<piece._shape[0].length; c++){
-            if (!piece._shape[r][c]) continue;
-            const rr = r0 + r, cc = c0 + c;
-            if (rr<0||cc<0||rr>=ROWS||cc>=COLS) continue;
-
-            const cell = cellEls[idx(rr,cc)];
-            cell.style.setProperty('--fill',   fill);
-            cell.style.setProperty('--stroke', stroke);
-            cell.classList.add('preview'); // CSS paints from --fill
-          }
-        }
-      }
-    }
-  }
-}
-
-
-      if (t<1){ requestAnimationFrame(frame); }
-      else{
-        clearHover(); clone.remove(); piece.style.visibility='';
-        place(piece._shape, R, C); piece.remove();
-        if (typeof done==='function') done();
-      }
-    }
-    requestAnimationFrame(frame);
-  }
-
-
-
-  function autoStep(){
-    if (!window.__bfAutoRunning) return;
-    if (!tray || tray.children.length===0){ refillTray(); setTimeout(autoStep, STEP_GAP); return; }
-const move = pickBestMove();
-if (!move){
-  // No legal placements: pop + reset board, then new set of tray pieces
-  boardPopReset(() => {
-    // remove ONLY the pieces, keep the 3 slots
-    tray.querySelectorAll('.slot > .bfmini-piece').forEach(el => el.remove());
-    refillTray();
-    setTimeout(autoStep, STEP_GAP);
-  });
-  return;
-}
-
-    animateDragAndPlace(move.piece, move.R, move.C, ()=>{
-     clearFullLines();
-if (tray.querySelectorAll('.slot > .bfmini-piece').length === 0) {
-  refillTray();  // only when all three are gone
-}
-setTimeout(autoStep, STEP_GAP);
-    });
-  }
-  // kick it off once
-  if (AUTOPLAY) startAuto();
-})();
-
+  // This DOMContentLoaded block continues in mode.js
+  // All game logic has been moved to separate JS files
 });
 </script>
 
+<script>
+function show(el){ if(el){ el.classList.remove('hidden'); el.setAttribute('aria-hidden','false'); el.style.display='block'; el.style.display = el.id === 'screen-classic-grid' ? 'grid' : 'block';} }
+function hide(el){ if(el){ el.classList.add('hidden');  el.setAttribute('aria-hidden','true');  el.style.display='none'; } }
+</script>
 
+<script>
+window.clearFullLinesClassic = function (board, cells, S, ROWS, COLS, idx){
+  const fullRows=[], fullCols=[];
+  for (let r=0;r<ROWS;r++) if (S[r].every(v=>v===1)) fullRows.push(r);
+  for (let c=0;c<COLS;c++){
+    let ok=true; for (let r=0;r<ROWS;r++){ if (S[r][c]===0){ ok=false; break; } }
+    if (ok) fullCols.push(c);
+  }
+  if (!fullRows.length && !fullCols.length) return;
 
+  // Visual pulse (keeps cells in the grid)
+  [...fullRows, ...fullCols].forEach(() => {/* optional: you can add a class for FX if you want */});
 
+  // After short delay, just unfill cells â€” DO NOT remove nodes
+  setTimeout(()=>{
+    fullRows.forEach(r=>{
+      for (let c=0;c<COLS;c++){
+        const el = cells[idx(r,c)]; if (!el) continue;
+        el.classList.remove('filled','preview','hover-ok','hover-bad','clearing');
+        el.style.removeProperty('--fill'); el.style.removeProperty('--stroke');
+        el.style.removeProperty('--glow'); el.style.removeProperty('--glow-inset');
+      }
+    });
+    fullCols.forEach(c=>{
+      for (let r=0;r<ROWS;r++){
+        const el = cells[idx(r,c)]; if (!el) continue;
+        el.classList.remove('filled','preview','hover-ok','hover-bad','clearing');
+        el.style.removeProperty('--fill'); el.style.removeProperty('--stroke');
+        el.style.removeProperty('--glow'); el.style.removeProperty('--glow-inset');
+      }
+    });
+  }, 240);
+};
+</script>
+
+<!-- Scripts moved to separate files -->
+<script src="init.js"></script>
+<script src="shared.js"></script>
+<script src="home.js"></script>
+<script src="mode.js"></script>
+<script src="classic.js"></script>
+<script src="tetris.js"></script>
 
 </body>
 </html>
