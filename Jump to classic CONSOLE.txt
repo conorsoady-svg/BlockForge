@@ -1,0 +1,2 @@
+hideHomeOverlay();    // hide the neon home overlay
+openClassicGrid();    // then show Classic

@@ -5,7 +5,9 @@ window.openClassicGrid = function () {
   if (typeof tStop === 'function') {
     tStop();
   }
-  
+    // Mark that we're in Classic mode (for CSS)
+  document.body.classList.add('classic-mode');
+
   // Use the global show/hide functions
   // Use the global show/hide functions
   if (window.hide && window.show) {

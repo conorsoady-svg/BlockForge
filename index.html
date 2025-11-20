@@ -1214,7 +1214,6 @@ html, body {
 #home, #game { touch-action: none; }
 
 /* Classic grid-only screen layout */
-/* Classic grid-only screen layout */
 #screen-classic-grid{
   position: fixed;
   inset: 0;
@@ -1425,7 +1424,9 @@ html, body {
     inset 0 2px 0 rgba(255,255,255,.60),
     inset 0 -3px 0 rgba(0,0,0,.35);
 }
-
+body.classic-mode #tetrisControls {
+  display: none !important;
+}
 </style>
 </head>
 
