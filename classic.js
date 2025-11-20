@@ -5,8 +5,12 @@ window.openClassicGrid = function () {
   if (typeof tStop === 'function') {
     tStop();
   }
-    // Mark that we're in Classic mode (for CSS)
-  document.body.classList.add('classic-mode');
+    // Hide the main Tetris board while in Classic
+  const tetrisBoard = document.getElementById('board');
+  if (tetrisBoard) {
+    tetrisBoard.classList.add('hidden');
+    tetrisBoard.style.display = 'none';
+  }
 
   // Use the global show/hide functions
   // Use the global show/hide functions

@@ -242,7 +242,6 @@ function uiLinesCleared(lines, bonus){ if(lines<=0) return; const label=(lines==
 function setBoardDimensions(cols,rows){ width=cols;height=rows; window.$('board').style.setProperty('--cols', String(cols)); }
 function hideAll(){['home','game'].forEach(x=>window.$(x).classList.add('hidden'))}
 function showHome(){ tStop(); if(typeof startDemo === 'function') startDemo(); hideAll(); window.$('home').classList.remove('hidden'); clearTetrisOverrides(); }
-document.body.classList.remove('classic-mode');
 function toggleTheme(){ document.body.classList.toggle('light') }
 
 /* Start modes */
