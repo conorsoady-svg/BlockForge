@@ -491,4 +491,3 @@ window.hide = function hide(el){
 window.openSettings = window.openSettings || function () {
   alert('6 7');
 };
-

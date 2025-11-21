@@ -385,19 +385,104 @@ function sizePreviewLayer(){
 }
 
 /* Drag logic (non-Tetris) */
-function clearPreview(){const layer=window.$('preview');layer.classList.remove('valid','invalid');layer.innerHTML=''}
-function drawPreview(piece,ax,ay){
-  if(currentMode==='tetris') return;
-  const layer=window.$('preview'); clearPreview(); if(ax==null||ay==null) return;
-  const valid=canPlace(piece.shape,ax,ay); layer.classList.add(valid?'valid':'invalid');
-  const s=window.cellSize(),p=window.pad(),g=window.gap();
-  for(let r=0;r<piece.shape.length;r++)for(let c=0;c<piece.shape[0].length;c++){
-    if(!piece.shape[r][c])continue;
-    const pb=document.createElement('div'); pb.className='preview-block';
-    pb.style.left=(p+(ax+c)*(s+g))+'px'; pb.style.top=(p+(ay+r)*(s+g))+'px';
-    pb.style.backgroundColor=piece.color; layer.appendChild(pb);
+/* Drag logic (non-Tetris) */
+function clearPreview(){
+  // Clear the overlay ghost
+  const layer = window.$('preview');
+  if (layer) {
+    layer.classList.remove('valid', 'invalid');
+    layer.innerHTML = '';
+  }
+
+  // Also clear any "about-to-clear" glow on the board itself
+  const boardEl = window.$('board');
+  if (boardEl) {
+    Array.from(boardEl.children).forEach(cell => {
+      cell.classList.remove('about-to-clear');
+    });
   }
 }
+
+function drawPreview(piece, ax, ay){
+  if (currentMode === 'tetris') return;
+
+  const layer = window.$('preview');
+  clearPreview();
+  if (ax == null || ay == null || !layer) return;
+
+  const valid = canPlace(piece.shape, ax, ay);
+  layer.classList.add(valid ? 'valid' : 'invalid');
+
+  const s = window.cellSize();
+  const p = window.pad();
+  const g = window.gap();
+
+  // --- Always draw the ghost blocks (same as before) ---
+  for (let r = 0; r < piece.shape.length; r++) {
+    for (let c = 0; c < piece.shape[0].length; c++) {
+      if (!piece.shape[r][c]) continue;
+      const pb = document.createElement('div');
+      pb.className = 'preview-block';
+      pb.style.left = (p + (ax + c) * (s + g)) + 'px';
+      pb.style.top  = (p + (ay + r) * (s + g)) + 'px';
+      pb.style.backgroundColor = piece.color;
+      layer.appendChild(pb);
+    }
+  }
+
+  // Only bother with line prediction if the placement is legal
+  if (!valid) return;
+
+  // --- Simulate this placement on a copy of the grid ---
+  const sim = grid.map(row => row.slice());
+  const h = piece.shape.length;
+  const w = piece.shape[0].length;
+
+  for (let r = 0; r < h; r++) {
+    for (let c = 0; c < w; c++) {
+      if (!piece.shape[r][c]) continue;
+      const yy = ay + r;
+      const xx = ax + c;
+      if (yy < 0 || yy >= height || xx < 0 || xx >= width) continue;
+      // Just store a truthy value; we only care about "filled vs empty"
+      sim[yy][xx] = sim[yy][xx] || piece.color || 1;
+    }
+  }
+
+  // --- Find rows / cols that WOULD be full after placing ---
+  const fullRows = [];
+  const fullCols = [];
+
+  for (let y = 0; y < height; y++) {
+    if (sim[y].every(v => !!v)) fullRows.push(y);
+  }
+
+  for (let x = 0; x < width; x++) {
+    let full = true;
+    for (let y = 0; y < height; y++) {
+      if (!sim[y][x]) { full = false; break; }
+    }
+    if (full) fullCols.push(x);
+  }
+
+  if (!fullRows.length && !fullCols.length) return;
+
+  // --- Apply the "about-to-clear" glow to the underlying board cells ---
+  const boardEl = window.$('board');
+  if (!boardEl) return;
+
+  for (let y = 0; y < height; y++) {
+    for (let x = 0; x < width; x++) {
+      if (!fullRows.includes(y) && !fullCols.includes(x)) continue;
+      const idx = y * width + x;
+      const cell = boardEl.children[idx];
+      if (cell) {
+        cell.classList.add('about-to-clear');
+      }
+    }
+  }
+}
+
 function canPlace(shape,x,y){
   if (!shape || !shape[0]) return false;
   for(let r=0;r<shape.length;r++)for(let c=0;c<shape[0].length;c++){

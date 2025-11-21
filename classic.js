@@ -234,14 +234,23 @@ document.addEventListener('DOMContentLoaded', () => {
   ));
 
   // --- helpers copied from your Mode DOMContentLoaded block ---
-  function clearHover(){
-    const els = board.querySelectorAll('.cell.preview, .cell.hover-ok, .cell.hover-bad');
-    els.forEach(el => {
-      el.classList.remove('preview','hover-ok','hover-bad');
+function clearHover(){
+  const els = board.querySelectorAll(
+    '.cell.preview, .cell.hover-ok, .cell.hover-bad, .cell.about-to-clear'
+  );
+  els.forEach(el => {
+    el.classList.remove('preview','hover-ok','hover-bad','about-to-clear');
+
+    // IMPORTANT: only wipe colours on temporary preview cells.
+    // Real placed blocks keep their fill / stroke so they don’t go black.
+    if (!el.classList.contains('filled')) {
       el.style.removeProperty('--fill');
       el.style.removeProperty('--stroke');
-    });
-  }
+      el.style.removeProperty('--glow');
+      el.style.removeProperty('--glow-inset');
+    }
+  });
+}
 
   function canPlace(shape, R, C){
     if (!shape || !shape[0]) return false;
@@ -404,16 +413,28 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function enableDrag(piece){
+    
     let dragging = false;
     let ghost = null;
     let offsetX = 0, offsetY = 0;
-    const FINGER_OFFSET = 200; // adjust as needed for finger size
+    const BASE_OFFSET = 150;   // default lift above finger
+    const MIN_OFFSET  = 0;    // how close it can get when you drag down
+    const MAX_OFFSET  = 2600;
+    const H_MAX_OFFSET = 800; // horizontal max offset (not used currently)
+    let FINGER_OFFSET = BASE_OFFSET; // adjust as needed for finger size
 
+    let startX = 0, startY = 0;
     piece.addEventListener('pointerdown', (e) => {
       dragging = true;
       piece.setPointerCapture?.(e.pointerId);
       // store click offset relative to piece center
-      offsetX = 0; offsetY = 0; // no custom offset — snap is center-aware
+    startX = e.clientX;
+      startY = e.clientY;
+      fingerOffset = BASE_OFFSET;
+
+      offsetX = 0;
+      offsetY = 0;
+
       // --- create the ghost at full grid-cell size ---
       ghost = makeDragGhost(piece, CELL, GAP);
       document.getElementById('screen-classic-grid').appendChild(ghost);
@@ -422,28 +443,67 @@ document.addEventListener('DOMContentLoaded', () => {
       // position it immediately
       ghost.style.left = e.clientX + 'px';
       ghost.style.top  = e.clientY + 'px';
-      ghost.style.transform = 'translate(-50%, calc(-50% - 200px))';
+      ghost.style.transform = 'translate(-50%, calc(-50% - 150px))';
     });
 
     piece.addEventListener('pointermove', (e) => {
       if (!dragging) return;
 
+ // --- update dynamic offsets based on drag direction ---
+    const dx = e.clientX - startX;
+    const dy = e.clientY - startY;
+
+    // up = negative dy, down = positive dy
+    const up   = Math.max(0, -dy);
+    const down = Math.max(0,  dy);
+
+    // === VERTICAL OFFSET (same as before, only vertical input) ===
+    let offset = BASE_OFFSET;
+
+    // move ghost further away as you drag up
+    offset += up * 0.3;
+
+    // bring ghost closer as you drag down
+    offset -= down * 0.3;
+
+    // clamp vertical
+    offset = Math.max(MIN_OFFSET, Math.min(MAX_OFFSET, offset));
+    fingerOffset = offset;
+
+    // === HORIZONTAL OFFSET (new) ===
+    // dx is signed: left < 0, right > 0
+    let hOffset = dx * 0.3; // scale how fast it moves sideways
+
+    // clamp horizontal
+    if (hOffset >  H_MAX_OFFSET) hOffset =  H_MAX_OFFSET;
+    if (hOffset < -H_MAX_OFFSET) hOffset = -H_MAX_OFFSET;
+
+    offsetX = hOffset;
+
       // --- keep the ghost following the finger/mouse anywhere on page ---
-      if (ghost){
-        ghost.style.left = e.clientX + 'px';
-        ghost.style.top  = e.clientY + 'px';
-      }
+    // --- keep the ghost following the finger/mouse anywhere on page ---
+    if (ghost){
+      ghost.style.left = e.clientX + 'px';
+      ghost.style.top  = e.clientY + 'px';
+      ghost.style.transform = `
+        translate(
+          calc(-50% + ${offsetX}px),
+          calc(-50% - ${fingerOffset}px)
+        )
+      `;
+    }
 
-      // --- live preview on the board (Classic) ---
-      // Convert pointer to grid space and anchor by piece center (≥50% rule)
-      const rect   = board.getBoundingClientRect();
-      const startX = rect.left + PAD;
-      const startY = rect.top  + PAD;
-      const step   = CELL + GAP;
+    // --- live preview on the board (Classic) ---
+    const rect   = board.getBoundingClientRect();
+    const startXBoard = rect.left + PAD;
+    const startYBoard = rect.top  + PAD;
+    const step   = CELL + GAP;
 
-      // pointer in grid units (lift Y by your finger offset so ghost & preview match)
-      const gx = (e.clientX                   - startX) / step;
-      const gy = ((e.clientY - FINGER_OFFSET) - startY) / step;
+    // pointer in grid units, using the SAME offsets as the ghost
+    const gx = ((e.clientX + offsetX) - startXBoard) / step;
+    const gy = ((e.clientY - fingerOffset) - startYBoard) / step;
+
+
 
       clearHover();
 
@@ -454,9 +514,48 @@ document.addEventListener('DOMContentLoaded', () => {
       // center-anchored majority snap (works for odd & even widths/heights)
       const anchorC = Math.floor(gx - (w - 1) / 2);
       const anchorR = Math.floor(gy - (h - 1) / 2);
-
-      const ok = (m && m[0]) ? canPlace(m, anchorR, anchorC) : false;
+            const ok = (m && m[0]) ? canPlace(m, anchorR, anchorC) : false;
       if (!ok) { return; } // only draw preview when legal
+// Simulate placing the shape on the current board to see which lines would clear
+const sim = Array.from({length: ROWS}, (_, r) =>
+  Array.from({length: COLS}, (_, c) =>
+    cellEls[idx(r,c)].classList.contains('filled') ? 1 : 0
+  )
+);
+
+const fullRow = new Array(ROWS).fill(false);
+const fullCol = new Array(COLS).fill(false);
+
+// Apply the preview shape into the simulated board
+for (let r = 0; r < m.length; r++){
+  for (let c = 0; c < m[0].length; c++){
+    if (!m[r][c]) continue;
+    const rr = anchorR + r, cc = anchorC + c;
+    if (rr<0 || cc<0 || rr>=ROWS || cc>=COLS) continue;
+    sim[rr][cc] = 1;
+  }
+}
+
+// Find rows that would become full
+for (let r = 0; r < ROWS; r++){
+  if (sim[r].every(v => v === 1)) {
+    fullRow[r] = true;
+  }
+}
+
+// Find columns that would become full
+for (let c = 0; c < COLS; c++){
+  let colFull = true;
+  for (let r = 0; r < ROWS; r++){
+    if (sim[r][c] !== 1){
+      colFull = false;
+      break;
+    }
+  }
+  if (colFull) {
+    fullCol[c] = true;
+  }
+}
 
       const color = {
         fill: piece.dataset.fill,
@@ -464,18 +563,68 @@ document.addEventListener('DOMContentLoaded', () => {
         glow: piece.dataset.glow,
         glowInset: piece.dataset.glowInset
       };
+
       for (let r = 0; r < (m ? m.length : 0); r++){
         for (let c = 0; c < (m ? m[0].length : 0); c++){
           if (!m[r][c]) continue;
           const rr = anchorR + r, cc = anchorC + c;
           if (rr<0||cc<0||rr>=ROWS||cc>=COLS) continue;
-          const cell = cellEls[idx(rr,cc)];
-          if (!cell || cell.classList.contains('filled')) continue;
-          cell.classList.add(ok ? 'hover-ok' : 'hover-bad');
-          cell.style.setProperty('--fill',   color.fill);
-          cell.style.setProperty('--stroke', color.stroke);
+const cell = cellEls[idx(rr,cc)];
+if (!cell || cell.classList.contains('filled')) continue;
+cell.classList.add(ok ? 'hover-ok' : 'hover-bad');
+cell.style.setProperty('--fill',   color.fill);
+cell.style.setProperty('--stroke', color.stroke);
+
+// Extra glow if this cell is on a row or column that will clear
+if (fullRow[rr] || fullCol[cc]) {
+  cell.classList.add('about-to-clear');
+}
+
+// (no about-to-clear here – we’ll glow real filled cells below)
+
+// === NEW: make all existing filled cells in any full row/col glow ===
+for (let r = 0; r < ROWS; r++){
+  for (let c = 0; c < COLS; c++){
+    if (!fullRow[r] && !fullCol[c]) continue; // only lines that will clear
+    const cell = cellEls[idx(r,c)];
+    if (!cell) continue;
+
+    // Only glow real placed blocks, not empty board squares
+    if (cell.classList.contains('filled')) {
+      cell.classList.add('about-to-clear');
+    }
+  }
+}
+
+// Extra glow if this cell is on a row or column that will clear
+if (fullRow[rr] || fullCol[cc]) {
+  cell.classList.add('about-to-clear');
+}
+// After painting the hover, make every cell in any full row/col glow
+for (let r = 0; r < ROWS; r++){
+  for (let c = 0; c < COLS; c++){
+    if (!fullRow[r] && !fullCol[c]) continue;
+    const cell = cellEls[idx(r,c)];
+    if (cell) {
+      cell.classList.add('about-to-clear');
+    }
+  }
+}
+
+
         }
       }
+            // NEW: make all existing filled cells in any full row/col glow
+      for (let r = 0; r < ROWS; r++){
+        for (let c = 0; c < COLS; c++){
+          if (!fullRow[r] && !fullCol[c]) continue;  // only lines that will clear
+          const cell2 = cellEls[idx(r,c)];
+          if (cell2 && cell2.classList.contains('filled')) {
+            cell2.classList.add('about-to-clear');
+          }
+        }
+      }
+
     });
 
     piece.addEventListener('pointerup', (e) => {
@@ -492,8 +641,9 @@ document.addEventListener('DOMContentLoaded', () => {
       const startYUp = rectUp.top  + PAD;
       const stepUp   = CELL + GAP;
 
-      const gxUp = (e.clientX                   - startXUp) / stepUp;
-      const gyUp = ((e.clientY - FINGER_OFFSET) - startYUp) / stepUp;
+const gxUp = ((e.clientX + offsetX)      - startXUp) / stepUp;
+const gyUp = ((e.clientY - fingerOffset) - startYUp) / stepUp;
+
 
       const mUp = piece._shape || shapeFromPiece(piece);
       const wUp = mUp ? mUp[0].length : 0;
@@ -716,4 +866,3 @@ window.syncClassicTrayFromHome = function(){
   if (!src || !dst) return;
   dst.innerHTML = src.innerHTML; // simple 1:1 copy of current pieces
 };
-
