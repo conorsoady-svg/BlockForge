@@ -14,7 +14,7 @@
 
 
 <style>
-:root{--cell:45;--gap:2;--pad:4;--clear-ms:420;--cols:8}
+:root{--cell:40;--gap:2;--pad:4;--clear-ms:420;--cols:8}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{height:100%;-webkit-text-size-adjust:100%}
 body{margin:0;background: radial-gradient(circle farthest-corner at 50% 50%, #010724 70%, #3A5292 150%); background-attachment: fixed; background-size: 100dvw 100dvh; background-repeat: no-repeat; background-position: center;color:#54FF10;text-align:center;font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;overscroll-behavior-y:none;-webkit-user-select:none;user-select:none}
@@ -1410,6 +1410,7 @@ html, body {
 
 /* Lock Classic board to 8Ã—8 tracks so it never visually shrinks */
 #screen-classic-grid #classicBoard{
+  --cell: 45;
   --cols: 8;
   --rows: 8;
   display: grid;
