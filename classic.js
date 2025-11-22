@@ -235,22 +235,52 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // --- helpers copied from your Mode DOMContentLoaded block ---
 function clearHover(){
-  const els = board.querySelectorAll(
-    '.cell.preview, .cell.hover-ok, .cell.hover-bad, .cell.about-to-clear'
+  // Clear temporary hover previews (ghost cells)
+  const hoverEls = board.querySelectorAll(
+    '.cell.preview, .cell.hover-ok, .cell.hover-bad'
   );
-  els.forEach(el => {
-    el.classList.remove('preview','hover-ok','hover-bad','about-to-clear');
+  hoverEls.forEach(el => {
+    el.classList.remove('preview','hover-ok','hover-bad');
 
-    // IMPORTANT: only wipe colours on temporary preview cells.
-    // Real placed blocks keep their fill / stroke so they don’t go black.
+    // Only wipe colours on *temporary* preview cells.
+    // Real placed blocks keep their colours.
     if (!el.classList.contains('filled')) {
       el.style.removeProperty('--fill');
       el.style.removeProperty('--stroke');
       el.style.removeProperty('--glow');
       el.style.removeProperty('--glow-inset');
+      el.style.removeProperty('--about-glow');
+      
+
+    }
+  });
+
+  // Clear highlighted rows/cols and restore original colours + glow
+  const hlEls = board.querySelectorAll('.cell.about-to-clear');
+  hlEls.forEach(el => {
+    el.classList.remove('about-to-clear');
+
+    if (el.dataset.origFillHighlight){
+      el.style.setProperty('--fill', el.dataset.origFillHighlight);
+      delete el.dataset.origFillHighlight;
+    }
+    if (el.dataset.origStrokeHighlight){
+      el.style.setProperty('--stroke', el.dataset.origStrokeHighlight);
+      delete el.dataset.origStrokeHighlight;
+    }
+    if (el.dataset.origGlowHighlight){
+      el.style.setProperty('--glow', el.dataset.origGlowHighlight);
+      delete el.dataset.origGlowHighlight;
+    }
+    if (el.dataset.origGlowInsetHighlight){
+      el.style.setProperty('--glow-inset', el.dataset.origGlowInsetHighlight);
+      delete el.dataset.origGlowInsetHighlight;
+        el.style.removeProperty('--about-glow');
+
     }
   });
 }
+
 
   function canPlace(shape, R, C){
     if (!shape || !shape[0]) return false;
@@ -566,6 +596,42 @@ for (let c = 0; c < COLS; c++){
 
       for (let r = 0; r < (m ? m.length : 0); r++){
         for (let c = 0; c < (m ? m[0].length : 0); c++){
+      // Highlight all existing filled blocks in any row/col that will clear,
+      // tinting both colour *and glow* to the dragged piece.
+      for (let r = 0; r < ROWS; r++){
+        for (let c = 0; c < COLS; c++){
+          if (!fullRow[r] && !fullCol[c]) continue;   // only lines that will clear
+
+          const cell2 = cellEls[idx(r,c)];
+          if (!cell2 || !cell2.classList.contains('filled')) continue;
+
+          // Store original colours + glow once so we can restore later
+          if (!cell2.dataset.origFillHighlight){
+            const curFill      = cell2.style.getPropertyValue('--fill');
+            const curStroke    = cell2.style.getPropertyValue('--stroke');
+            const curGlow      = cell2.style.getPropertyValue('--glow');
+            const curGlowInset = cell2.style.getPropertyValue('--glow-inset');
+
+            if (curFill)      cell2.dataset.origFillHighlight        = curFill;
+            if (curStroke)    cell2.dataset.origStrokeHighlight      = curStroke;
+            if (curGlow)      cell2.dataset.origGlowHighlight        = curGlow;
+            if (curGlowInset) cell2.dataset.origGlowInsetHighlight   = curGlowInset;
+          }
+
+          // Use the dragged piece's colour & glow
+          const glowCol      = color.glow      || color.stroke || color.fill;
+          const glowInsetCol = color.glowInset || color.stroke || color.fill;
+
+          cell2.style.setProperty('--fill',        color.fill);
+          cell2.style.setProperty('--stroke',      color.stroke);
+          cell2.style.setProperty('--glow',        glowCol);
+          cell2.style.setProperty('--glow-inset',  glowInsetCol);
+          cell2.style.setProperty('--about-glow',  glowCol); 
+          cell2.classList.add('about-to-clear');
+          
+        }
+      }
+
           if (!m[r][c]) continue;
           const rr = anchorR + r, cc = anchorC + c;
           if (rr<0||cc<0||rr>=ROWS||cc>=COLS) continue;
@@ -577,6 +643,7 @@ cell.style.setProperty('--stroke', color.stroke);
 
 // Extra glow if this cell is on a row or column that will clear
 if (fullRow[rr] || fullCol[cc]) {
+  cell.style.setProperty('--about-glow', color.glow || color.stroke || color.fill);
   cell.classList.add('about-to-clear');
 }
 
