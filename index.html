@@ -716,6 +716,7 @@ button, input, select, textarea { font: inherit; }
     z-index: 4;
 }
 
+
 /* Tray piece cells pick up the same vars */
 .bfmini-piece .cell{
   width: calc(var(--cell, 40) * 0.8px);
@@ -965,30 +966,86 @@ button, input, select, textarea { font: inherit; }
 }
 
 
-/* Bright, lightened outline glow for rows/cols that will clear */
-.board .cell.about-to-clear::before,
-#classicBoard .cell.about-to-clear::before{
+/* Block Blast-style outline glow for rows/cols that will clear */
+/* ::after creates the bright outline/halo that hugs each tile's edges */
+.board .cell.filled.about-to-clear::after,
+#classicBoard .cell.filled.about-to-clear::after{
   content: "";
   position: absolute;
-  inset: -3px;              /* stays right around the outline */
-  border-radius: 10px;
+  inset: 0;                  /* same size as tile to hug the edges */
+  border-radius: inherit;     /* matches tile border-radius exactly */
   pointer-events: none;
+  z-index: -1;               /* behind the cell content */
+  
+  /* Create an outline glow that hugs the tile edges using box-shadow */
+  /* Multiple layers: bright white core + large colored halo */
+  box-shadow:
+    /* Bright white inner edge (hugs the tile outline tightly) */
+    0 0 0 1.5px rgba(255, 255, 255, 1.0),
+    /* Bright white core glow (immediate halo) */
+    0 0 3px rgba(255, 255, 255, 0.98),
+    0 0 6px rgba(255, 255, 255, 0.95),
+    0 0 10px rgba(255, 255, 255, 0.90),
+    /* Colored outer halo using the dragged piece's color (lightened/brightened) */
+    0 0 14px var(--about-glow, rgba(255, 255, 255, 0.85)),
+    0 0 20px var(--about-glow, rgba(255, 255, 255, 0.75)),
+    0 0 30px var(--about-glow, rgba(255, 255, 255, 0.60)),
+    0 0 44px var(--about-glow, rgba(255, 255, 255, 0.45)),
+    0 0 60px var(--about-glow, rgba(255, 255, 255, 0.30));
 }
-  /* Extra soft glow on each cell in the line */
-#classicBoard .cell.about-to-clear{
-  outline: 0.1px solid rgba(255,255,255,0.85);
-  box-shadow:
-    0 0 8px  rgba(255,255,255,0.85),
-    0 0 22px var(--about-glow, rgba(255,255,255,0.95));
 
-  /* White core + strong coloured halo (lighter than tile colour) */
-  box-shadow:
-    0 0 6px  rgba(255,255,255,0.95),
-    0 0 14px rgba(255,255,255,0.90),
-    0 0 26px var(--about-glow, rgba(255,255,255,0.95)),
-    0 0 46px var(--about-glow, rgba(255,255,255,0.90));
+/* Ensure filled cells with about-to-clear get the sheen overlay (same as normal filled cells) */
+.board .cell.filled.about-to-clear::before,
+#classicBoard .cell.filled.about-to-clear::before{
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
 
-  filter: brightness(1.15);
+  /* bright hairline at top → fade → subtle dark at bottom (same as normal filled cells) */
+  background:
+    linear-gradient(
+      to bottom,
+      rgba(255,255,255,.45) 0px,
+      rgba(255,255,255,.28) 2px,
+      rgba(255,255,255,0) 28%,
+      rgba(0,0,0,0)       72%,
+      rgba(0,0,0,.22)    100%
+    );
+
+  /* makes the highlight pop over gradients without washing color */
+  mix-blend-mode: screen;
+  opacity: 0.9;
+}
+
+/* Enhanced glow on the cell itself - combines bevel with intense Block Blast-style glow */
+.board .cell.filled.about-to-clear,
+#classicBoard .cell.filled.about-to-clear{
+  /* Bright white outline that complements the ::after glow */
+  outline: .5px solid rgba(255, 255, 255, 0.98);
+  outline-offset: -1px;       /* hugs the tile edge */
+  
+  /* Combine bevel inset shadows (from normal filled cells) with intense Block Blast glow */
+  box-shadow:
+    /* Bevel shadows - same as normal filled cells (preserves 3D look) */
+    0 0 1px rgba(255, 255, 255, 0.35),
+    inset 0 2px 0 rgba(255, 255, 255, 0.60),
+    inset 0 -3px 0 rgba(0, 0, 0, 0.35),
+    /* Intense Block Blast-style glow - bright white core + large colored halo */
+    /* Multiple layers create that "bloomy" soft beam effect */
+    0 0 2px rgba(255, 255, 255, 1.0),
+    0 0 5px rgba(255, 255, 255, 0.96),
+    0 0 10px rgba(255, 255, 255, 0.90),
+    0 0 16px rgba(255, 255, 255, 0.82),
+    /* Colored outer halo - creates the soft beam along the row/column */
+    0 0 22px var(--about-glow, rgba(255, 255, 255, 0.75)),
+    0 0 32px var(--about-glow, rgba(255, 255, 255, 0.65)),
+    0 0 46px var(--about-glow, rgba(255, 255, 255, 0.50)),
+    0 0 64px var(--about-glow, rgba(255, 255, 255, 0.35));
+
+  /* Brighten and enhance the tile itself for that "lit up" Block Blast effect */
+  filter: brightness(1.3) saturate(1.2);
 }
 /* Force an explicit width even inside a flex row */
 #homeOfflineBtn{
