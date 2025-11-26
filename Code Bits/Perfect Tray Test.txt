@@ -1,0 +1,5 @@
+window.DEBUG_PERFECT_TRAY = true
+
+or
+
+console.log('Watching for trays...')
