@@ -240,7 +240,7 @@ function uiPiecePlaced(cells){ if(cells>0){ floatPoints('+'+cells); pulseScore()
 function uiLinesCleared(lines, bonus){ if(lines<=0) return; const label=(lines===1?'Line':'Lines'); floatPoints(`${lines} ${label}! +${bonus}`); pulseScore(); }
 
 function setBoardDimensions(cols,rows){ width=cols;height=rows; window.$('board').style.setProperty('--cols', String(cols)); }
-function hideAll(){['home','game'].forEach(x=>window.$(x).classList.add('hidden'))}
+function hideAll(){['home','game','screen-classic-grid'].forEach(x=>{const el=window.$(x);if(el)el.classList.add('hidden');})}
 function showHome(){ tStop(); if(typeof startDemo === 'function') startDemo(); hideAll(); window.$('home').classList.remove('hidden'); clearTetrisOverrides(); }
 function toggleTheme(){ document.body.classList.toggle('light') }
 
@@ -260,6 +260,16 @@ function startMode(mode){
   }
   if (mode==='tetris'){
     clearTetrisOverrides();
+    // Restore board and game visibility (may have been hidden by Classic mode)
+    const board = window.$('board');
+    const game = window.$('game');
+    if (board) {
+      board.classList.remove('hidden');
+      board.style.display = '';
+    }
+    if (game) {
+      game.style.display = '';
+    }
     setBoardDimensions(10,20);
     resetGame(); tStart(); sizePreviewLayer();
     window.$('boardWrap').classList.add('tetris');

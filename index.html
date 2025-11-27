@@ -158,6 +158,147 @@ font-weight: bold;
    this prevents the container from moving (only the SVG moves). */
 #homeSettingsBtn:active{ transform: none !important; }
 
+/* Settings button for game screens (Classic & Tetris) */
+.game-settings-btn {
+  position: fixed !important;
+  z-index: 2000;
+  top: max(env(safe-area-inset-top), 10px) !important;
+  right: max(env(safe-area-inset-right), 10px) !important;
+  background: transparent !important;
+  border: none !important;
+  padding: 8px;
+  cursor: pointer;
+  opacity: 0.8;
+  transition: opacity 0.2s;
+}
+.game-settings-btn:hover {
+  opacity: 1;
+}
+.game-settings-btn img {
+  width: 36px;
+  height: 36px;
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));
+}
+
+/* ===== SETTINGS MODAL ===== */
+.settings-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.settings-modal.hidden {
+  display: none;
+}
+.settings-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(4px);
+}
+.settings-box {
+  position: relative;
+  background: linear-gradient(145deg, #1a1a2e, #16213e);
+  border: 2px solid rgba(255, 255, 255, 0.15);
+  border-radius: 16px;
+  padding: 24px 32px;
+  min-width: 280px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5), 0 0 60px rgba(0, 200, 255, 0.1);
+}
+.settings-box h2 {
+  margin: 0 0 20px 0;
+  text-align: center;
+  font-size: 1.5rem;
+  color: #fff;
+  text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+}
+.settings-game-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+.settings-game-buttons.hidden {
+  display: none;
+}
+.settings-game-buttons button {
+  padding: 12px 24px;
+  font-size: 1rem;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  background: linear-gradient(145deg, #2d4a7c, #1e3a5f);
+  color: #fff;
+  transition: transform 0.1s, box-shadow 0.2s;
+}
+.settings-game-buttons button:hover {
+  box-shadow: 0 0 15px rgba(0, 200, 255, 0.4);
+}
+.settings-game-buttons button:active {
+  transform: scale(0.97);
+}
+.settings-divider {
+  height: 1px;
+  background: rgba(255, 255, 255, 0.15);
+  margin: 8px 0;
+}
+.settings-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+.settings-row:last-of-type {
+  border-bottom: none;
+}
+.settings-row span {
+  color: #ccc;
+  font-size: 1rem;
+}
+.settings-row button {
+  padding: 8px 16px;
+  font-size: 0.9rem;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+  transition: background 0.2s;
+}
+.settings-row button:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+.settings-row button.icon-toggle {
+  padding: 6px;
+  background: transparent;
+}
+.settings-row button.icon-toggle img {
+  display: block;
+  opacity: 0.9;
+}
+.settings-row button.icon-toggle.off img {
+  opacity: 0.4;
+}
+.settings-close {
+  display: block;
+  width: 100%;
+  margin-top: 20px;
+  padding: 12px;
+  font-size: 1rem;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+  transition: background 0.2s;
+}
+.settings-close:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
 
 
 
@@ -1389,7 +1530,7 @@ html, body {
 #classicGridWrap { 
   align-self: center;           /* start | center | end */
   justify-self: center;         /* start | center | end */
-  transform: translate(0, 40px);  /* X, Y â€” e.g., up 24px */
+  transform: translate(0, -25px);  /* X, Y â€” e.g., up 24px */
 }
 
 /* Examples:
@@ -1553,20 +1694,19 @@ body.classic-mode #tetrisControls {
 /* ===== FLOATING POINT POPUP ===== */
 .classic-popup {
   font-family: inherit;
-  font-size: 1.8rem;
+  font-size: 2rem;
   font-weight: 700;
   color: #fff;
   text-shadow: 
     0 0 8px rgba(255, 255, 255, 0.8),
     0 0 16px rgba(255, 200, 50, 0.6),
     0 2px 4px rgba(0, 0, 0, 0.5);
-  animation: popupFloat 1s ease-out forwards;
   pointer-events: none;
   white-space: nowrap;
 }
 
 .classic-popup.combo {
-  font-size: 1.5rem;
+  font-size: 1.6rem;
   color: #ffcc00;
   text-shadow: 
     0 0 10px rgba(255, 200, 0, 0.9),
@@ -1575,26 +1715,12 @@ body.classic-mode #tetrisControls {
 }
 
 .classic-popup.full-clear {
-  font-size: 2.2rem;
+  font-size: 2.4rem;
   color: #00ffcc;
   text-shadow: 
     0 0 12px rgba(0, 255, 200, 0.9),
     0 0 24px rgba(0, 200, 255, 0.7),
     0 2px 4px rgba(0, 0, 0, 0.5);
-}
-
-@keyframes popupFloat {
-  0% {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
-  20% {
-    transform: translateY(-10px) scale(1.1);
-  }
-  100% {
-    opacity: 0;
-    transform: translateY(-50px) scale(0.9);
-  }
 }
 </style>
 </head>
@@ -1657,6 +1783,43 @@ body.classic-mode #tetrisControls {
   <button onclick="goHome()">Home</button>
 </div>
 
+<!-- Settings Modal -->
+<div id="settingsModal" class="settings-modal hidden">
+  <div class="settings-backdrop" onclick="closeSettings()"></div>
+  <div class="settings-box">
+    <h2>Settings</h2>
+    
+    <!-- Game-only buttons (shown only in Classic/Tetris) -->
+    <div id="settingsGameButtons" class="settings-game-buttons hidden">
+      <button onclick="restartFromSettings()">Restart</button>
+      <button onclick="homeFromSettings()">Home</button>
+      <div class="settings-divider"></div>
+    </div>
+    
+    <!-- Always visible options -->
+    <div class="settings-row">
+      <span>Theme</span>
+      <button id="settingsThemeBtn" onclick="toggleThemeFromSettings()">Dark</button>
+    </div>
+    
+    <div class="settings-row">
+      <span>Sound</span>
+      <button id="settingsSoundBtn" onclick="toggleSound()" class="icon-toggle">
+        <img src="icons/sound-on.png" alt="Sound" width="28" height="28" />
+      </button>
+    </div>
+    
+    <div class="settings-row">
+      <span>Music</span>
+      <button id="settingsMusicBtn" onclick="toggleMusic()" class="icon-toggle">
+        <img src="icons/music-on.png" alt="Music" width="28" height="28" />
+      </button>
+    </div>
+    
+    <button class="settings-close" onclick="closeSettings()">Close</button>
+  </div>
+</div>
+
 <div id="backMenu" class="hidden">
   <h2>Pause</h2>
   <button onclick="(hideBackMenu(),goHome())">Home</button>
@@ -1667,6 +1830,11 @@ body.classic-mode #tetrisControls {
 
 <!-- Game -->
 <div id="game" class="app center hidden">
+  <!-- Settings button for Tetris -->
+  <button class="game-settings-btn" onclick="openSettings()" aria-label="Settings" title="Settings">
+    <img src="icons/settings.png" alt="" width="40" height="40" draggable="false" />
+  </button>
+  
   <div id="score">0</div>
   <div id="hudLayer">
     <div id="comboBanner">Combo x1.00</div>
@@ -1682,6 +1850,11 @@ body.classic-mode #tetrisControls {
 </div>
 <!-- Classic grid-only screen -->
 <div id="screen-classic-grid" class="app hidden">
+  <!-- Settings button -->
+  <button class="game-settings-btn" onclick="openSettings()" aria-label="Settings" title="Settings">
+    <img src="icons/settings.png" alt="" width="40" height="40" draggable="false" />
+  </button>
+  
   <!-- Score display above the board -->
   <div id="classicScoreDisplay">0</div>
   
@@ -1791,8 +1964,132 @@ body.classic-mode #tetrisControls {
 <!-- Put this just above </body> -->
 <script>
   // Make sure a global function exists for the Settings button
-  window.openSettings = window.openSettings || function () {
-    alert('6 7');
+  // Settings modal state
+  let soundEnabled = true;
+  let musicEnabled = true;
+  
+  window.openSettings = function() {
+    const modal = document.getElementById('settingsModal');
+    const gameButtons = document.getElementById('settingsGameButtons');
+    if (!modal) return;
+    
+    // Show game buttons only if in Classic or Tetris mode
+    const inClassic = !document.getElementById('screen-classic-grid')?.classList.contains('hidden');
+    const inTetris = !document.getElementById('game')?.classList.contains('hidden') && 
+                     document.getElementById('board')?.style.display !== 'none';
+    
+    if (gameButtons) {
+      if (inClassic || inTetris) {
+        gameButtons.classList.remove('hidden');
+      } else {
+        gameButtons.classList.add('hidden');
+      }
+    }
+    
+    // Update theme button text
+    const themeBtn = document.getElementById('settingsThemeBtn');
+    if (themeBtn) {
+      themeBtn.textContent = document.body.classList.contains('light') ? 'Light' : 'Dark';
+    }
+    
+    modal.classList.remove('hidden');
+  };
+  
+  window.closeSettings = function() {
+    const modal = document.getElementById('settingsModal');
+    if (modal) modal.classList.add('hidden');
+  };
+  
+  window.restartFromSettings = function() {
+    closeSettings();
+    // Check which mode is active and restart
+    const inClassic = !document.getElementById('screen-classic-grid')?.classList.contains('hidden');
+    if (inClassic) {
+      // Reset classic board
+      if (window.resetClassicScore) window.resetClassicScore();
+      const board = document.getElementById('classicBoard');
+      if (board) {
+        board.querySelectorAll('.cell').forEach(c => {
+          c.classList.remove('filled', 'preview', 'hover-ok', 'hover-bad', 'clearing');
+          c.style.removeProperty('--fill');
+          c.style.removeProperty('--stroke');
+          c.style.removeProperty('--glow');
+        });
+      }
+      if (window.refillTrayClassic) window.refillTrayClassic();
+    } else {
+      // Tetris restart
+      if (typeof retryGame === 'function') retryGame();
+    }
+  };
+  
+  window.homeFromSettings = function() {
+    closeSettings();
+    
+    // Check if we're in Classic mode
+    const classicScreen = document.getElementById('screen-classic-grid');
+    const inClassic = classicScreen && !classicScreen.classList.contains('hidden');
+    
+    if (inClassic) {
+      // Hide Classic screen
+      classicScreen.classList.add('hidden');
+      classicScreen.style.display = 'none';
+      
+      // Also hide game screen if visible
+      const gameScreen = document.getElementById('game');
+      if (gameScreen) {
+        gameScreen.classList.add('hidden');
+        gameScreen.style.display = 'none';
+      }
+      
+      // Restore Tetris board visibility (it was hidden when Classic started)
+      const tetrisBoard = document.getElementById('board');
+      if (tetrisBoard) {
+        tetrisBoard.classList.remove('hidden');
+        tetrisBoard.style.display = '';
+      }
+      
+      // Show home screen
+      const homeScreen = document.getElementById('home');
+      if (homeScreen) {
+        homeScreen.classList.remove('hidden');
+        homeScreen.style.display = 'block';
+      }
+      
+      // Start demo if available
+      if (typeof startDemo === 'function') startDemo();
+    } else {
+      // Tetris mode - use existing goHome
+      if (typeof goHome === 'function') goHome();
+    }
+  };
+  
+  window.toggleThemeFromSettings = function() {
+    document.body.classList.toggle('light');
+    const themeBtn = document.getElementById('settingsThemeBtn');
+    if (themeBtn) {
+      themeBtn.textContent = document.body.classList.contains('light') ? 'Light' : 'Dark';
+    }
+  };
+  
+  window.toggleSound = function() {
+    soundEnabled = !soundEnabled;
+    const btn = document.getElementById('settingsSoundBtn');
+    if (btn) {
+      btn.classList.toggle('off', !soundEnabled);
+      const img = btn.querySelector('img');
+      if (img) img.src = soundEnabled ? 'icons/sound-on.png' : 'icons/sound-off.png';
+    }
+  };
+  
+  window.toggleMusic = function() {
+    musicEnabled = !musicEnabled;
+    const btn = document.getElementById('settingsMusicBtn');
+    if (btn) {
+      btn.classList.toggle('off', !musicEnabled);
+      const img = btn.querySelector('img');
+      if (img) img.src = musicEnabled ? 'icons/music-on.png' : 'icons/music-off.png';
+    }
   };
 </script>
 <script>

@@ -919,10 +919,11 @@ const gyUp = ((e.clientY - fingerOffset) - startYUp) / stepUp;
     scoreAnimationId = requestAnimationFrame(animate);
   }
   
-  // Show floating popup for points/combo
+  // Show floating popup that flies to score
   function showPopup(text, type = 'points') {
-    const container = document.getElementById('classicPopupContainer');
-    if (!container) return;
+    const scoreEl = document.getElementById('classicScoreDisplay');
+    const board = document.getElementById('classicBoard');
+    if (!scoreEl || !board) return;
     
     const popup = document.createElement('div');
     popup.className = 'classic-popup';
@@ -930,11 +931,42 @@ const gyUp = ((e.clientY - fingerOffset) - startYUp) / stepUp;
     if (type === 'full-clear') popup.classList.add('full-clear');
     popup.textContent = text;
     
-    container.appendChild(popup);
+    // Position between row 1 and row 2 (about 1.5 rows from top), centered horizontally
+    const boardRect = board.getBoundingClientRect();
+    const scoreRect = scoreEl.getBoundingClientRect();
+    const rowHeight = boardRect.height / 8; // 8 rows
     
-    // Remove after animation
-    setTimeout(() => popup.remove(), 1000);
+    popup.style.position = 'fixed';
+    popup.style.left = (boardRect.left + boardRect.width / 2) + 'px';
+    popup.style.top = (boardRect.top + rowHeight * 1.5) + 'px'; // Between row 1 and 2
+    popup.style.transform = 'translate(-50%, -50%)';
+    popup.style.zIndex = '2000';
+    popup.style.pointerEvents = 'none';
+    
+    document.body.appendChild(popup);
+    
+    // Calculate target position (score element)
+    const targetX = scoreRect.left + scoreRect.width / 2;
+    const targetY = scoreRect.top + scoreRect.height / 2;
+    
+    // Wait a moment, then animate flying to score
+    setTimeout(() => {
+      popup.style.transition = 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)';
+      popup.style.left = targetX + 'px';
+      popup.style.top = targetY + 'px';
+      popup.style.transform = 'translate(-50%, -50%) scale(0.5)';
+      popup.style.opacity = '0.7';
+    }, 400); // Stay visible for 400ms before flying
+    
+    // Update score when popup reaches target, then remove
+    setTimeout(() => {
+      updateScoreDisplay();
+      popup.remove();
+    }, 700); // 400ms wait + 300ms fly
   }
+  
+  // Delayed score update - score updates when popup hits
+  let pendingScoreUpdate = false;
   
   // Calculate line clear points: 24 * (4 ^ (linesCleared - 1))
   function calculateLinePoints(linesCleared) {
@@ -955,6 +987,7 @@ const gyUp = ((e.clientY - fingerOffset) - startYUp) / stepUp;
     
     // Add piece placement points (base points = number of squares)
     gameState.score += pieceSquares;
+    // Immediate update for piece points (no popup)
     updateScoreDisplay();
   }
   
@@ -968,16 +1001,15 @@ const gyUp = ((e.clientY - fingerOffset) - startYUp) / stepUp;
     const comboMultiplier = getComboMultiplier();
     const totalLinePoints = linePoints * comboMultiplier;
     
-    // Add line clear points to score
+    // Add line clear points to score (display updates when popup hits)
     gameState.score += totalLinePoints;
-    updateScoreDisplay();
     
-    // Show points popup
+    // Show points popup - score updates when it reaches the score display
     showPopup(`+${totalLinePoints.toLocaleString()}`);
     
     // Show combo popup if applicable
     if (comboMultiplier >= 3) {
-      setTimeout(() => showPopup(`Combo x${comboMultiplier}`, 'combo'), 150);
+      setTimeout(() => showPopup(`Combo x${comboMultiplier}`, 'combo'), 400);
     }
     
     return totalLinePoints;
@@ -989,9 +1021,8 @@ const gyUp = ((e.clientY - fingerOffset) - startYUp) / stepUp;
     // Full board clear bonus = 5x the line points with combo
     const fullClearBonus = linePointsWithCombo * 5;
     gameState.score += fullClearBonus;
-    updateScoreDisplay();
     
-    // Show full clear popup
+    // Show full clear popup - score updates when it reaches the score display
     setTimeout(() => showPopup(`PERFECT! +${fullClearBonus.toLocaleString()}`, 'full-clear'), 300);
     
     return fullClearBonus;
@@ -2993,35 +3024,35 @@ const gyUp = ((e.clientY - fingerOffset) - startYUp) / stepUp;
     // Keep re-rolling until both guarantees are met (unless we have a perfect tray or good tray)
     while (attempts < MAX_ATTEMPTS && !specialTrayShapes) {
       attempts++;
-      let hasPlayable = false;
+    let hasPlayable = false;
       shapesForSlots = new Array(slots.length).fill(null);
 
       // First pass: pick shapes for empty slots only
-      slots.forEach((slot, i) => {
-        if (slot.firstElementChild && slot.querySelector('.bfmini-piece')) return;
+    slots.forEach((slot, i) => {
+      if (slot.firstElementChild && slot.querySelector('.bfmini-piece')) return;
 
-        const shape = window.weightedRandomShape();
-        shapesForSlots[i] = shape;
+      const shape = window.weightedRandomShape();
+      shapesForSlots[i] = shape;
 
-        if (enforceGuarantee && !hasPlayable && shapeCanFitAnywhere(shape)) {
+      if (enforceGuarantee && !hasPlayable && shapeCanFitAnywhere(shape)) {
+        hasPlayable = true;
+      }
+    });
+
+    // If we're doing a full refill and none of the chosen shapes can fit, force one that can.
+    if (enforceGuarantee && !hasPlayable) {
+      const allShapes = Array.isArray(window.SHAPES) ? window.SHAPES : [];
+      const playable = allShapes.filter(s => shapeCanFitAnywhere(s));
+
+      if (playable.length){
+        // Put a guaranteed-playable shape into the first empty slot
+        for (let i = 0; i < slots.length; i++){
+          const slot = slots[i];
+          if (slot.firstElementChild && slot.querySelector('.bfmini-piece')) continue;
+          shapesForSlots[i] = playable[(Math.random()*playable.length)|0];
           hasPlayable = true;
+          break;
         }
-      });
-
-      // If we're doing a full refill and none of the chosen shapes can fit, force one that can.
-      if (enforceGuarantee && !hasPlayable) {
-        const allShapes = Array.isArray(window.SHAPES) ? window.SHAPES : [];
-        const playable = allShapes.filter(s => shapeCanFitAnywhere(s));
-
-        if (playable.length){
-          // Put a guaranteed-playable shape into the first empty slot
-          for (let i = 0; i < slots.length; i++){
-            const slot = slots[i];
-            if (slot.firstElementChild && slot.querySelector('.bfmini-piece')) continue;
-            shapesForSlots[i] = playable[(Math.random()*playable.length)|0];
-            hasPlayable = true;
-            break;
-          }
         } else {
           // Board is completely dead - no shapes can fit anywhere
           // Can't guarantee anything, so break and use whatever we got

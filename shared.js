@@ -488,6 +488,4 @@ window.hide = function hide(el){
 })();
 
 // ---------- Settings button (placeholder) ----------
-window.openSettings = window.openSettings || function () {
-  alert('6 7');
-};
+// openSettings is now defined in index.html with full modal functionality
