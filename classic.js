@@ -51,8 +51,51 @@ window.openClassicGrid = function () {
     classic.setAttribute('aria-hidden','false');
     classic.style.setProperty('display', 'grid', 'important'); // Classic screen uses grid layout, override !important from .hidden
     
-    // Ensure the board has cells (in case initialization didn't run or screen was hidden)
+    // Clear the board first (in case there's leftover state from previous game)
     const board = document.getElementById('classicBoard');
+    if (board) {
+      const cells = Array.from(board.querySelectorAll('.cell'));
+      cells.forEach(cell => {
+        cell.classList.remove('filled', 'preview', 'hover-ok', 'hover-bad', 'clearing', 'about-to-clear');
+        cell.style.removeProperty('--fill');
+        cell.style.removeProperty('--stroke');
+        cell.style.removeProperty('--glow');
+        cell.style.removeProperty('--glow-inset');
+        cell.style.removeProperty('filter');
+        cell.style.removeProperty('box-shadow');
+        cell.style.removeProperty('transition');
+        cell.style.removeProperty('animation');
+        cell.style.removeProperty('transform');
+      });
+      
+      // Reset color system to ensure fresh, bright colors
+      // Access the colorQueue from the closure if possible, or reset the index
+      if (window.safeNextColor && typeof window.safeNextColor === 'function') {
+        window.safeNextColor._i = 0;
+      }
+      // Try to reset nextColor's internal queue by calling it until it resets
+      if (window.nextColor && typeof window.nextColor === 'function') {
+        // Force a fresh shuffle by accessing the queue
+        // Since colorQueue is in a closure, we can't directly reset it,
+        // but calling nextColor enough times will trigger a reshuffle
+        // Actually, let's just ensure we get fresh colors by resetting the index
+      }
+    }
+    
+    // Clear the tray to ensure fresh pieces are generated
+    const classicTray = document.getElementById('bfTrayClassic');
+    if (classicTray) {
+      // CRITICAL: Reset tray opacity to 1 (might be 0.5 from previous game over)
+      classicTray.style.setProperty('opacity', '1', 'important');
+      classicTray.style.pointerEvents = ''; // Re-enable interactions
+      classicTray.querySelectorAll('.bfmini-piece').forEach(p => p.remove());
+      // Also clear slot contents
+      classicTray.querySelectorAll('.slot').forEach(slot => {
+        slot.innerHTML = '';
+      });
+    }
+    
+    // Ensure the board has cells (in case initialization didn't run or screen was hidden)
     if (board && board.querySelectorAll('.cell').length === 0) {
       // Board is empty, create cells
       const COLS = 8;
@@ -80,14 +123,406 @@ window.openClassicGrid = function () {
     if (window.initClassicDnD) {
       window.initClassicDnD();
     }
-    // Also ensure tray is refilled
+    // Always refill tray when opening classic (ensures 3 pieces)
     const classicTray = document.getElementById('bfTrayClassic');
-    if (classicTray && classicTray.querySelectorAll('.bfmini-piece').length === 0) {
-      if (window.refillTrayClassic) {
-        window.refillTrayClassic();
-      }
+    if (classicTray) {
+      // Clear any existing pieces first
+      classicTray.querySelectorAll('.bfmini-piece').forEach(p => p.remove());
+      classicTray.querySelectorAll('.slot').forEach(slot => {
+        slot.innerHTML = '';
+      });
+      // Then refill (with a small delay to ensure DOM is ready)
+      setTimeout(() => {
+        if (window.refillTrayClassic) {
+          window.refillTrayClassic();
+        }
+      }, 50);
     }
+    
+    // Trigger entry animation (same as Tetris)
+    // Wait a bit longer to ensure screen is visible and cells are rendered
+    setTimeout(() => {
+      const board = document.getElementById('classicBoard');
+      if (board) {
+        const cells = Array.from(board.querySelectorAll('.cell'));
+        if (cells.length > 0) {
+          // Ensure cells are visible before animating
+          cells.forEach(cell => {
+            if (getComputedStyle(cell).display === 'none') {
+              cell.style.display = '';
+            }
+            // Reset transform to ensure animation starts from correct state
+            cell.style.transform = '';
+            // Force a reflow to ensure styles are applied
+            void cell.offsetHeight;
+          });
+          // Trigger animation
+          classicBoardWave('in', cells);
+        }
+      }
+    }, 150);
   }, 0);
+};
+
+// Classic board wave animation (same as Tetris entry animation with enhanced jump)
+// Only animates empty cells (not filled ones)
+function classicBoardWave(type, cells) {
+  if (!cells || cells.length === 0) {
+    console.warn('classicBoardWave: No cells provided');
+    return;
+  }
+  
+  // Filter to only empty cells (not filled)
+  const emptyCells = cells.filter(cell => !cell.classList.contains('filled'));
+  
+  if (emptyCells.length === 0) {
+    console.warn('classicBoardWave: No empty cells found');
+    return;
+  }
+  
+  const COLS = 8;
+  const ROWS = 8;
+  const base = type === 'out' ? 520 : 420;
+  const step = 38;
+  const waveInDuration = 420; // ms
+  const jumpOffset = type === 'in' ? waveInDuration + 50 : 100; // Start jump after waveIn completes
+  const secondJumpOffset = type === 'in' ? waveInDuration + 350 : 200; // Second jump after first completes
+  
+  // Ensure cells are visible and reset any existing animations
+  emptyCells.forEach((cell) => {
+    // Get cell position from dataset or calculate from index
+    const r = parseInt(cell.dataset.r) || 0;
+    const c = parseInt(cell.dataset.c) || 0;
+    const d = (c + r) * step;
+    
+    // Reset animation and transform to ensure clean start
+    cell.style.animation = 'none';
+    cell.style.transform = '';
+    cell.style.opacity = '';
+    // Force reflow to ensure reset takes effect
+    void cell.offsetHeight;
+    
+    if (type === 'in') {
+      // Wave in, then jump out with 1.4 scale (matching game over)
+      // Use a more visible jump animation that's easier to see
+      const animString = `waveIn .42s ease both ${d}ms, classicEntryJump .4s ease both ${d + jumpOffset}ms`;
+      // Set will-change for better animation performance
+      cell.style.willChange = 'transform, opacity';
+      cell.style.animation = animString;
+      // Debug: log first cell's animation
+      if (emptyCells.indexOf(cell) === 0) {
+        console.log('First cell animation:', animString, 'Delay:', d, 'Jump offset:', d + jumpOffset);
+      }
+    } else {
+      cell.style.willChange = 'transform, opacity';
+      cell.style.animation = `waveOut .52s ease both ${d}ms, jumpOutClassic .3s ease both ${d + jumpOffset}ms`;
+    }
+  });
+  
+  const total = (COLS + ROWS) * step + base + secondJumpOffset + 260;
+  return new Promise(res => {
+    setTimeout(() => {
+      emptyCells.forEach(c => c.style.animation = '');
+      res();
+    }, total);
+  });
+}
+
+  // Check piece container styles (not just cells)
+  window.comparePieceContainers = function() {
+    const tray = document.getElementById('bfTrayClassic');
+    if (!tray) return;
+    
+    const pieces = Array.from(tray.querySelectorAll('.bfmini-piece'));
+    console.log('=== PIECE CONTAINER COMPARISON ===\n');
+    
+    pieces.forEach((piece, i) => {
+      const computed = getComputedStyle(piece);
+      const firstCell = piece.querySelector('.cell');
+      const cellComputed = firstCell ? getComputedStyle(firstCell) : null;
+      
+      // Try to get ::before pseudo-element styles
+      let beforeOpacity = 'N/A';
+      let beforeMixBlend = 'N/A';
+      if (firstCell) {
+        try {
+          const beforeStyles = window.getComputedStyle(firstCell, '::before');
+          beforeOpacity = beforeStyles.opacity;
+          beforeMixBlend = beforeStyles.mixBlendMode;
+        } catch(e) {
+          // Pseudo-element access might not work in all browsers
+        }
+      }
+      
+      console.log(`\nPiece ${i + 1} CONTAINER:`, {
+        'piece.opacity': computed.opacity,
+        'piece.filter': computed.filter,
+        'piece.hasDragging': piece.classList.contains('dragging'),
+        'piece.style.opacity': piece.style.opacity || 'not set',
+        'piece.style.filter': piece.style.filter || 'not set',
+        'cell.opacity': cellComputed ? cellComputed.opacity : 'no cell',
+        'cell.filter': cellComputed ? cellComputed.filter : 'no cell',
+        'cell.background': cellComputed ? cellComputed.background.substring(0, 80) : 'no cell',
+        'cell::before opacity': beforeOpacity,
+        'cell::before mixBlendMode': beforeMixBlend,
+        'cell.style.background': firstCell ? firstCell.style.background || 'not set' : 'no cell',
+        'cell.style.opacity': firstCell ? firstCell.style.opacity || 'not set' : 'no cell',
+      });
+      
+      // Also check if parent has any styles
+      const parent = piece.parentElement;
+      if (parent) {
+        const parentComputed = getComputedStyle(parent);
+        console.log(`  Parent (${parent.tagName}.${parent.className}):`, {
+          opacity: parentComputed.opacity,
+          filter: parentComputed.filter,
+        });
+      }
+      
+      // Check all ancestors for opacity/filter
+      let ancestor = parent;
+      let depth = 0;
+      while (ancestor && depth < 3) {
+        const ancComputed = getComputedStyle(ancestor);
+        if (ancComputed.opacity !== '1' || ancComputed.filter !== 'none') {
+          console.log(`  ⚠️ Ancestor at depth ${depth} (${ancestor.tagName}.${ancestor.className}):`, {
+            opacity: ancComputed.opacity,
+            filter: ancComputed.filter,
+          });
+        }
+        ancestor = ancestor.parentElement;
+        depth++;
+      }
+    });
+  };
+  
+  // Check cell computed styles to see what's different
+  window.compareCellStyles = function() {
+    const tray = document.getElementById('bfTrayClassic');
+    if (!tray) return;
+    
+    const pieces = Array.from(tray.querySelectorAll('.bfmini-piece'));
+    console.log('=== CELL STYLE COMPARISON ===\n');
+    
+    pieces.forEach((piece, i) => {
+      const cells = Array.from(piece.querySelectorAll('.cell'));
+      console.log(`\nPiece ${i + 1} (${cells.length} cells):`);
+      
+      cells.forEach((cell, j) => {
+        const computed = getComputedStyle(cell);
+        console.log(`  Cell ${j + 1}:`, {
+          opacity: computed.opacity,
+          filter: computed.filter,
+          background: computed.background.substring(0, 60) + '...',
+          '--fill': cell.style.getPropertyValue('--fill') || 'not set',
+          hasPreview: cell.classList.contains('preview'),
+          hasHoverOk: cell.classList.contains('hover-ok'),
+          mixBlendMode: computed.mixBlendMode,
+          brightness: computed.filter.includes('brightness') ? computed.filter : 'none'
+        });
+      });
+    });
+  };
+  
+  // Comprehensive troubleshooting function for color issues
+  window.troubleshootClassicColors = function() {
+    console.log('=== CLASSIC COLOR TROUBLESHOOTING ===\n');
+    
+    const tray = document.getElementById('bfTrayClassic');
+    if (!tray) {
+      console.error('❌ Tray not found');
+      return;
+    }
+    
+    const pieces = Array.from(tray.querySelectorAll('.bfmini-piece'));
+    const palette = window.PALETTE || [];
+    
+    console.log(`Found ${pieces.length} pieces in tray\n`);
+    
+    // Check color queue state
+    console.log('--- COLOR QUEUE STATE ---');
+    if (window.safeNextColor && typeof window.safeNextColor._i === 'number') {
+      console.log(`safeNextColor._i: ${window.safeNextColor._i}`);
+    } else {
+      console.log('⚠️ safeNextColor._i not found or not a number');
+    }
+    
+    if (window.colorQueue) {
+      console.log(`colorQueue length: ${window.colorQueue.length}`);
+      if (window.colorQueue.length > 0) {
+        console.log('colorQueue colors:', window.colorQueue.map(c => c.fill));
+      }
+    } else {
+      console.log('⚠️ window.colorQueue not accessible (likely in closure)');
+    }
+    
+    console.log('\n--- PALETTE COLORS ---');
+    palette.forEach((p, i) => {
+      console.log(`  ${i}: ${p.fill} (stroke: ${p.stroke})`);
+    });
+    
+    console.log('\n--- PIECE ANALYSIS ---');
+    pieces.forEach((piece, i) => {
+      const datasetFill = piece.dataset.fill;
+      const styleFill = piece.style.getPropertyValue('--fill');
+      const firstCell = piece.querySelector('.cell');
+      const cellStyleFill = firstCell ? firstCell.style.getPropertyValue('--fill') : 'none';
+      const computed = getComputedStyle(piece);
+      const cellComputed = firstCell ? getComputedStyle(firstCell) : null;
+      
+      // Check for opacity/filter issues
+      const pieceOpacity = computed.opacity;
+      const pieceFilter = computed.filter;
+      const cellOpacity = cellComputed ? cellComputed.opacity : 'N/A';
+      const cellFilter = cellComputed ? cellComputed.filter : 'N/A';
+      const cellBg = cellComputed ? cellComputed.background : 'N/A';
+      
+      // Find matching palette color
+      const matchingPalette = palette.find(p => 
+        p.fill === datasetFill || 
+        p.fill === styleFill || 
+        p.fill === cellStyleFill
+      );
+      
+      // Check if it looks like a preview color (darker/less saturated)
+      const isDark = pieceOpacity < 1 || pieceFilter !== 'none' || cellOpacity < 1;
+      
+      console.log(`\nPiece ${i + 1}:`);
+      console.log(`  dataset.fill: ${datasetFill || 'MISSING'}`);
+      console.log(`  style --fill: ${styleFill || 'MISSING'}`);
+      console.log(`  cell --fill: ${cellStyleFill || 'MISSING'}`);
+      console.log(`  matches palette: ${matchingPalette ? '✅ YES' : '❌ NO'}`);
+      if (matchingPalette) {
+        console.log(`  palette index: ${palette.indexOf(matchingPalette)}`);
+      }
+      console.log(`  piece opacity: ${pieceOpacity} ${pieceOpacity < 1 ? '⚠️ LOW' : '✅'}`);
+      console.log(`  piece filter: ${pieceFilter} ${pieceFilter !== 'none' ? '⚠️ APPLIED' : '✅'}`);
+      console.log(`  cell opacity: ${cellOpacity} ${cellOpacity < 1 ? '⚠️ LOW' : '✅'}`);
+      console.log(`  cell filter: ${cellFilter} ${cellFilter !== 'none' ? '⚠️ APPLIED' : '✅'}`);
+      console.log(`  cell background: ${cellBg.substring(0, 60)}...`);
+      
+      if (isDark) {
+        console.log(`  ⚠️ WARNING: Piece appears darker (opacity/filter issue)`);
+      }
+    });
+    
+    // Test what safeNextColor returns next
+    console.log('\n--- TESTING safeNextColor() ---');
+    const testColors = [];
+    for (let i = 0; i < 3; i++) {
+      const c = window.safeNextColor ? window.safeNextColor() : null;
+      testColors.push(c);
+      console.log(`  Call ${i + 1}: ${c ? c.fill : 'null'}`);
+    }
+    
+    // Check if test colors match palette
+    console.log('\n--- COLOR MATCHING ---');
+    testColors.forEach((testColor, i) => {
+      if (!testColor) {
+        console.log(`  Test ${i + 1}: ❌ null`);
+        return;
+      }
+      const inPalette = palette.some(p => p.fill === testColor.fill);
+      console.log(`  Test ${i + 1}: ${inPalette ? '✅' : '❌'} ${testColor.fill}`);
+    });
+    
+    console.log('\n=== END TROUBLESHOOTING ===');
+  };
+  
+  // Debug function to compare colors
+  window.compareClassicColors = function() {
+    const tray = document.getElementById('bfTrayClassic');
+    if (!tray) return;
+    
+    const pieces = Array.from(tray.querySelectorAll('.bfmini-piece'));
+    const palette = window.PALETTE || [];
+    
+    console.log('=== COLOR COMPARISON ===');
+    pieces.forEach((piece, i) => {
+      const datasetFill = piece.dataset.fill;
+      const styleFill = piece.style.getPropertyValue('--fill');
+      const firstCell = piece.querySelector('.cell');
+      const cellFill = firstCell ? firstCell.style.getPropertyValue('--fill') : 'none';
+      const computedBg = firstCell ? getComputedStyle(firstCell).background : 'none';
+      
+      // Find matching palette color
+      const matchingPalette = palette.find(p => p.fill === datasetFill || p.fill === styleFill);
+      
+      console.log(`Piece ${i + 1}:`, {
+        datasetFill,
+        styleFill,
+        cellFill,
+        computedBg: computedBg.substring(0, 50) + '...',
+        matchesPalette: !!matchingPalette,
+        paletteIndex: matchingPalette ? palette.indexOf(matchingPalette) : -1
+      });
+    });
+    
+    console.log('\nPalette colors:');
+    palette.forEach((p, i) => {
+      console.log(`  ${i}: ${p.fill}`);
+    });
+    
+    // Test what safeNextColor returns
+    console.log('\nNext 3 colors from safeNextColor():');
+    for (let i = 0; i < 3; i++) {
+      const c = window.safeNextColor ? window.safeNextColor() : null;
+      console.log(`  ${i + 1}:`, c ? c.fill : 'null');
+    }
+  };
+  
+  // Debug function to check piece colors
+  window.debugClassicTrayColors = function() {
+    const tray = document.getElementById('bfTrayClassic');
+    if (!tray) {
+      console.error('Tray not found');
+      return;
+    }
+    
+    const pieces = Array.from(tray.querySelectorAll('.bfmini-piece'));
+    console.log('=== CLASSIC TRAY COLOR DEBUG ===');
+    console.log('Total pieces:', pieces.length);
+    
+    pieces.forEach((piece, i) => {
+      const computed = getComputedStyle(piece);
+      const firstCell = piece.querySelector('.cell');
+      const cellComputed = firstCell ? getComputedStyle(firstCell) : null;
+      
+      console.log(`\nPiece ${i + 1}:`, {
+        '--fill (piece)': piece.style.getPropertyValue('--fill') || computed.getPropertyValue('--fill'),
+        '--stroke (piece)': piece.style.getPropertyValue('--stroke') || computed.getPropertyValue('--stroke'),
+        '--glow (piece)': piece.style.getPropertyValue('--glow') || computed.getPropertyValue('--glow'),
+        'dataset.fill': piece.dataset.fill,
+        'dataset.stroke': piece.dataset.stroke,
+        'cell background': cellComputed ? cellComputed.background : 'no cell',
+        'cell computed --fill': cellComputed ? cellComputed.getPropertyValue('--fill') : 'no cell',
+        'opacity': computed.opacity
+      });
+    });
+    
+    // Test safeNextColor
+    console.log('\nTesting safeNextColor():');
+    for (let i = 0; i < 3; i++) {
+      const color = window.safeNextColor ? window.safeNextColor() : null;
+      console.log(`  Color ${i + 1}:`, color);
+    }
+  };
+  
+  // Expose for testing
+  window.testClassicEntryAnimation = function() {
+  const board = document.getElementById('classicBoard');
+  if (!board) {
+    console.error('Classic board not found');
+    return;
+  }
+  const cells = Array.from(board.querySelectorAll('.cell'));
+  const emptyCells = cells.filter(cell => !cell.classList.contains('filled'));
+  console.log('Found cells:', cells.length, 'Empty cells:', emptyCells.length);
+  if (emptyCells.length > 0) {
+    classicBoardWave('in', cells); // Pass all cells, function will filter
+  } else {
+    console.error('No empty cells found on classic board');
+  }
 };
 
 // Global row/col clearer for Classic — never removes DOM cells
@@ -136,11 +571,29 @@ window.clearFullLinesWithCount = function(){
     }
   }, 300);
 
-  // Mark cells for clearing animation
-  fullRows.forEach(r=>{ for(let c=0;c<COLS;c++) cells[idx(r,c)]?.classList.add('clearing'); });
-  fullCols.forEach(c=>{ for(let r=0;r<ROWS;r++) cells[idx(r,c)]?.classList.add('clearing'); });
+  // Mark cells for clearing animation with staggered delay for visual effect
+  fullRows.forEach((r, rowIdx) => { 
+    for(let c=0;c<COLS;c++) {
+      const cell = cells[idx(r,c)];
+      if (cell) {
+        // Stagger animation slightly for rows (left to right)
+        cell.style.setProperty('--clear-delay', `${rowIdx * 5 + c * 3}ms`);
+        cell.classList.add('clearing');
+      }
+    }
+  });
+  fullCols.forEach((c, colIdx) => { 
+    for(let r=0;r<ROWS;r++) {
+      const cell = cells[idx(r,c)];
+      if (cell && !cell.classList.contains('clearing')) {
+        // Stagger animation slightly for cols (top to bottom)
+        cell.style.setProperty('--clear-delay', `${colIdx * 5 + r * 3}ms`);
+        cell.classList.add('clearing');
+      }
+    }
+  });
 
-  // After short delay, just unfill cells — DO NOT remove nodes
+  // After animation completes, just unfill cells — DO NOT remove nodes
   setTimeout(()=>{
     fullRows.forEach(r=>{
       for (let c=0;c<COLS;c++){
@@ -148,6 +601,7 @@ window.clearFullLinesWithCount = function(){
         el.classList.remove('filled','preview','hover-ok','hover-bad','clearing');
         el.style.removeProperty('--fill'); el.style.removeProperty('--stroke');
         el.style.removeProperty('--glow'); el.style.removeProperty('--glow-inset');
+        el.style.removeProperty('--clear-delay');
       }
     });
     fullCols.forEach(c=>{
@@ -156,9 +610,10 @@ window.clearFullLinesWithCount = function(){
         el.classList.remove('filled','preview','hover-ok','hover-bad','clearing');
         el.style.removeProperty('--fill'); el.style.removeProperty('--stroke');
         el.style.removeProperty('--glow'); el.style.removeProperty('--glow-inset');
+        el.style.removeProperty('--clear-delay');
       }
     });
-  }, 240);
+  }, 300); // Match animation duration
   
   return totalCleared;
 };
@@ -189,12 +644,14 @@ window.clearFullLinesClassic = function(board, cells, S, ROWS, COLS, idx){
       el.classList.remove('filled','clearing','preview','hover-ok','hover-bad');
       el.style.removeProperty('--fill'); el.style.removeProperty('--stroke');
       el.style.removeProperty('--glow'); el.style.removeProperty('--glow-inset');
+      el.style.removeProperty('--clear-delay');
     }});    
     fullCols.forEach(c=>{ for(let r=0;r<ROWS;r++){
       S[r][c]=0; const el=cells[idx(r,c)]; if(!el) return;
       el.classList.remove('filled','clearing','preview','hover-ok','hover-bad');
       el.style.removeProperty('--fill'); el.style.removeProperty('--stroke');
       el.style.removeProperty('--glow'); el.style.removeProperty('--glow-inset');
+      el.style.removeProperty('--clear-delay');
     }});
     // resync S from DOM so placements work immediately after clears
     for (let r = 0; r < ROWS; r++) {
@@ -202,7 +659,7 @@ window.clearFullLinesClassic = function(board, cells, S, ROWS, COLS, idx){
         S[r][c] = cells[idx(r,c)].classList.contains('filled') ? 1 : 0;
       }
     }
-  }, 240);
+  }, 300); // Match animation duration
 };
 
 // Classic screen initialization
@@ -401,6 +858,8 @@ function clearHover(){
     p.dataset.stroke    = color.stroke;    p.style.setProperty('--stroke', color.stroke);
     p.dataset.glow      = color.glow;      p.style.setProperty('--glow', color.glow);
     p.dataset.glowInset = color.glowInset; p.style.setProperty('--glow-inset', color.glowInset);
+    // Ensure piece doesn't have dragging class
+    p.classList.remove('dragging');
 
     const s = (typeof scale === 'number' ? scale : 0.8);
     p.dataset.scale = String(s);
@@ -411,6 +870,11 @@ function clearHover(){
         if (shape[r][c]) {
           const cell = document.createElement('div');
           cell.className = 'cell';
+          // Set color CSS variables on each cell
+          cell.style.setProperty('--fill', color.fill);
+          cell.style.setProperty('--stroke', color.stroke);
+          cell.style.setProperty('--glow', color.glow);
+          cell.style.setProperty('--glow-inset', color.glowInset);
           p.appendChild(cell);
         } else {
           const spacer = document.createElement('div');
@@ -419,6 +883,7 @@ function clearHover(){
         }
       }
     }
+    
     (window.enableDrag || (()=>{}))(p);
 
     return p;
@@ -793,7 +1258,7 @@ const gyUp = ((e.clientY - fingerOffset) - startYUp) / stepUp;
                 onBoardCleared(linePointsWithCombo);
               }
             }
-          }, 280); // After 240ms line clear animation
+          }, 320); // After 300ms line clear animation
         }
         
         piece.remove();
@@ -803,6 +1268,23 @@ const gyUp = ((e.clientY - fingerOffset) - startYUp) / stepUp;
             onTrayComplete();
           }
           refillTrayClassic();
+          // Check for game over after refill
+          // If lines were cleared, wait for animation to complete (240ms) before checking
+          const delay = linesCleared > 0 ? 280 : 100;
+          setTimeout(() => {
+            if (typeof window.checkForGameOverClassic === 'function') {
+              window.checkForGameOverClassic();
+            }
+          }, delay);
+        } else {
+          // Check for game over after placement (if pieces remain)
+          // If lines were cleared, wait for animation to complete (240ms) before checking
+          const delay = linesCleared > 0 ? 280 : 100;
+          setTimeout(() => {
+            if (typeof window.checkForGameOverClassic === 'function') {
+              window.checkForGameOverClassic();
+            }
+          }, delay);
         }
       } else {
         // invalid drop; just restore the piece
@@ -975,9 +1457,11 @@ const gyUp = ((e.clientY - fingerOffset) - startYUp) / stepUp;
   }
   
   // Get combo multiplier (starts at 3 consecutive trays with clears)
+  // Uses exponential growth: 2^(comboCount-2) for comboCount >= 3
+  // comboCount 3 -> 2x, 4 -> 4x, 5 -> 8x, 6 -> 16x, etc.
   function getComboMultiplier() {
     if (gameState.currentComboCount < 3) return 1;
-    return gameState.currentComboCount;
+    return Math.pow(2, gameState.currentComboCount - 2);
   }
   
   // Called when a piece is successfully placed
@@ -1095,48 +1579,48 @@ const gyUp = ((e.clientY - fingerOffset) - startYUp) / stepUp;
   function getGoodTrayProbability(phase, fillRatio) {
     let baseProbability = 0;
 
-    // Base probability by phase - increased to make good trays more frequent
+    // Base probability by phase - DOUBLED to make good trays more frequent
     switch (phase) {
       case "early":
         // Early game: higher chance to hook the player
-        baseProbability = 0.20; // 20% base (increased)
+        baseProbability = 0.40; // 40% base (doubled from 20%)
         // Boost if board is open
         if (fillRatio < 0.3) {
-          baseProbability = 0.28; // Up to 28% for very open boards
+          baseProbability = 0.56; // Up to 56% for very open boards (doubled from 28%)
         } else if (fillRatio < 0.5) {
-          baseProbability = 0.24; // 24% for moderately open boards
+          baseProbability = 0.48; // 48% for moderately open boards (doubled from 24%)
         }
         break;
 
       case "mid":
         // Mid game: moderate chance
-        baseProbability = 0.12; // 12% base (increased)
+        baseProbability = 0.24; // 24% base (doubled from 12%)
         // Boost if board is open or just cleared a lot
         if (fillRatio < 0.4) {
-          baseProbability = 0.20; // Up to 20% for open boards
+          baseProbability = 0.40; // Up to 40% for open boards (doubled from 20%)
         } else if (gameState.lastClearCount >= 3) {
           // Just cleared multiple lines - slight boost
-          baseProbability = 0.15;
+          baseProbability = 0.30; // Doubled from 15%
         }
         break;
 
       case "late":
         // Late game: rare but not impossible
-        baseProbability = 0.05; // 5% base (increased)
+        baseProbability = 0.10; // 10% base (doubled from 5%)
         // Slight boost only if board is very open (unlikely in late game)
         if (fillRatio < 0.3) {
-          baseProbability = 0.08;
+          baseProbability = 0.16; // Doubled from 8%
         }
         break;
     }
 
     // Universal boost for very open boards (regardless of phase)
     if (fillRatio < 0.25) {
-      baseProbability = Math.max(baseProbability, 0.22);
+      baseProbability = Math.max(baseProbability, 0.44); // Doubled from 0.22
     }
 
-    // Cap at reasonable maximum
-    return Math.min(baseProbability, 0.30);
+    // Cap at reasonable maximum (doubled from 0.30)
+    return Math.min(baseProbability, 0.60);
   }
 
   // Calculate probability of generating a PERFECT OPPORTUNITY (single-tray or multi-tray board clear)
@@ -1147,39 +1631,40 @@ const gyUp = ((e.clientY - fingerOffset) - startYUp) / stepUp;
     }
     
     // Perfect opportunity probability starts high in early game, then drops below good tray after first use
+    // TRIPLED to make perfect trays more frequent
     let baseProbability = 0;
     
     switch (phase) {
       case "early":
         // Early game: high chance (but less than good tray)
-        baseProbability = 0.12; // 12% base
+        baseProbability = 0.36; // 36% base (tripled from 12%)
         if (fillRatio < 0.3) {
-          baseProbability = 0.18; // Up to 18% for very open boards
+          baseProbability = 0.54; // Up to 54% for very open boards (tripled from 18%)
         } else if (fillRatio < 0.5) {
-          baseProbability = 0.15; // 15% for moderately open boards
+          baseProbability = 0.45; // 45% for moderately open boards (tripled from 15%)
         }
         break;
         
       case "mid":
         // Mid game: moderate chance
-        baseProbability = 0.06; // 6% base
+        baseProbability = 0.18; // 18% base (tripled from 6%)
         if (fillRatio < 0.4) {
-          baseProbability = 0.10; // Up to 10% for open boards
+          baseProbability = 0.30; // Up to 30% for open boards (tripled from 10%)
         }
         break;
         
       case "late":
         // Late game: rare but not impossible
-        baseProbability = 0.02; // 2% base
+        baseProbability = 0.06; // 6% base (tripled from 2%)
         if (fillRatio < 0.3) {
-          baseProbability = 0.04; // Slight boost for open boards
+          baseProbability = 0.12; // Slight boost for open boards (tripled from 4%)
         }
         break;
     }
     
     // BOOST: If player has cleared 20+ lines total, increase probability significantly
     if (gameState.totalLinesClearedEver >= 20) {
-      const milestoneBoost = Math.min(0.15, baseProbability * 1.5); // Up to 15% boost or 1.5x, whichever is smaller
+      const milestoneBoost = Math.min(0.45, baseProbability * 1.5); // Up to 45% boost or 1.5x, whichever is smaller (tripled from 0.15)
       baseProbability += milestoneBoost;
     }
     
@@ -1195,7 +1680,7 @@ const gyUp = ((e.clientY - fingerOffset) - startYUp) / stepUp;
     
     // Minimum probability (never impossible, but rare after multiple uses)
     // This ensures perfect trays can still appear randomly by luck
-    return Math.max(baseProbability, 0.005); // 0.5% minimum (pure luck chance)
+    return Math.max(baseProbability, 0.015); // 1.5% minimum (tripled from 0.5% - pure luck chance)
   }
 
   // ===== SIMULATION HELPERS FOR CLEAR GUARANTEE =====
@@ -3094,7 +3579,34 @@ const gyUp = ((e.clientY - fingerOffset) - startYUp) / stepUp;
       slot.innerHTML = '';
 
       const shape = shapesForSlots[i] || window.weightedRandomShape();
-      const color = (window.safeNextColor ? window.safeNextColor() : window.safeNextColor());
+      // Get color properly with fallback
+      let color;
+      if (window.safeNextColor && typeof window.safeNextColor === 'function') {
+        color = window.safeNextColor();
+      } else if (window.PALETTE && Array.isArray(window.PALETTE) && window.PALETTE.length > 0) {
+        // Fallback to random palette color
+        color = window.PALETTE[Math.floor(Math.random() * window.PALETTE.length)];
+      } else {
+        // Ultimate fallback
+        color = {
+          fill: 'linear-gradient(180deg, #7bf5ff, #00B5E5)',
+          stroke: 'rgba(123,245,255,.45)',
+          glow: 'rgba(123,245,255,.35)',
+          glowInset: 'rgba(0,0,0,.45)'
+        };
+      }
+      
+      // Ensure color object has all required properties
+      if (!color.fill || !color.stroke || !color.glow || !color.glowInset) {
+        console.warn('Invalid color object:', color);
+        color = {
+          fill: color.fill || 'linear-gradient(180deg, #7bf5ff, #00B5E5)',
+          stroke: color.stroke || 'rgba(123,245,255,.45)',
+          glow: color.glow || 'rgba(123,245,255,.35)',
+          glowInset: color.glowInset || 'rgba(0,0,0,.45)'
+        };
+      }
+      
       const scale = autoScaleForShape(shape);
       const piece = makePiece(shape, color, scale);
       piece.dataset.slot = slot.dataset.slot;
@@ -3105,6 +3617,14 @@ const gyUp = ((e.clientY - fingerOffset) - startYUp) / stepUp;
     if (enforceGuarantee) {
       incrementTrayCount();
     }
+    
+    // Check for game over after refilling tray
+    // Use a reasonable delay to ensure DOM is updated (no line clear animation here, so shorter delay is fine)
+    setTimeout(() => {
+      if (typeof window.checkForGameOverClassic === 'function') {
+        window.checkForGameOverClassic();
+      }
+    }, 100);
   }
 
   // --- Classic tray guarantee self-tests (debug only, console output) ---
@@ -3208,6 +3728,500 @@ const gyUp = ((e.clientY - fingerOffset) - startYUp) / stepUp;
   window.getPerfectOpportunityProbability = getPerfectOpportunityProbability;
   window.getGoodTrayProbability = getGoodTrayProbability;
   window.gameStateClassic = gameState; // Expose game state for testing
+
+  // ===== GAME OVER DETECTION AND ANIMATION =====
+  
+  // Track if game over sequence has started (prevent multiple triggers)
+  let gameOverInProgress = false;
+  
+  // Check if any piece in the tray can be placed on the board
+  function hasAnyLegalMove() {
+    const tray = document.getElementById('bfTrayClassic');
+    if (!tray) return true; // If tray doesn't exist, assume moves available
+    
+    const pieces = Array.from(tray.querySelectorAll('.bfmini-piece'));
+    if (pieces.length === 0) return true; // Empty tray means we'll refill, so assume moves available
+    
+    // Check each piece in the tray
+    for (const piece of pieces) {
+      const shape = shapeFromPiece(piece);
+      if (!shape || !shape[0]) continue;
+      
+      // Check if this shape can be placed anywhere on the board
+      if (shapeCanFitAnywhere(shape)) {
+        return true; // Found at least one legal move
+      }
+    }
+    
+    return false; // No legal moves found
+  }
+  
+  // Check for game over condition and trigger sequence if needed
+  function checkForGameOver() {
+    // Don't check if game over is already in progress
+    if (gameOverInProgress) return;
+    
+    // Check if there are any legal moves
+    if (!hasAnyLegalMove()) {
+      // No legal moves - start game over sequence
+      startGameOverSequence();
+    }
+  }
+  
+  // Fill empty cells with random colors (bottom to top)
+  async function fillRemainingBoard() {
+    const board = document.getElementById('classicBoard');
+    if (!board) return;
+    
+    // CRITICAL: Lock grid dimensions before filling to prevent collapse
+    const boardRect = board.getBoundingClientRect();
+    const computed = getComputedStyle(board);
+    
+    // Store original grid template (don't modify it, just ensure it stays)
+    const originalGridRows = computed.gridTemplateRows;
+    const originalGridCols = computed.gridTemplateColumns;
+    
+    const emptyCells = [];
+    
+    // Collect all empty cells, organized by row (bottom to top)
+    for (let r = ROWS - 1; r >= 0; r--) {
+      for (let c = 0; c < COLS; c++) {
+        const cell = cellEls[idx(r, c)];
+        if (cell && !cell.classList.contains('filled')) {
+          emptyCells.push({ cell, row: r, col: c });
+        }
+      }
+    }
+    
+    // Get color palette (use window.PALETTE if available, otherwise fallback)
+    const palette = window.PALETTE || [
+      { fill: 'linear-gradient(180deg, #7bf5ff, #00B5E5)', stroke: 'rgba(123,245,255,.45)', glow: 'rgba(123,245,255,.35)', glowInset: 'rgba(0,0,0,.45)' },
+      { fill: 'linear-gradient(180deg, #FF31F4, #9F0BDB)', stroke: 'rgba(255,49,244,.45)', glow: 'rgba(255,49,244,.35)', glowInset: 'rgba(0,0,0,.45)' },
+      { fill: 'linear-gradient(180deg, #FEA019, #CD7317)', stroke: 'rgba(254,160,25,.45)', glow: 'rgba(254,160,25,.35)', glowInset: 'rgba(0,0,0,.45)' },
+      { fill: 'linear-gradient(180deg, #ff0000, #CB040A)', stroke: 'rgba(255,0,0,.45)', glow: 'rgba(255,0,0,.35)', glowInset: 'rgba(0,0,0,.45)' },
+      { fill: 'linear-gradient(180deg, #7A5CFF, #7c82ff)', stroke: 'rgba(122,92,255,.45)', glow: 'rgba(122,92,255,.35)', glowInset: 'rgba(0,0,0,.45)' },
+      { fill: 'linear-gradient(180deg, #9AFF00, #4bb630)', stroke: 'rgba(154,255,0,.45)', glow: 'rgba(154,255,0,.35)', glowInset: 'rgba(0,0,0,.45)' }
+    ];
+    
+    // Fill cells row by row from bottom to top with delay
+    const rowsFilled = new Set();
+    for (const { cell, row } of emptyCells) {
+      if (!rowsFilled.has(row)) {
+        rowsFilled.add(row);
+        // Wait a bit between rows for visual effect
+        await new Promise(resolve => setTimeout(resolve, 50));
+      }
+      
+      // Pick random color
+      const color = palette[Math.floor(Math.random() * palette.length)];
+      
+      // Fill the cell - ONLY modify cell properties, never board properties
+      cell.classList.add('filled');
+      cell.style.setProperty('--fill', color.fill || color);
+      cell.style.setProperty('--stroke', color.stroke || 'rgba(255,255,255,0.3)');
+      cell.style.setProperty('--glow', color.glow || 'rgba(255,255,255,0.2)');
+      cell.style.setProperty('--glow-inset', color.glowInset || 'rgba(0,0,0,0.3)');
+      
+      // Also update the board state
+      const r = parseInt(cell.dataset.r);
+      const c = parseInt(cell.dataset.c);
+      if (r >= 0 && r < ROWS && c >= 0 && c < COLS) {
+        S[r][c] = 1;
+      }
+      
+      // Safety check: ensure grid hasn't collapsed
+      const currentComputed = getComputedStyle(board);
+      if (currentComputed.gridTemplateRows !== originalGridRows) {
+        console.warn('Grid rows changed during fill! Restoring...');
+        board.style.gridTemplateRows = originalGridRows;
+      }
+    }
+  }
+  
+  // Diagonal jump animation using overlay elements (sibling to board, not child)
+  async function diagonalJumpAnimation() {
+    const board = document.getElementById('classicBoard');
+    if (!board) return;
+    
+    const boardWrap = board.parentElement; // classicGridWrap
+    if (!boardWrap) return;
+    
+    // Get board position BEFORE creating any overlays (critical!)
+    const boardRect = board.getBoundingClientRect();
+    
+    // Create overlay container as a SIBLING to the board, not a child
+    // This prevents it from affecting grid layout
+    let overlayContainer = document.getElementById('classicJumpOverlay');
+    if (overlayContainer) {
+      overlayContainer.remove(); // Remove if exists
+    }
+    
+    overlayContainer = document.createElement('div');
+    overlayContainer.id = 'classicJumpOverlay';
+    overlayContainer.style.position = 'fixed'; // Use fixed, not absolute
+    overlayContainer.style.left = boardRect.left + 'px';
+    overlayContainer.style.top = boardRect.top + 'px';
+    overlayContainer.style.width = boardRect.width + 'px';
+    overlayContainer.style.height = boardRect.height + 'px';
+    overlayContainer.style.pointerEvents = 'none';
+    overlayContainer.style.zIndex = '100';
+    // Insert as sibling to boardWrap, not child of board
+    if (boardWrap.parentElement) {
+      boardWrap.parentElement.appendChild(overlayContainer);
+    } else {
+      document.body.appendChild(overlayContainer);
+    }
+    
+    // Create diagonal wave: for each diagonal sum (r+c), animate all cells with that sum
+    const maxSum = (ROWS - 1) + (COLS - 1);
+    
+    for (let sum = 0; sum <= maxSum; sum++) {
+      const diagonalCells = [];
+      
+      // Collect all cells on this diagonal
+      for (let r = 0; r < ROWS; r++) {
+        for (let c = 0; c < COLS; c++) {
+          if (r + c === sum) {
+            const cell = cellEls[idx(r, c)];
+            if (cell) diagonalCells.push(cell);
+          }
+        }
+      }
+      
+      // Create overlay divs for each cell on this diagonal
+      const overlays = [];
+      diagonalCells.forEach(cell => {
+        const cellRect = cell.getBoundingClientRect();
+        
+        // Position relative to overlay container (which is positioned at board location)
+        const overlay = document.createElement('div');
+        overlay.style.position = 'absolute';
+        overlay.style.left = (cellRect.left - boardRect.left) + 'px';
+        overlay.style.top = (cellRect.top - boardRect.top) + 'px';
+        overlay.style.width = cellRect.width + 'px';
+        overlay.style.height = cellRect.height + 'px';
+        overlay.style.borderRadius = getComputedStyle(cell).borderRadius || '10px';
+        overlay.style.background = getComputedStyle(cell).background || cell.style.getPropertyValue('--fill') || '#0A0F28';
+        overlay.style.boxShadow = getComputedStyle(cell).boxShadow || '';
+        overlay.style.transition = 'transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.3s';
+        overlay.style.transformOrigin = 'center center';
+        overlay.style.opacity = '0.9';
+        overlay.style.pointerEvents = 'none';
+        
+        overlayContainer.appendChild(overlay);
+        overlays.push(overlay);
+        
+        // Trigger scale animation
+        requestAnimationFrame(() => {
+          overlay.style.transform = 'scale(1.4)';
+        });
+      });
+      
+      // Wait a bit before next diagonal (50% faster: 100ms → 50ms)
+      await new Promise(resolve => setTimeout(resolve, 50));
+      
+      // Fade out and remove overlays
+      overlays.forEach(overlay => {
+        overlay.style.opacity = '0';
+        overlay.style.transform = 'scale(1)';
+      });
+      
+      // Remove overlays after animation (slower to match the longer transition)
+      setTimeout(() => {
+        overlays.forEach(overlay => overlay.remove());
+      }, 350);
+    }
+    
+    // Wait for final animation to complete (50% faster: 300ms → 150ms)
+    await new Promise(resolve => setTimeout(resolve, 150));
+    
+    // Clean up overlay container
+    if (overlayContainer && overlayContainer.parentNode) {
+      overlayContainer.remove();
+    }
+  }
+  
+  // Main game over sequence
+  async function startGameOverSequence() {
+    if (gameOverInProgress) return;
+    gameOverInProgress = true;
+    
+    // Disable further piece placement
+    const tray = document.getElementById('bfTrayClassic');
+    if (tray) {
+      tray.style.pointerEvents = 'none';
+      tray.style.opacity = '0.5';
+    }
+    
+    // 1. Show "No Space Left" bar
+    const noSpaceBar = document.getElementById('noSpaceLeftBar');
+    if (noSpaceBar) {
+      noSpaceBar.classList.remove('hidden');
+    }
+    
+    // Wait for bar to appear
+    await new Promise(resolve => setTimeout(resolve, 800));
+    
+    // 2. Fill remaining board spaces with random colors
+    await fillRemainingBoard();
+    
+    // Wait a moment
+    await new Promise(resolve => setTimeout(resolve, 300));
+    
+    // 3. Diagonal jump animation (using visual effects, not transforms)
+    await diagonalJumpAnimation();
+    
+    // 4. Show Game Over overlay
+    const overlay = document.getElementById('classicGameOverOverlay');
+    const finalScoreEl = document.getElementById('classicFinalScore');
+    
+    if (overlay && finalScoreEl) {
+      finalScoreEl.textContent = gameState.score.toLocaleString();
+      overlay.classList.remove('hidden');
+    }
+  }
+  
+  // Restart Classic game
+  window.restartClassicGame = function() {
+    // Reset game over flag
+    gameOverInProgress = false;
+    
+    // Hide overlays
+    const noSpaceBar = document.getElementById('noSpaceLeftBar');
+    const overlay = document.getElementById('classicGameOverOverlay');
+    if (noSpaceBar) noSpaceBar.classList.add('hidden');
+    if (overlay) overlay.classList.add('hidden');
+    
+    // Clear board
+    cellEls.forEach(cell => {
+      cell.classList.remove('filled', 'preview', 'hover-ok', 'hover-bad', 'clearing', 'about-to-clear');
+      cell.style.removeProperty('--fill');
+      cell.style.removeProperty('--stroke');
+      cell.style.removeProperty('--glow');
+      cell.style.removeProperty('--glow-inset');
+      cell.style.removeProperty('filter');
+      cell.style.removeProperty('box-shadow');
+      cell.style.removeProperty('transition');
+      S[parseInt(cell.dataset.r)][parseInt(cell.dataset.c)] = 0;
+    });
+    
+    // Reset game state
+    gameState.score = 0;
+    gameState.currentComboCount = 0;
+    gameState.currentTrayHadClear = false;
+    gameState.piecesPlacedThisTray = 0;
+    gameState.trayCount = 0;
+    gameState.linesCleared = 0;
+    gameState.lastClearCount = 0;
+    gameState.perfectTrayUsed = false;
+    gameState.perfectTrayCount = 0;
+    gameState.perfectSequence = null;
+    
+    // Reset score display
+    updateScoreDisplay();
+    
+    // Re-enable tray and ensure it's fully opaque
+    const tray = document.getElementById('bfTrayClassic');
+    if (tray) {
+      tray.style.pointerEvents = '';
+      tray.style.setProperty('opacity', '1', 'important'); // Explicitly set to 1, not empty string
+    }
+    
+    // Clear tray and refill
+    if (tray) {
+      tray.querySelectorAll('.bfmini-piece').forEach(p => p.remove());
+    }
+    refillTrayClassic();
+    
+    // Reinitialize drag handlers for new pieces
+    if (window.initClassicDnD) {
+      setTimeout(() => {
+        window.initClassicDnD();
+      }, 100);
+    }
+  };
+  
+  // Home button from game over
+  // Helper function to clear the classic board completely
+  function clearClassicBoard() {
+    const board = document.getElementById('classicBoard');
+    if (!board) return;
+    
+    const cells = Array.from(board.querySelectorAll('.cell'));
+    cells.forEach(cell => {
+      // Remove all classes and styles
+      cell.classList.remove('filled', 'preview', 'hover-ok', 'hover-bad', 'clearing', 'about-to-clear');
+      cell.style.removeProperty('--fill');
+      cell.style.removeProperty('--stroke');
+      cell.style.removeProperty('--glow');
+      cell.style.removeProperty('--glow-inset');
+      cell.style.removeProperty('filter');
+      cell.style.removeProperty('box-shadow');
+      cell.style.removeProperty('transition');
+      cell.style.removeProperty('animation');
+      cell.style.removeProperty('transform');
+    });
+    
+    // Reset color queue to ensure fresh colors
+    if (window.nextColor && typeof window.nextColor === 'function') {
+      // Force color queue to reset by accessing the internal queue
+      if (window.colorQueue) {
+        window.colorQueue = [];
+      }
+    }
+    // Reset safeNextColor index
+    if (window.safeNextColor && typeof window.safeNextColor === 'function') {
+      window.safeNextColor._i = 0;
+    }
+  }
+  
+  window.homeFromClassicGameOver = function() {
+    // Hide overlays
+    const noSpaceBar = document.getElementById('noSpaceLeftBar');
+    const overlay = document.getElementById('classicGameOverOverlay');
+    if (noSpaceBar) noSpaceBar.classList.add('hidden');
+    if (overlay) overlay.classList.add('hidden');
+    
+    // Reset game over flag
+    gameOverInProgress = false;
+    
+    // CRITICAL: Reset tray opacity to 1 before clearing (might be 0.5 from game over)
+    const tray = document.getElementById('bfTrayClassic');
+    if (tray) {
+      tray.style.setProperty('opacity', '1', 'important');
+      tray.style.pointerEvents = '';
+    }
+    
+    // Clear the board before going home
+    clearClassicBoard();
+    
+    // Use existing home function
+    if (window.homeFromSettings) {
+      window.homeFromSettings();
+    } else if (typeof goHome === 'function') {
+      goHome();
+    }
+  };
+  
+  // Expose check function for external calls
+  window.checkForGameOverClassic = checkForGameOver;
+  
+  // Expose game over sequence for testing (bypasses legal move check)
+  window.testGameOverSequence = function() {
+    if (typeof startGameOverSequence === 'function') {
+      startGameOverSequence();
+    }
+  };
+  
+  // Diagnostic function to check grid state
+  window.diagnoseGrid = function() {
+    const board = document.getElementById('classicBoard');
+    if (!board) {
+      console.log('❌ Board not found');
+      return;
+    }
+    
+    const rect = board.getBoundingClientRect();
+    const computed = getComputedStyle(board);
+    const firstCell = cellEls[0];
+    const cellRect = firstCell ? firstCell.getBoundingClientRect() : null;
+    
+    console.log('=== GRID DIAGNOSTICS ===');
+    console.log('Board dimensions:', {
+      width: rect.width + 'px',
+      height: rect.height + 'px',
+      computedWidth: computed.width,
+      computedHeight: computed.height
+    });
+    console.log('Grid template:', {
+      rows: computed.gridTemplateRows,
+      cols: computed.gridTemplateColumns,
+      gap: computed.gap
+    });
+    console.log('Cell size:', cellRect ? {
+      width: cellRect.width + 'px',
+      height: cellRect.height + 'px'
+    } : 'No cells found');
+    console.log('Board position:', computed.position);
+    console.log('Board overflow:', computed.overflow);
+    console.log('Board display:', computed.display);
+    console.log('Board style attributes:', {
+      height: board.style.height || 'none',
+      width: board.style.width || 'none',
+      minHeight: board.style.minHeight || 'none',
+      minWidth: board.style.minWidth || 'none'
+    });
+    
+    // Check for any cells with transforms
+    const cellsWithTransform = Array.from(cellEls).filter(c => {
+      const cellStyle = getComputedStyle(c);
+      return cellStyle.transform !== 'none' || c.style.transform;
+    });
+    console.log('Cells with transforms:', cellsWithTransform.length);
+    
+    // Check for overlay elements
+    const overlay = document.getElementById('classicJumpOverlay');
+    console.log('Overlay exists:', !!overlay);
+    if (overlay) {
+      const overlayRect = overlay.getBoundingClientRect();
+      console.log('Overlay dimensions:', {
+        width: overlayRect.width + 'px',
+        height: overlayRect.height + 'px'
+      });
+    }
+    
+    return {
+      boardRect: rect,
+      cellRect: cellRect,
+      computed: {
+        gridTemplateRows: computed.gridTemplateRows,
+        gridTemplateColumns: computed.gridTemplateColumns
+      }
+    };
+  };
+  
+  // Monitor grid during animation
+  window.monitorGridDuringAnimation = function() {
+    const board = document.getElementById('classicBoard');
+    if (!board) return;
+    
+    const initialHeight = board.getBoundingClientRect().height;
+    console.log('📊 Starting grid monitor. Initial height:', initialHeight + 'px');
+    
+    const interval = setInterval(() => {
+      const currentHeight = board.getBoundingClientRect().height;
+      const computed = getComputedStyle(board);
+      
+      if (currentHeight !== initialHeight) {
+        console.warn('⚠️ GRID HEIGHT CHANGED!', {
+          initial: initialHeight + 'px',
+          current: currentHeight + 'px',
+          difference: (currentHeight - initialHeight) + 'px',
+          gridTemplateRows: computed.gridTemplateRows,
+          boardStyleHeight: board.style.height,
+          boardStyleMinHeight: board.style.minHeight
+        });
+      }
+      
+      // Check for any cells with problematic styles
+      const problematicCells = Array.from(cellEls).filter(c => {
+        const style = c.style;
+        return style.transform || style.scale || style.height || style.width;
+      });
+      
+      if (problematicCells.length > 0) {
+        console.warn('⚠️ Cells with problematic styles:', problematicCells.length);
+      }
+    }, 50);
+    
+    // Stop after 10 seconds
+    setTimeout(() => {
+      clearInterval(interval);
+      console.log('📊 Grid monitor stopped');
+    }, 10000);
+    
+    return interval;
+  };
 
   // Seed the Classic tray
   refillTrayClassic();
