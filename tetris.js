@@ -65,7 +65,16 @@ function updateGhostBtn(){ const txt=['Off','Outline','Solid'][ghostMode]||'Outl
 function toggleGhostMode(){ ghostMode=(ghostMode+1)%3; updateGhostBtn(); tRenderGhost(); }
 
 // ---------- Tetris ----------
-const TCOLORS={I:'#00e5ff',O:'#ffd166',T:'#b784f5',S:'#39ff14',Z:'#ff3bff',J:'#1ea7ff',L:'#ff9f1c'};
+// Use Classic mode palette colors (extract solid colors from gradients)
+const TCOLORS={
+  I:'#7bf5ff',  // Cyan (light blue) - from Classic palette
+  O:'#FEA019',  // Orange - from Classic palette
+  T:'#7A5CFF',  // Violet - from Classic palette
+  S:'#9AFF00',  // Green - from Classic palette
+  Z:'#FF31F4',  // Magenta - from Classic palette
+  J:'#ff0000',  // Red - from Classic palette
+  L:'#CD7317'   // Dark Orange - from Classic palette
+};
 const TETROMINOES={I:[[1,1,1,1]],O:[[1,1],[1,1]],T:[[1,1,1],[0,1,0]],S:[[0,1,1],[1,1,0]],Z:[[1,1,0],[0,1,1]],J:[[1,0,0],[1,1,1]],L:[[0,0,1],[1,1,1]]};
 let tActive=null,tX=0,tY=0,tRot=0,tDropTimer=null,tDropMs=900,tNext=null,tLines=0,tBag=[];
 function tMatrixRotate(m){const h=m.length,w=m[0].length,r=Array.from({length:w},()=>Array(h).fill(0));for(let y=0;y<h;y++)for(let x=0;x<w;x++)r[x][h-1-y]=m[y][x];return r}
@@ -112,8 +121,8 @@ function tClearLines(){
 }
 function tTick(){ if(!tActive) return; if(!tCollide(tX,tY+1,tActive,tRot)){ tY++; } else { tMerge(); tClearLines(); tNewPiece(); } renderBoard() }
 function tScheduleDrop(){ if(tDropTimer) clearInterval(tDropTimer); tDropTimer=setInterval(tTick,tDropMs) }
-function tStart(){ window.$('tetrisControls').style.display='flex'; tDropMs=900; tLines=0; tBag=[]; tRefillBag(); tNext=tDrawFromBag(); tNewPiece(); tScheduleDrop(); document.addEventListener('keydown',tKeydown) }
-function tStop(){ window.$('tetrisControls').style.display='none'; if(tDropTimer){clearInterval(tDropTimer); tDropTimer=null} document.removeEventListener('keydown',tKeydown); window.$('preview').innerHTML=''}
+function tStart(){ tDropMs=900; tLines=0; tBag=[]; tRefillBag(); tNext=tDrawFromBag(); tNewPiece(); tScheduleDrop(); document.addEventListener('keydown',tKeydown) }
+function tStop(){ if(tDropTimer){clearInterval(tDropTimer); tDropTimer=null} document.removeEventListener('keydown',tKeydown); window.$('preview').innerHTML=''}
 
 function tKeydown(e){
   const k=e.key;
@@ -138,22 +147,39 @@ function tRotate(dir){
     if(!tCollide(nx,ny,tActive,to)){ tX=nx; tY=ny; tRot=to; tRenderGhost(); return; }
   }
 }
+// Store the cell size for the next piece tray to ensure consistency
+let trayCellSize = null;
+
 function tRenderNext(){
   const el=window.$('tray'); el.innerHTML=''; if(!tNext) return;
   const s=tGetShape(tNext,0);
+  // Calculate cell size once on first call, then reuse it to ensure consistency
+  if(trayCellSize === null){
+    trayCellSize = Math.floor(window.cellSize()*0.6); // 20% larger than original 0.5
+  }
   const table=document.createElement('table'); table.cellSpacing=0;
+  table.style.width = 'auto';
+  table.style.height = 'auto';
   for(let r=0;r<s.length;r++){
     const tr=document.createElement('tr');
     for(let c=0;c<s[0].length;c++){
       const td=document.createElement('td');
-      td.style.width=td.style.height=Math.floor(window.cellSize()*0.5)+'px';
+      // Use the stored cellSize to ensure consistent sizing - always use the same value
+      td.style.width=trayCellSize+'px';
+      td.style.height=trayCellSize+'px';
+      td.style.minWidth=trayCellSize+'px';
+      td.style.minHeight=trayCellSize+'px';
+      td.style.maxWidth=trayCellSize+'px';
+      td.style.maxHeight=trayCellSize+'px';
+      td.style.boxSizing='border-box';
       if(s[r][c]){ td.className='block'; td.style.backgroundColor=TCOLORS[tNext]; }
       tr.appendChild(td);
     }
     tr.style.lineHeight=0; table.appendChild(tr);
   }
   const wrap=document.createElement('div'); wrap.className='piece slot'; wrap.appendChild(table); el.appendChild(wrap);
-  fitTetrisToViewport();
+  // Don't recalculate board size when next piece changes - board size should stay constant
+  // fitTetrisToViewport();
 }
 
 /* Ghost */
@@ -199,17 +225,17 @@ function fitTetrisToViewport(){
   if (currentMode !== 'tetris') return;
   const boardEl = window.$('board'); if (!boardEl) return;
   const cols = width, rows = height, padPx = window.pad(), gapPx = window.gap();
-  const trayH = window.$('tray') ? window.$('tray').offsetHeight : 0;
-  const ctrlsEl = window.$('tetrisControls');
-  const ctrlsH  = (ctrlsEl && ctrlsEl.style.display !== 'none') ? ctrlsEl.offsetHeight : 0;
+  // Don't use tray height - it's absolutely positioned and shouldn't affect board size
+  // Also, tray height changes with different pieces, causing board to resize
   const headerH = 56;
   const vh = window.innerHeight, vw = window.innerWidth;
-  const availH = Math.max(220, vh - trayH - ctrlsH - headerH - 16);
+  const availH = Math.max(220, vh - headerH - 16);
   const availW = Math.max(260, vw - 32);
   const cellFromH = Math.floor((availH - 2*padPx - (rows-1)*gapPx) / rows);
   const cellFromW = Math.floor((availW - 2*padPx - (cols-1)*gapPx) / cols);
-  const size = Math.max(12, Math.min(cellFromH, cellFromW, 40));
-  boardEl.style.setProperty('--cell', String(size));
+  // Reduce cell size by 15% (multiply by 0.85) to make grid slightly smaller
+  const size = Math.max(12, Math.min(cellFromH, cellFromW, 40)) * 0.85;
+  boardEl.style.setProperty('--cell', String(Math.floor(size)));
   document.documentElement.style.removeProperty('--cell');
   sizePreviewLayer();
   renderBoard();

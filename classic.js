@@ -133,9 +133,9 @@ window.openClassicGrid = function () {
       });
       // Then refill (with a small delay to ensure DOM is ready)
       setTimeout(() => {
-        if (window.refillTrayClassic) {
-          window.refillTrayClassic();
-        }
+      if (window.refillTrayClassic) {
+        window.refillTrayClassic();
+      }
       }, 50);
     }
     
@@ -571,13 +571,18 @@ window.clearFullLinesWithCount = function(){
     }
   }, 300);
 
-  // Mark cells for clearing animation with staggered delay for visual effect
+  // Mark cells for clearing animation with staggered delay and random rotation for breaking effect
   fullRows.forEach((r, rowIdx) => { 
     for(let c=0;c<COLS;c++) {
       const cell = cells[idx(r,c)];
       if (cell) {
-        // Stagger animation slightly for rows (left to right)
-        cell.style.setProperty('--clear-delay', `${rowIdx * 5 + c * 3}ms`);
+        // Stagger animation slightly for rows (left to right) with random variation
+        const baseDelay = rowIdx * 10 + c * 5;
+        const randomDelay = Math.random() * 20; // Add randomness for more chaotic breaking
+        cell.style.setProperty('--clear-delay', `${baseDelay + randomDelay}ms`);
+        // Add random rotation direction for breaking effect (more dramatic)
+        const rotationDir = Math.random() > 0.5 ? 1 : -1;
+        cell.style.setProperty('--break-rotation', `${rotationDir * (20 + Math.random() * 30)}deg`);
         cell.classList.add('clearing');
       }
     }
@@ -586,8 +591,13 @@ window.clearFullLinesWithCount = function(){
     for(let r=0;r<ROWS;r++) {
       const cell = cells[idx(r,c)];
       if (cell && !cell.classList.contains('clearing')) {
-        // Stagger animation slightly for cols (top to bottom)
-        cell.style.setProperty('--clear-delay', `${colIdx * 5 + r * 3}ms`);
+        // Stagger animation slightly for cols (top to bottom) with random variation
+        const baseDelay = colIdx * 10 + r * 5;
+        const randomDelay = Math.random() * 20;
+        cell.style.setProperty('--clear-delay', `${baseDelay + randomDelay}ms`);
+        // Add random rotation direction for breaking effect (more dramatic)
+        const rotationDir = Math.random() > 0.5 ? 1 : -1;
+        cell.style.setProperty('--break-rotation', `${rotationDir * (20 + Math.random() * 30)}deg`);
         cell.classList.add('clearing');
       }
     }
@@ -598,22 +608,34 @@ window.clearFullLinesWithCount = function(){
     fullRows.forEach(r=>{
       for (let c=0;c<COLS;c++){
         const el = cells[idx(r,c)]; if (!el) continue;
-        el.classList.remove('filled','preview','hover-ok','hover-bad','clearing');
+        el.classList.remove('filled','preview','hover-ok','hover-bad','clearing','lock-color','about-to-clear');
         el.style.removeProperty('--fill'); el.style.removeProperty('--stroke');
         el.style.removeProperty('--glow'); el.style.removeProperty('--glow-inset');
         el.style.removeProperty('--clear-delay');
+        el.style.removeProperty('--break-rotation');
+        el.style.removeProperty('--about-glow');
+        delete el.dataset.origFillHighlight;
+        delete el.dataset.origStrokeHighlight;
+        delete el.dataset.origGlowHighlight;
+        delete el.dataset.origGlowInsetHighlight;
       }
     });
     fullCols.forEach(c=>{
       for (let r=0;r<ROWS;r++){
         const el = cells[idx(r,c)]; if (!el) continue;
-        el.classList.remove('filled','preview','hover-ok','hover-bad','clearing');
+        el.classList.remove('filled','preview','hover-ok','hover-bad','clearing','lock-color','about-to-clear');
         el.style.removeProperty('--fill'); el.style.removeProperty('--stroke');
         el.style.removeProperty('--glow'); el.style.removeProperty('--glow-inset');
         el.style.removeProperty('--clear-delay');
+        el.style.removeProperty('--break-rotation');
+        el.style.removeProperty('--about-glow');
+        delete el.dataset.origFillHighlight;
+        delete el.dataset.origStrokeHighlight;
+        delete el.dataset.origGlowHighlight;
+        delete el.dataset.origGlowInsetHighlight;
       }
     });
-  }, 300); // Match animation duration
+  }, 500); // Match animation duration (500ms)
   
   return totalCleared;
 };
@@ -659,7 +681,7 @@ window.clearFullLinesClassic = function(board, cells, S, ROWS, COLS, idx){
         S[r][c] = cells[idx(r,c)].classList.contains('filled') ? 1 : 0;
       }
     }
-  }, 300); // Match animation duration
+  }, 500); // Match animation duration (500ms)
 };
 
 // Classic screen initialization
@@ -749,6 +771,20 @@ function clearHover(){
   // Clear highlighted rows/cols and restore original colours + glow
   const hlEls = board.querySelectorAll('.cell.about-to-clear');
   hlEls.forEach(el => {
+    // If this cell has been "locked" for an incoming clear, we keep
+    // whatever colour it currently has (the placed piece's tint) so
+    // it doesn't snap back to the old colour during the clear anim.
+    if (el.classList.contains('lock-color')) {
+      el.classList.remove('about-to-clear');
+      // We no longer need any stored originals for this cell
+      delete el.dataset.origFillHighlight;
+      delete el.dataset.origStrokeHighlight;
+      delete el.dataset.origGlowHighlight;
+      delete el.dataset.origGlowInsetHighlight;
+      el.style.removeProperty('--about-glow');
+      return;
+    }
+
     el.classList.remove('about-to-clear');
 
     if (el.dataset.origFillHighlight){
@@ -1218,15 +1254,81 @@ const gyUp = ((e.clientY - fingerOffset) - startYUp) / stepUp;
       const anchorUpC = Math.floor(gxUp - (wUp - 1) / 2);
       const anchorUpR = Math.floor(gyUp - (hUp - 1) / 2);
 
-      clearHover();
+      const canPlaceHere = (mUp && mUp[0]) ? canPlace(mUp, anchorUpR, anchorUpC) : false;
 
-      if (mUp && mUp[0] && canPlace(mUp, anchorUpR, anchorUpC)) {
-        const colorUp = {
+      // If this drop will actually place, pre-tint any lines that will clear
+      // to the piece's colour and "lock" them so clearHover() doesn't restore
+      // the old colour. That way, the clear animation keeps the hovered tint.
+      let colorUp = null;
+      if (canPlaceHere) {
+        colorUp = {
           fill: piece.dataset.fill,
           stroke: piece.dataset.stroke,
           glow: piece.dataset.glow,
           glowInset: piece.dataset.glowInset
         };
+
+        try {
+          // Build a simulated board with the placed piece to see which
+          // rows/cols will clear from this final placement.
+          const sim = Array.from({length: ROWS}, (_, r) =>
+            Array.from({length: COLS}, (_, c) =>
+              cellEls[idx(r,c)].classList.contains('filled') ? 1 : 0
+            )
+          );
+
+          for (let r = 0; r < mUp.length; r++){
+            for (let c = 0; c < mUp[0].length; c++){
+              if (!mUp[r][c]) continue;
+              const rr = anchorUpR + r, cc = anchorUpC + c;
+              if (rr<0 || cc<0 || rr>=ROWS || cc>=COLS) continue;
+              sim[rr][cc] = 1;
+            }
+          }
+
+          const fullRowUp = new Array(ROWS).fill(false);
+          const fullColUp = new Array(COLS).fill(false);
+
+          for (let r = 0; r < ROWS; r++){
+            if (sim[r].every(v => v === 1)) fullRowUp[r] = true;
+          }
+          for (let c = 0; c < COLS; c++){
+            let colFull = true;
+            for (let r = 0; r < ROWS; r++){
+              if (sim[r][c] !== 1){
+                colFull = false;
+                break;
+              }
+            }
+            if (colFull) fullColUp[c] = true;
+          }
+
+          // Lock colour on any *already filled* cells in clearing lines.
+          for (let r = 0; r < ROWS; r++){
+            for (let c = 0; c < COLS; c++){
+              if (!fullRowUp[r] && !fullColUp[c]) continue;
+              const cell = cellEls[idx(r,c)];
+              if (!cell || !cell.classList.contains('filled')) continue;
+
+              const glowCol      = colorUp.glow      || colorUp.stroke || colorUp.fill;
+              const glowInsetCol = colorUp.glowInset || colorUp.stroke || colorUp.fill;
+
+              cell.classList.add('lock-color','about-to-clear');
+              cell.style.setProperty('--fill',        colorUp.fill);
+              cell.style.setProperty('--stroke',      colorUp.stroke);
+              cell.style.setProperty('--glow',        glowCol);
+              cell.style.setProperty('--glow-inset',  glowInsetCol);
+              cell.style.setProperty('--about-glow',  glowCol);
+            }
+          }
+        } catch (err) {
+          console.warn('Classic: failed to pre-lock clear colours', err);
+        }
+      }
+
+      clearHover();
+
+      if (canPlaceHere) {
         
         // Count piece squares for scoring
         const pieceSquares = mUp.flat().filter(v => v === 1).length;
@@ -1258,7 +1360,7 @@ const gyUp = ((e.clientY - fingerOffset) - startYUp) / stepUp;
                 onBoardCleared(linePointsWithCombo);
               }
             }
-          }, 320); // After 300ms line clear animation
+          }, 520); // After 500ms line clear animation
         }
         
         piece.remove();
@@ -1269,8 +1371,8 @@ const gyUp = ((e.clientY - fingerOffset) - startYUp) / stepUp;
           }
           refillTrayClassic();
           // Check for game over after refill
-          // If lines were cleared, wait for animation to complete (240ms) before checking
-          const delay = linesCleared > 0 ? 280 : 100;
+          // If lines were cleared, wait for animation to complete (500ms) before checking
+          const delay = linesCleared > 0 ? 520 : 100;
           setTimeout(() => {
             if (typeof window.checkForGameOverClassic === 'function') {
               window.checkForGameOverClassic();
@@ -1278,8 +1380,8 @@ const gyUp = ((e.clientY - fingerOffset) - startYUp) / stepUp;
           }, delay);
         } else {
           // Check for game over after placement (if pieces remain)
-          // If lines were cleared, wait for animation to complete (240ms) before checking
-          const delay = linesCleared > 0 ? 280 : 100;
+          // If lines were cleared, wait for animation to complete (500ms) before checking
+          const delay = linesCleared > 0 ? 520 : 100;
           setTimeout(() => {
             if (typeof window.checkForGameOverClassic === 'function') {
               window.checkForGameOverClassic();
@@ -1366,7 +1468,7 @@ const gyUp = ((e.clientY - fingerOffset) - startYUp) / stepUp;
     
     if (diff <= 0) {
       displayedScore = targetScore;
-      scoreEl.textContent = displayedScore.toLocaleString();
+      scoreEl.textContent = displayedScore;
       return;
     }
     
@@ -1387,13 +1489,13 @@ const gyUp = ((e.clientY - fingerOffset) - startYUp) / stepUp;
       // Ease out for smooth finish
       const eased = 1 - Math.pow(1 - progress, 3);
       displayedScore = Math.floor(startScore + diff * eased);
-      scoreEl.textContent = displayedScore.toLocaleString();
+      scoreEl.textContent = displayedScore;
       
       if (progress < 1) {
         scoreAnimationId = requestAnimationFrame(animate);
       } else {
         displayedScore = targetScore;
-        scoreEl.textContent = displayedScore.toLocaleString();
+        scoreEl.textContent = displayedScore;
         scoreAnimationId = null;
       }
     }
@@ -1450,18 +1552,26 @@ const gyUp = ((e.clientY - fingerOffset) - startYUp) / stepUp;
   // Delayed score update - score updates when popup hits
   let pendingScoreUpdate = false;
   
-  // Calculate line clear points: 24 * (4 ^ (linesCleared - 1))
-  function calculateLinePoints(linesCleared) {
-    if (linesCleared <= 0) return 0;
-    return 24 * Math.pow(4, linesCleared - 1);
-  }
-  
-  // Get combo multiplier (starts at 3 consecutive trays with clears)
-  // Uses exponential growth: 2^(comboCount-2) for comboCount >= 3
-  // comboCount 3 -> 2x, 4 -> 4x, 5 -> 8x, 6 -> 16x, etc.
-  function getComboMultiplier() {
-    if (gameState.currentComboCount < 3) return 1;
-    return Math.pow(2, gameState.currentComboCount - 2);
+  // Calculate points per line based on combo count (before incrementing)
+  // Points are calculated for the combo level AFTER this clear
+  // No combo (comboCount 0): 45 per line
+  // Combo 2 (comboCount 1): 90 per line
+  // Combo 3 (comboCount 2): 135 per line
+  // Combo 4 (comboCount 3): 180 per line
+  // Combo 5 (comboCount 4): 280 per line
+  // Combo 6+ (comboCount 5+): 280 + 70 * (comboCount - 4) per line
+  function getPointsPerLine() {
+    const comboCount = gameState.currentComboCount;
+    if (comboCount < 1) {
+      return 45; // No combo (comboCount 0) -> will become combo 1, but no combo bonus yet
+    } else if (comboCount < 4) {
+      return 45 * (comboCount + 1); // comboCount 1->90 (combo 2), 2->135 (combo 3), 3->180 (combo 4)
+    } else if (comboCount === 4) {
+      return 280; // comboCount 4 -> 280 (combo 5)
+    } else {
+      // Combo 6+: 280 + 70 * (comboCount - 4)
+      return 280 + 70 * (comboCount - 4); // comboCount 5->350 (combo 6), 6->420 (combo 7), etc.
+    }
   }
   
   // Called when a piece is successfully placed
@@ -1481,19 +1591,24 @@ const gyUp = ((e.clientY - fingerOffset) - startYUp) / stepUp;
   function onLinesCleared(linesCleared) {
     if (linesCleared <= 0) return 0;
     
-    const linePoints = calculateLinePoints(linesCleared);
-    const comboMultiplier = getComboMultiplier();
-    const totalLinePoints = linePoints * comboMultiplier;
+    // Calculate points per line based on current combo count (before incrementing)
+    const pointsPerLine = getPointsPerLine();
+    
+    // Increment combo for each line cleared (even if multiple clears on same tray)
+    gameState.currentComboCount += linesCleared;
+    
+    // Total points = points per line * number of lines cleared
+    const totalLinePoints = pointsPerLine * linesCleared;
     
     // Add line clear points to score (display updates when popup hits)
     gameState.score += totalLinePoints;
     
-    // Show points popup - score updates when it reaches the score display
-    showPopup(`+${totalLinePoints.toLocaleString()}`);
+    // Show points popup - score updates when it reaches the score display (no commas)
+    showPopup(`+${totalLinePoints}`);
     
-    // Show combo popup if applicable
-    if (comboMultiplier >= 3) {
-      setTimeout(() => showPopup(`Combo x${comboMultiplier}`, 'combo'), 400);
+    // Show combo popup if applicable (display combo count, not multiplier)
+    if (gameState.currentComboCount >= 2) {
+      setTimeout(() => showPopup(`Combo ${gameState.currentComboCount}`, 'combo'), 400);
     }
     
     return totalLinePoints;
@@ -1507,20 +1622,18 @@ const gyUp = ((e.clientY - fingerOffset) - startYUp) / stepUp;
     gameState.score += fullClearBonus;
     
     // Show full clear popup - score updates when it reaches the score display
-    setTimeout(() => showPopup(`PERFECT! +${fullClearBonus.toLocaleString()}`, 'full-clear'), 300);
+    setTimeout(() => showPopup(`PERFECT! +${fullClearBonus}`, 'full-clear'), 300);
     
     return fullClearBonus;
   }
   
-  // Called when tray is emptied (all 3 pieces placed) - update combo
+  // Called when tray is emptied (all 3 pieces placed) - check if combo should reset
   function onTrayComplete() {
-    if (gameState.currentTrayHadClear) {
-      // Tray had at least one clear - increment or maintain combo
-      gameState.currentComboCount++;
-    } else {
-      // Tray had no clears - reset combo
+    if (!gameState.currentTrayHadClear) {
+      // Tray had no clears - reset combo (combo already incremented in onLinesCleared for each line)
       gameState.currentComboCount = 0;
     }
+    // If tray had clears, combo was already incremented in onLinesCleared, so do nothing here
   }
   
   // Reset score for new game
@@ -1579,48 +1692,48 @@ const gyUp = ((e.clientY - fingerOffset) - startYUp) / stepUp;
   function getGoodTrayProbability(phase, fillRatio) {
     let baseProbability = 0;
 
-    // Base probability by phase - DOUBLED to make good trays more frequent
+    // Base probability by phase - INCREASED to make good trays more frequent
     switch (phase) {
       case "early":
         // Early game: higher chance to hook the player
-        baseProbability = 0.40; // 40% base (doubled from 20%)
+        baseProbability = 0.50; // 50% base (increased from 40%)
         // Boost if board is open
         if (fillRatio < 0.3) {
-          baseProbability = 0.56; // Up to 56% for very open boards (doubled from 28%)
+          baseProbability = 0.65; // Up to 65% for very open boards (increased from 56%)
         } else if (fillRatio < 0.5) {
-          baseProbability = 0.48; // 48% for moderately open boards (doubled from 24%)
+          baseProbability = 0.58; // 58% for moderately open boards (increased from 48%)
         }
         break;
 
       case "mid":
         // Mid game: moderate chance
-        baseProbability = 0.24; // 24% base (doubled from 12%)
+        baseProbability = 0.32; // 32% base (increased from 24%)
         // Boost if board is open or just cleared a lot
         if (fillRatio < 0.4) {
-          baseProbability = 0.40; // Up to 40% for open boards (doubled from 20%)
+          baseProbability = 0.50; // Up to 50% for open boards (increased from 40%)
         } else if (gameState.lastClearCount >= 3) {
           // Just cleared multiple lines - slight boost
-          baseProbability = 0.30; // Doubled from 15%
+          baseProbability = 0.40; // Increased from 30%
         }
         break;
 
       case "late":
         // Late game: rare but not impossible
-        baseProbability = 0.10; // 10% base (doubled from 5%)
+        baseProbability = 0.15; // 15% base (increased from 10%)
         // Slight boost only if board is very open (unlikely in late game)
         if (fillRatio < 0.3) {
-          baseProbability = 0.16; // Doubled from 8%
+          baseProbability = 0.22; // Increased from 16%
         }
         break;
     }
 
     // Universal boost for very open boards (regardless of phase)
     if (fillRatio < 0.25) {
-      baseProbability = Math.max(baseProbability, 0.44); // Doubled from 0.22
+      baseProbability = Math.max(baseProbability, 0.54); // Increased from 0.44
     }
 
-    // Cap at reasonable maximum (doubled from 0.30)
-    return Math.min(baseProbability, 0.60);
+    // Cap at reasonable maximum
+    return Math.min(baseProbability, 0.70);
   }
 
   // Calculate probability of generating a PERFECT OPPORTUNITY (single-tray or multi-tray board clear)
@@ -1631,40 +1744,40 @@ const gyUp = ((e.clientY - fingerOffset) - startYUp) / stepUp;
     }
     
     // Perfect opportunity probability starts high in early game, then drops below good tray after first use
-    // TRIPLED to make perfect trays more frequent
+    // INCREASED to make perfect trays more frequent
     let baseProbability = 0;
     
     switch (phase) {
       case "early":
         // Early game: high chance (but less than good tray)
-        baseProbability = 0.36; // 36% base (tripled from 12%)
+        baseProbability = 0.45; // 45% base (increased from 36%)
         if (fillRatio < 0.3) {
-          baseProbability = 0.54; // Up to 54% for very open boards (tripled from 18%)
+          baseProbability = 0.62; // Up to 62% for very open boards (increased from 54%)
         } else if (fillRatio < 0.5) {
-          baseProbability = 0.45; // 45% for moderately open boards (tripled from 15%)
+          baseProbability = 0.54; // 54% for moderately open boards (increased from 45%)
         }
         break;
         
       case "mid":
         // Mid game: moderate chance
-        baseProbability = 0.18; // 18% base (tripled from 6%)
+        baseProbability = 0.25; // 25% base (increased from 18%)
         if (fillRatio < 0.4) {
-          baseProbability = 0.30; // Up to 30% for open boards (tripled from 10%)
+          baseProbability = 0.40; // Up to 40% for open boards (increased from 30%)
         }
         break;
         
       case "late":
         // Late game: rare but not impossible
-        baseProbability = 0.06; // 6% base (tripled from 2%)
+        baseProbability = 0.10; // 10% base (increased from 6%)
         if (fillRatio < 0.3) {
-          baseProbability = 0.12; // Slight boost for open boards (tripled from 4%)
+          baseProbability = 0.18; // Increased from 12%
         }
         break;
     }
     
     // BOOST: If player has cleared 20+ lines total, increase probability significantly
     if (gameState.totalLinesClearedEver >= 20) {
-      const milestoneBoost = Math.min(0.45, baseProbability * 1.5); // Up to 45% boost or 1.5x, whichever is smaller (tripled from 0.15)
+      const milestoneBoost = Math.min(0.50, baseProbability * 1.5); // Up to 50% boost or 1.5x, whichever is smaller (increased from 0.45)
       baseProbability += milestoneBoost;
     }
     
@@ -1680,7 +1793,7 @@ const gyUp = ((e.clientY - fingerOffset) - startYUp) / stepUp;
     
     // Minimum probability (never impossible, but rare after multiple uses)
     // This ensures perfect trays can still appear randomly by luck
-    return Math.max(baseProbability, 0.015); // 1.5% minimum (tripled from 0.5% - pure luck chance)
+    return Math.max(baseProbability, 0.02); // 2% minimum (increased from 1.5%)
   }
 
   // ===== SIMULATION HELPERS FOR CLEAR GUARANTEE =====
@@ -3976,7 +4089,7 @@ const gyUp = ((e.clientY - fingerOffset) - startYUp) / stepUp;
     const finalScoreEl = document.getElementById('classicFinalScore');
     
     if (overlay && finalScoreEl) {
-      finalScoreEl.textContent = gameState.score.toLocaleString();
+      finalScoreEl.textContent = gameState.score;
       overlay.classList.remove('hidden');
     }
   }
