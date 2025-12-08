@@ -433,10 +433,11 @@ font-weight: bold;
 /* Score display: top left with label */
 .tetris #score{
   position: absolute;
-  top: 80px;
-  left: 150px;
+  /* Using viewport units for consistent positioning across devices */
+  top: 8vh; /* Adjust this percentage to match your desired position */
+  left: 8vw; /* Adjust this percentage to match your desired position */
   transform: none;
-  font-size: 28px;
+  font-size: clamp(20px, 3vh, 32px); /* Responsive font size */
   font-weight: 700;
   color: #fff;
   text-shadow: 0 0 8px rgba(255, 255, 255, 0.5);
@@ -453,12 +454,12 @@ font-weight: bold;
   letter-spacing: 2px;
   text-transform: uppercase;
 }
-/* Next piece display: top right */
+/* Next piece display: top right - using viewport units for consistent positioning */
 .tetris #tray{
   position: absolute;
   /* Adjust position: change top/right values or use transform below */
-  top: 70px;
-  right: 60px;
+  top: 8vh; /* 8% from top of viewport */
+  right: 4vw; /* 4% from right of viewport */
   /* Fine-tune with transform: translateX (horizontal), translateY (vertical) */
   transform: translateX(0px) translateY(0px);
   display: block;

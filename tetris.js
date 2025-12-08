@@ -77,6 +77,8 @@ const TCOLORS={
 };
 const TETROMINOES={I:[[1,1,1,1]],O:[[1,1],[1,1]],T:[[1,1,1],[0,1,0]],S:[[0,1,1],[1,1,0]],Z:[[1,1,0],[0,1,1]],J:[[1,0,0],[1,1,1]],L:[[0,0,1],[1,1,1]]};
 let tActive=null,tX=0,tY=0,tRot=0,tDropTimer=null,tDropMs=900,tNext=null,tLines=0,tBag=[];
+// Touch drag state for horizontal movement
+let tTouchStartX=0,tTouchStartY=0,tIsDragging=false,tDragStartX=0;
 function tMatrixRotate(m){const h=m.length,w=m[0].length,r=Array.from({length:w},()=>Array(h).fill(0));for(let y=0;y<h;y++)for(let x=0;x<w;x++)r[x][h-1-y]=m[y][x];return r}
 function tGetShape(name,rot){let m=TETROMINOES[name];for(let i=0;i<(rot%4+4)%4;i++)m=tMatrixRotate(m);return m}
 function tShuffle(a){for(let i=a.length-1;i>0;i--){const j=window.randi(i+1);[a[i],a[j]]=[a[j],a[i]]}return a}
@@ -121,8 +123,79 @@ function tClearLines(){
 }
 function tTick(){ if(!tActive) return; if(!tCollide(tX,tY+1,tActive,tRot)){ tY++; } else { tMerge(); tClearLines(); tNewPiece(); } renderBoard() }
 function tScheduleDrop(){ if(tDropTimer) clearInterval(tDropTimer); tDropTimer=setInterval(tTick,tDropMs) }
-function tStart(){ tDropMs=900; tLines=0; tBag=[]; tRefillBag(); tNext=tDrawFromBag(); tNewPiece(); tScheduleDrop(); document.addEventListener('keydown',tKeydown) }
-function tStop(){ if(tDropTimer){clearInterval(tDropTimer); tDropTimer=null} document.removeEventListener('keydown',tKeydown); window.$('preview').innerHTML=''}
+// Touch handlers for horizontal dragging
+function tTouchStart(e){
+  if(currentMode !== 'tetris' || !tActive) return;
+  if(e.touches && e.touches[0]){
+    tTouchStartX = e.touches[0].clientX;
+    tTouchStartY = e.touches[0].clientY;
+    tIsDragging = true;
+    tDragStartX = tX; // Store the X position when drag starts
+    e.preventDefault();
+  }
+}
+function tTouchMove(e){
+  if(currentMode !== 'tetris' || !tActive || !tIsDragging) return;
+  if(e.touches && e.touches[0]){
+    const currentX = e.touches[0].clientX;
+    const deltaX = currentX - tTouchStartX;
+    // Only process horizontal movement (ignore vertical)
+    const cellSize = window.cellSize() || 40;
+    const threshold = cellSize * 0.6; // Move when dragged 60% of a cell width
+    
+    // Calculate how many cells to move from the starting drag position
+    const cellsToMove = Math.round(deltaX / threshold);
+    const newX = tDragStartX + cellsToMove;
+    
+    // Only move if position changed, within bounds, and no collision
+    if(newX !== tX && newX >= 0 && newX + tGetShape(tActive,tRot)[0].length <= width){
+      if(!tCollide(newX, tY, tActive, tRot)){
+        tX = newX;
+        tRenderGhost();
+        renderBoard();
+      }
+    }
+    e.preventDefault();
+  }
+}
+function tTouchEnd(e){
+  if(currentMode !== 'tetris') return;
+  tIsDragging = false;
+  tDragStartX = 0;
+}
+
+function tStart(){ 
+  tDropMs=900; 
+  tLines=0; 
+  tBag=[]; 
+  tRefillBag(); 
+  tNext=tDrawFromBag(); 
+  tNewPiece(); 
+  tScheduleDrop(); 
+  document.addEventListener('keydown',tKeydown);
+  // Add touch listeners for horizontal dragging
+  const boardEl = window.$('board');
+  if(boardEl){
+    boardEl.addEventListener('touchstart', tTouchStart, {passive: false});
+    boardEl.addEventListener('touchmove', tTouchMove, {passive: false});
+    boardEl.addEventListener('touchend', tTouchEnd, {passive: false});
+    boardEl.addEventListener('touchcancel', tTouchEnd, {passive: false});
+  }
+}
+function tStop(){ 
+  if(tDropTimer){clearInterval(tDropTimer); tDropTimer=null} 
+  document.removeEventListener('keydown',tKeydown);
+  // Remove touch listeners
+  const boardEl = window.$('board');
+  if(boardEl){
+    boardEl.removeEventListener('touchstart', tTouchStart);
+    boardEl.removeEventListener('touchmove', tTouchMove);
+    boardEl.removeEventListener('touchend', tTouchEnd);
+    boardEl.removeEventListener('touchcancel', tTouchEnd);
+  }
+  window.$('preview').innerHTML='';
+  tIsDragging = false;
+}
 
 function tKeydown(e){
   const k=e.key;
