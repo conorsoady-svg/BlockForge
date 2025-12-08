@@ -123,42 +123,61 @@ function tClearLines(){
 }
 function tTick(){ if(!tActive) return; if(!tCollide(tX,tY+1,tActive,tRot)){ tY++; } else { tMerge(); tClearLines(); tNewPiece(); } renderBoard() }
 function tScheduleDrop(){ if(tDropTimer) clearInterval(tDropTimer); tDropTimer=setInterval(tTick,tDropMs) }
-// Touch handlers for horizontal dragging - smooth continuous movement
+// Touch handlers for horizontal dragging - smooth continuous movement like classic mode
 function tTouchStart(e){
   if(currentMode !== 'tetris' || !tActive) return;
   if(e.touches && e.touches[0]){
-    tTouchStartX = e.touches[0].clientX;
-    tTouchStartY = e.touches[0].clientY;
     tIsDragging = true;
-    tDragStartX = tX; // Store the X position when drag starts
+    // Calculate the board's position and cell size
+    const boardEl = window.$('board');
+    if(!boardEl) return;
+    const rect = boardEl.getBoundingClientRect();
+    const cellSize = window.cellSize() || 40;
+    const pad = window.pad() || 0;
+    const gap = window.gap() || 0;
+    
+    // Calculate which cell the finger is over
+    const fingerX = e.touches[0].clientX;
+    const relativeX = fingerX - rect.left - pad;
+    const cellIndex = Math.floor(relativeX / (cellSize + gap));
+    
+    // Center the piece on the finger position
+    const pieceWidth = tGetShape(tActive, tRot)[0].length;
+    const newX = Math.max(0, Math.min(cellIndex - Math.floor(pieceWidth / 2), width - pieceWidth));
+    
+    if(!tCollide(newX, tY, tActive, tRot)){
+      tX = newX;
+      tRenderGhost();
+      renderBoard();
+    }
     e.preventDefault();
   }
 }
 function tTouchMove(e){
   if(currentMode !== 'tetris' || !tActive || !tIsDragging) return;
   if(e.touches && e.touches[0]){
-    const currentX = e.touches[0].clientX;
-    const deltaX = currentX - tTouchStartX;
-    // Only process horizontal movement (ignore vertical)
+    // Calculate the board's position and cell size
+    const boardEl = window.$('board');
+    if(!boardEl) return;
+    const rect = boardEl.getBoundingClientRect();
     const cellSize = window.cellSize() || 40;
-    // Use a smaller threshold for smoother, more responsive movement
-    const threshold = cellSize * 0.3; // Move when dragged 30% of a cell width (more sensitive)
+    const pad = window.pad() || 0;
+    const gap = window.gap() || 0;
     
-    // Calculate how many cells to move from the starting drag position
-    // Use floor/round for smoother incremental movement
-    const cellsToMove = Math.round(deltaX / threshold);
-    const newX = tDragStartX + cellsToMove;
+    // Calculate which cell the finger is over - smooth following
+    const fingerX = e.touches[0].clientX;
+    const relativeX = fingerX - rect.left - pad;
+    const cellIndex = Math.floor(relativeX / (cellSize + gap));
     
-    // Only move if position changed, within bounds, and no collision
-    if(newX !== tX && newX >= 0 && newX + tGetShape(tActive,tRot)[0].length <= width){
-      if(!tCollide(newX, tY, tActive, tRot)){
-        tX = newX;
-        tRenderGhost();
-        renderBoard();
-        // Update the start position for smoother continuous dragging
-        tTouchStartX = currentX;
-        tDragStartX = tX;
-      }
+    // Center the piece on the finger position
+    const pieceWidth = tGetShape(tActive, tRot)[0].length;
+    const newX = Math.max(0, Math.min(cellIndex - Math.floor(pieceWidth / 2), width - pieceWidth));
+    
+    // Only move if position changed and no collision
+    if(newX !== tX && !tCollide(newX, tY, tActive, tRot)){
+      tX = newX;
+      tRenderGhost();
+      renderBoard();
     }
     e.preventDefault();
   }
@@ -166,7 +185,6 @@ function tTouchMove(e){
 function tTouchEnd(e){
   if(currentMode !== 'tetris') return;
   tIsDragging = false;
-  tDragStartX = 0;
 }
 
 function tStart(){ 
