@@ -123,7 +123,7 @@ function tClearLines(){
 }
 function tTick(){ if(!tActive) return; if(!tCollide(tX,tY+1,tActive,tRot)){ tY++; } else { tMerge(); tClearLines(); tNewPiece(); } renderBoard() }
 function tScheduleDrop(){ if(tDropTimer) clearInterval(tDropTimer); tDropTimer=setInterval(tTick,tDropMs) }
-// Touch handlers for horizontal dragging
+// Touch handlers for horizontal dragging - smooth continuous movement
 function tTouchStart(e){
   if(currentMode !== 'tetris' || !tActive) return;
   if(e.touches && e.touches[0]){
@@ -141,9 +141,11 @@ function tTouchMove(e){
     const deltaX = currentX - tTouchStartX;
     // Only process horizontal movement (ignore vertical)
     const cellSize = window.cellSize() || 40;
-    const threshold = cellSize * 0.6; // Move when dragged 60% of a cell width
+    // Use a smaller threshold for smoother, more responsive movement
+    const threshold = cellSize * 0.3; // Move when dragged 30% of a cell width (more sensitive)
     
     // Calculate how many cells to move from the starting drag position
+    // Use floor/round for smoother incremental movement
     const cellsToMove = Math.round(deltaX / threshold);
     const newX = tDragStartX + cellsToMove;
     
@@ -153,6 +155,9 @@ function tTouchMove(e){
         tX = newX;
         tRenderGhost();
         renderBoard();
+        // Update the start position for smoother continuous dragging
+        tTouchStartX = currentX;
+        tDragStartX = tX;
       }
     }
     e.preventDefault();
@@ -173,26 +178,20 @@ function tStart(){
   tNewPiece(); 
   tScheduleDrop(); 
   document.addEventListener('keydown',tKeydown);
-  // Add touch listeners for horizontal dragging
-  const boardEl = window.$('board');
-  if(boardEl){
-    boardEl.addEventListener('touchstart', tTouchStart, {passive: false});
-    boardEl.addEventListener('touchmove', tTouchMove, {passive: false});
-    boardEl.addEventListener('touchend', tTouchEnd, {passive: false});
-    boardEl.addEventListener('touchcancel', tTouchEnd, {passive: false});
-  }
+  // Add touch listeners for horizontal dragging - attach to document for anywhere on screen
+  document.addEventListener('touchstart', tTouchStart, {passive: false});
+  document.addEventListener('touchmove', tTouchMove, {passive: false});
+  document.addEventListener('touchend', tTouchEnd, {passive: false});
+  document.addEventListener('touchcancel', tTouchEnd, {passive: false});
 }
 function tStop(){ 
   if(tDropTimer){clearInterval(tDropTimer); tDropTimer=null} 
   document.removeEventListener('keydown',tKeydown);
   // Remove touch listeners
-  const boardEl = window.$('board');
-  if(boardEl){
-    boardEl.removeEventListener('touchstart', tTouchStart);
-    boardEl.removeEventListener('touchmove', tTouchMove);
-    boardEl.removeEventListener('touchend', tTouchEnd);
-    boardEl.removeEventListener('touchcancel', tTouchEnd);
-  }
+  document.removeEventListener('touchstart', tTouchStart);
+  document.removeEventListener('touchmove', tTouchMove);
+  document.removeEventListener('touchend', tTouchEnd);
+  document.removeEventListener('touchcancel', tTouchEnd);
   window.$('preview').innerHTML='';
   tIsDragging = false;
 }
