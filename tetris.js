@@ -78,7 +78,7 @@ const TCOLORS={
 const TETROMINOES={I:[[1,1,1,1]],O:[[1,1],[1,1]],T:[[1,1,1],[0,1,0]],S:[[0,1,1],[1,1,0]],Z:[[1,1,0],[0,1,1]],J:[[1,0,0],[1,1,1]],L:[[0,0,1],[1,1,1]]};
 let tActive=null,tX=0,tY=0,tRot=0,tDropTimer=null,tDropMs=900,tNext=null,tLines=0,tBag=[];
 // Touch drag state for horizontal movement
-let tTouchStartX=0,tTouchStartY=0,tIsDragging=false,tDragStartX=0;
+let tTouchStartX=0,tTouchStartY=0,tIsDragging=false,tDragStartX=0,tHasMoved=false;
 function tMatrixRotate(m){const h=m.length,w=m[0].length,r=Array.from({length:w},()=>Array(h).fill(0));for(let y=0;y<h;y++)for(let x=0;x<w;x++)r[x][h-1-y]=m[y][x];return r}
 function tGetShape(name,rot){let m=TETROMINOES[name];for(let i=0;i<(rot%4+4)%4;i++)m=tMatrixRotate(m);return m}
 function tShuffle(a){for(let i=a.length-1;i>0;i--){const j=window.randi(i+1);[a[i],a[j]]=[a[j],a[i]]}return a}
@@ -127,64 +127,78 @@ function tScheduleDrop(){ if(tDropTimer) clearInterval(tDropTimer); tDropTimer=s
 function tTouchStart(e){
   if(currentMode !== 'tetris' || !tActive) return;
   if(e.touches && e.touches[0]){
-    tIsDragging = true;
-    // Calculate the board's position and cell size
-    const boardEl = window.$('board');
-    if(!boardEl) return;
-    const rect = boardEl.getBoundingClientRect();
-    const cellSize = window.cellSize() || 40;
-    const pad = window.pad() || 0;
-    const gap = window.gap() || 0;
-    
-    // Calculate which cell the finger is over
-    const fingerX = e.touches[0].clientX;
-    const relativeX = fingerX - rect.left - pad;
-    const cellIndex = Math.floor(relativeX / (cellSize + gap));
-    
-    // Center the piece on the finger position
-    const pieceWidth = tGetShape(tActive, tRot)[0].length;
-    const newX = Math.max(0, Math.min(cellIndex - Math.floor(pieceWidth / 2), width - pieceWidth));
-    
-    if(!tCollide(newX, tY, tActive, tRot)){
-      tX = newX;
-      tRenderGhost();
-      renderBoard();
-    }
-    e.preventDefault();
+    // Store initial touch position - don't move piece yet
+    tTouchStartX = e.touches[0].clientX;
+    tTouchStartY = e.touches[0].clientY;
+    tIsDragging = false; // Not dragging yet, just touched
+    tHasMoved = false;
+    tDragStartX = tX; // Store current piece position
+    // Don't prevent default here - allow other handlers to work
+    // Only prevent if we're actually dragging (in touchmove)
   }
 }
 function tTouchMove(e){
-  if(currentMode !== 'tetris' || !tActive || !tIsDragging) return;
+  if(currentMode !== 'tetris' || !tActive) return;
   if(e.touches && e.touches[0]){
-    // Calculate the board's position and cell size
-    const boardEl = window.$('board');
-    if(!boardEl) return;
-    const rect = boardEl.getBoundingClientRect();
-    const cellSize = window.cellSize() || 40;
-    const pad = window.pad() || 0;
-    const gap = window.gap() || 0;
+    const currentX = e.touches[0].clientX;
+    const currentY = e.touches[0].clientY;
+    const deltaX = Math.abs(currentX - tTouchStartX);
+    const deltaY = Math.abs(currentY - tTouchStartY);
     
-    // Calculate which cell the finger is over - smooth following
-    const fingerX = e.touches[0].clientX;
-    const relativeX = fingerX - rect.left - pad;
-    const cellIndex = Math.floor(relativeX / (cellSize + gap));
+    // Only start dragging if moved horizontally more than vertically (horizontal drag)
+    // And moved at least 10px to distinguish from tap
+    const dragThreshold = 10;
+    const isHorizontalDrag = deltaX > deltaY && deltaX > dragThreshold;
     
-    // Center the piece on the finger position
-    const pieceWidth = tGetShape(tActive, tRot)[0].length;
-    const newX = Math.max(0, Math.min(cellIndex - Math.floor(pieceWidth / 2), width - pieceWidth));
-    
-    // Only move if position changed and no collision
-    if(newX !== tX && !tCollide(newX, tY, tActive, tRot)){
-      tX = newX;
-      tRenderGhost();
-      renderBoard();
+    if(isHorizontalDrag && !tIsDragging){
+      // Start dragging - piece moves from current position
+      tIsDragging = true;
+      tHasMoved = true;
+      tTouchStartX = currentX; // Reset start to current for smooth dragging
+      tDragStartX = tX; // Current piece position
+      e.preventDefault();
     }
-    e.preventDefault();
+    
+    if(tIsDragging){
+      // Calculate the board's position and cell size
+      const boardEl = window.$('board');
+      if(!boardEl) return;
+      const rect = boardEl.getBoundingClientRect();
+      const cellSize = window.cellSize() || 40;
+      const pad = window.pad() || 0;
+      const gap = window.gap() || 0;
+      
+      // Calculate which cell the finger is over - smooth following
+      const fingerX = currentX;
+      const relativeX = fingerX - rect.left - pad;
+      const cellIndex = Math.floor(relativeX / (cellSize + gap));
+      
+      // Center the piece on the finger position
+      const pieceWidth = tGetShape(tActive, tRot)[0].length;
+      const newX = Math.max(0, Math.min(cellIndex - Math.floor(pieceWidth / 2), width - pieceWidth));
+      
+      // Only move if position changed and no collision
+      if(newX !== tX && !tCollide(newX, tY, tActive, tRot)){
+        tX = newX;
+        tRenderGhost();
+        renderBoard();
+      }
+      e.preventDefault();
+      e.stopPropagation(); // Prevent other handlers
+    }
   }
 }
 function tTouchEnd(e){
   if(currentMode !== 'tetris') return;
+  // If we didn't move, it was a tap (can be used for rotation)
+  const wasTap = !tHasMoved;
   tIsDragging = false;
+  tHasMoved = false;
+  
+  // If it was a tap, don't prevent default - allow rotation handler to work
+  if(!wasTap){
+    e.preventDefault();
+  }
 }
 
 function tStart(){ 
@@ -197,19 +211,20 @@ function tStart(){
   tScheduleDrop(); 
   document.addEventListener('keydown',tKeydown);
   // Add touch listeners for horizontal dragging - attach to document for anywhere on screen
-  document.addEventListener('touchstart', tTouchStart, {passive: false});
-  document.addEventListener('touchmove', tTouchMove, {passive: false});
-  document.addEventListener('touchend', tTouchEnd, {passive: false});
-  document.addEventListener('touchcancel', tTouchEnd, {passive: false});
+  // Use capture phase to ensure we get events even when other handlers are present
+  document.addEventListener('touchstart', tTouchStart, {passive: true, capture: true});
+  document.addEventListener('touchmove', tTouchMove, {passive: false, capture: true});
+  document.addEventListener('touchend', tTouchEnd, {passive: true, capture: true});
+  document.addEventListener('touchcancel', tTouchEnd, {passive: true, capture: true});
 }
 function tStop(){ 
   if(tDropTimer){clearInterval(tDropTimer); tDropTimer=null} 
   document.removeEventListener('keydown',tKeydown);
   // Remove touch listeners
-  document.removeEventListener('touchstart', tTouchStart);
-  document.removeEventListener('touchmove', tTouchMove);
-  document.removeEventListener('touchend', tTouchEnd);
-  document.removeEventListener('touchcancel', tTouchEnd);
+  document.removeEventListener('touchstart', tTouchStart, {capture: true});
+  document.removeEventListener('touchmove', tTouchMove, {capture: true});
+  document.removeEventListener('touchend', tTouchEnd, {capture: true});
+  document.removeEventListener('touchcancel', tTouchEnd, {capture: true});
   window.$('preview').innerHTML='';
   tIsDragging = false;
 }
