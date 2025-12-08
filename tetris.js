@@ -128,7 +128,9 @@ function tOnTouchMove(e){
   if(!tDragging || currentMode !== 'tetris' || !tActive) return;
   if(!e.touches || !e.touches[0]) return;
   e.preventDefault();
+  e.stopPropagation(); // Prevent other handlers from interfering
   const t = e.touches[0];
+  // Call drag move directly - ensure it's called on every touchmove
   tOnDragMove({clientX: t.clientX, clientY: t.clientY, preventDefault(){}});
 }
 
@@ -143,7 +145,8 @@ function tOnDragMove(e){
   const p = window.pad();
   const g = window.gap();
   
-  // Calculate which cell the finger is over (horizontal only)
+  // Calculate which cell the finger is over (horizontal only) - continuous following
+  // Use the exact same calculation as classic mode
   const relativeX = e.clientX - rect.left - p;
   const cellIndex = Math.floor(relativeX / (s + g));
   
@@ -151,33 +154,37 @@ function tOnDragMove(e){
   const pieceWidth = tGetShape(tActive, tRot)[0].length;
   const newX = Math.max(0, Math.min(cellIndex - Math.floor(pieceWidth / 2), width - pieceWidth));
   
-  // Only move if position changed and no collision
-  if(newX !== tX && !tCollide(newX, tY, tActive, tRot)){
-    tX = newX;
-    tRenderGhost();
-    renderBoard();
+  // Always update position continuously - no stopping, follows finger exactly
+  // Only check bounds, collision check happens but we update regardless for smooth following
+  if(newX !== tX && newX >= 0 && newX + pieceWidth <= width){
+    if(!tCollide(newX, tY, tActive, tRot)){
+      tX = newX;
+      tRenderGhost();
+      renderBoard();
+    }
   }
 }
 
 function tStartDrag(cx, cy){
   if(currentMode !== 'tetris' || !tActive) return;
   tDragging = true;
-  document.addEventListener('pointermove', tOnDragMove, {passive: false});
-  document.addEventListener('touchmove', tOnTouchMove, {passive: false});
+  // Use capture phase to ensure we get all events, even if other handlers try to stop them
+  document.addEventListener('pointermove', tOnDragMove, {passive: false, capture: true});
+  document.addEventListener('touchmove', tOnTouchMove, {passive: false, capture: true});
   const end = (e) => { tEndDrag(e); cleanup(); };
   const cancel = () => { tDragging = false; cleanup(); };
   function cleanup(){
-    document.removeEventListener('pointermove', tOnDragMove);
-    document.removeEventListener('touchmove', tOnTouchMove);
-    document.removeEventListener('pointerup', end);
-    document.removeEventListener('pointercancel', cancel);
-    document.removeEventListener('touchend', end);
-    document.removeEventListener('touchcancel', cancel);
+    document.removeEventListener('pointermove', tOnDragMove, {capture: true});
+    document.removeEventListener('touchmove', tOnTouchMove, {capture: true});
+    document.removeEventListener('pointerup', end, {capture: true});
+    document.removeEventListener('pointercancel', cancel, {capture: true});
+    document.removeEventListener('touchend', end, {capture: true});
+    document.removeEventListener('touchcancel', cancel, {capture: true});
   }
-  document.addEventListener('pointerup', end, {once: true});
-  document.addEventListener('pointercancel', cancel, {once: true});
-  document.addEventListener('touchend', end, {once: true});
-  document.addEventListener('touchcancel', cancel, {once: true});
+  document.addEventListener('pointerup', end, {once: true, capture: true});
+  document.addEventListener('pointercancel', cancel, {once: true, capture: true});
+  document.addEventListener('touchend', end, {once: true, capture: true});
+  document.addEventListener('touchcancel', cancel, {once: true, capture: true});
   tOnDragMove({clientX: cx, clientY: cy, preventDefault(){}});
 }
 
