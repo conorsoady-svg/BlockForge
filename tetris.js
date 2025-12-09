@@ -78,7 +78,7 @@ const TCOLORS={
 const TETROMINOES={I:[[1,1,1,1]],O:[[1,1],[1,1]],T:[[1,1,1],[0,1,0]],S:[[0,1,1],[1,1,0]],Z:[[1,1,0],[0,1,1]],J:[[1,0,0],[1,1,1]],L:[[0,0,1],[1,1,1]]};
 let tActive=null,tX=0,tY=0,tRot=0,tDropTimer=null,tDropMs=900,tNext=null,tLines=0,tBag=[];
 // Touch drag state for horizontal movement - using classic mode approach
-let tDragging=false;
+let tDragging=false,tHasDragged=false;
 function tMatrixRotate(m){const h=m.length,w=m[0].length,r=Array.from({length:w},()=>Array(h).fill(0));for(let y=0;y<h;y++)for(let x=0;x<w;x++)r[x][h-1-y]=m[y][x];return r}
 function tGetShape(name,rot){let m=TETROMINOES[name];for(let i=0;i<(rot%4+4)%4;i++)m=tMatrixRotate(m);return m}
 function tShuffle(a){for(let i=a.length-1;i>0;i--){const j=window.randi(i+1);[a[i],a[j]]=[a[j],a[i]]}return a}
@@ -130,6 +130,7 @@ function tOnTouchMove(e){
   e.preventDefault();
   e.stopPropagation(); // Prevent other handlers from interfering
   const t = e.touches[0];
+  tHasDragged = true; // Mark that we've actually dragged
   // Call drag move directly - ensure it's called on every touchmove
   tOnDragMove({clientX: t.clientX, clientY: t.clientY, preventDefault(){}});
 }
@@ -168,11 +169,12 @@ function tOnDragMove(e){
 function tStartDrag(cx, cy){
   if(currentMode !== 'tetris' || !tActive) return;
   tDragging = true;
+  tHasDragged = false; // Reset - haven't dragged yet, just touched
   // Use capture phase to ensure we get all events, even if other handlers try to stop them
   document.addEventListener('pointermove', tOnDragMove, {passive: false, capture: true});
   document.addEventListener('touchmove', tOnTouchMove, {passive: false, capture: true});
   const end = (e) => { tEndDrag(e); cleanup(); };
-  const cancel = () => { tDragging = false; cleanup(); };
+  const cancel = () => { tDragging = false; tHasDragged = false; cleanup(); };
   function cleanup(){
     document.removeEventListener('pointermove', tOnDragMove, {capture: true});
     document.removeEventListener('touchmove', tOnTouchMove, {capture: true});
@@ -185,12 +187,18 @@ function tStartDrag(cx, cy){
   document.addEventListener('pointercancel', cancel, {once: true, capture: true});
   document.addEventListener('touchend', end, {once: true, capture: true});
   document.addEventListener('touchcancel', cancel, {once: true, capture: true});
-  tOnDragMove({clientX: cx, clientY: cy, preventDefault(){}});
+  // DON'T call tOnDragMove here - only move when actually dragging
 }
 
 function tEndDrag(e){
   if(!tDragging) return;
   tDragging = false;
+  // If it was just a tap (no dragging), don't prevent default - allow other handlers (like rotation)
+  if(!tHasDragged){
+    // It was a tap, not a drag - don't interfere with other handlers
+    return;
+  }
+  tHasDragged = false;
 }
 
 // Touch start handler - exactly like classic mode
