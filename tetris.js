@@ -171,35 +171,46 @@ function tStartDrag(cx, cy){
   if(currentMode !== 'tetris' || !tActive) return;
   tDragging = true;
   tHasDragged = false; // Reset - haven't dragged yet, just touched
-  // Use capture phase to ensure we get all events, even if other handlers try to stop them
-  document.addEventListener('pointermove', tOnDragMove, {passive: false, capture: true});
-  document.addEventListener('touchmove', tOnTouchMove, {passive: false, capture: true});
+  // Don't use capture phase - allow other handlers to work
+  // Only prevent default on touchmove when actually dragging
+  document.addEventListener('pointermove', tOnDragMove, {passive: false});
+  document.addEventListener('touchmove', tOnTouchMove, {passive: false});
   const end = (e) => { tEndDrag(e); cleanup(); };
   const cancel = () => { tDragging = false; tHasDragged = false; cleanup(); };
   function cleanup(){
-    document.removeEventListener('pointermove', tOnDragMove, {capture: true});
-    document.removeEventListener('touchmove', tOnTouchMove, {capture: true});
-    document.removeEventListener('pointerup', end, {capture: true});
-    document.removeEventListener('pointercancel', cancel, {capture: true});
-    document.removeEventListener('touchend', end, {capture: true});
-    document.removeEventListener('touchcancel', cancel, {capture: true});
+    document.removeEventListener('pointermove', tOnDragMove);
+    document.removeEventListener('touchmove', tOnTouchMove);
+    document.removeEventListener('pointerup', end);
+    document.removeEventListener('pointercancel', cancel);
+    document.removeEventListener('touchend', end);
+    document.removeEventListener('touchcancel', cancel);
   }
-  document.addEventListener('pointerup', end, {once: true, capture: true});
-  document.addEventListener('pointercancel', cancel, {once: true, capture: true});
-  document.addEventListener('touchend', end, {once: true, capture: true});
-  document.addEventListener('touchcancel', cancel, {once: true, capture: true});
+  document.addEventListener('pointerup', end, {once: true});
+  document.addEventListener('pointercancel', cancel, {once: true});
+  document.addEventListener('touchend', end, {once: true});
+  document.addEventListener('touchcancel', cancel, {once: true});
   // DON'T call tOnDragMove here - only move when actually dragging
+  // The piece should NOT move on touchstart - only on touchmove
 }
 
 function tEndDrag(e){
   if(!tDragging) return;
+  const wasTap = !tHasDragged;
   tDragging = false;
-  // If it was just a tap (no dragging), don't prevent default - allow other handlers (like rotation)
-  if(!tHasDragged){
-    // It was a tap, not a drag - don't interfere with other handlers
+  tHasDragged = false;
+  
+  // If it was just a tap (no dragging), trigger rotation
+  if(wasTap){
+    // It was a tap, not a drag - rotate the piece
+    if(!isPaused && tActive){
+      tRotate(1);
+      renderBoard();
+    }
+    // Don't prevent default - allow normal touch behavior
     return;
   }
-  tHasDragged = false;
+  // If it was a drag, prevent default to stop any other handlers
+  if(e && e.preventDefault) e.preventDefault();
 }
 
 // Touch start handler - exactly like classic mode
@@ -210,7 +221,8 @@ function tTouchStart(e){
     // Start drag tracking but DON'T move the piece yet
     // Only move when there's actual dragging motion (touchmove)
     tStartDrag(t.clientX, t.clientY);
-    // Don't prevent default here - allow tap to work for rotation
+    // Don't prevent default or stop propagation - allow tap to work for rotation
+    // Return without preventing default so rotation handler can work
   }
 }
 
