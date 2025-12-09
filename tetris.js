@@ -136,7 +136,8 @@ function tOnTouchMove(e){
 }
 
 function tOnDragMove(e){
-  if(!tDragging || currentMode !== 'tetris' || !tActive) return;
+  // Only move if we've actually dragged (not just tapped)
+  if(!tDragging || !tHasDragged || currentMode !== 'tetris' || !tActive) return;
   if(e && e.preventDefault) e.preventDefault();
   
   const boardEl = window.$('board');
@@ -206,7 +207,10 @@ function tTouchStart(e){
   if(currentMode !== 'tetris' || !tActive) return;
   if(e.touches && e.touches[0]){
     const t = e.touches[0];
+    // Start drag tracking but DON'T move the piece yet
+    // Only move when there's actual dragging motion (touchmove)
     tStartDrag(t.clientX, t.clientY);
+    // Don't prevent default here - allow tap to work for rotation
   }
 }
 
