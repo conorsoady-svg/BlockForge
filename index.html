@@ -13,35 +13,105 @@
 <meta name="theme-color" content="#0c1226">
 
 <script>
-  // Request fullscreen immediately when app is clicked/launched (runs before page fully loads)
+  // Request fullscreen continuously until it works (runs before page fully loads)
   (function(){
+    let isFullscreen = false;
+    
+    function checkFullscreen(){
+      return !!(document.fullscreenElement || document.webkitFullscreenElement || 
+                document.mozFullScreenElement || document.msFullscreenElement);
+    }
+    
     function requestFullscreen(){
+      if(isFullscreen || checkFullscreen()) {
+        isFullscreen = true;
+        return;
+      }
+      
       if(document.documentElement.requestFullscreen){
-        document.documentElement.requestFullscreen().catch(()=>{});
+        document.documentElement.requestFullscreen().catch(()=>{}).then(()=>{
+          if(checkFullscreen()) isFullscreen = true;
+        });
       } else if(document.documentElement.webkitRequestFullscreen){
         document.documentElement.webkitRequestFullscreen();
+        if(checkFullscreen()) isFullscreen = true;
       } else if(document.documentElement.mozRequestFullScreen){
         document.documentElement.mozRequestFullScreen();
+        if(checkFullscreen()) isFullscreen = true;
       } else if(document.documentElement.msRequestFullscreen){
         document.documentElement.msRequestFullscreen();
+        if(checkFullscreen()) isFullscreen = true;
       }
     }
-    // Try immediately (runs as soon as script loads)
+    
+    // Try immediately and keep retrying
     requestFullscreen();
+    
+    // Retry every 100ms until fullscreen is achieved
+    const retryInterval = setInterval(()=>{
+      if(checkFullscreen()){
+        isFullscreen = true;
+        clearInterval(retryInterval);
+      } else {
+        requestFullscreen();
+      }
+    }, 100);
+    
     // Also try when DOM is ready
     if(document.readyState === 'loading'){
-      document.addEventListener('DOMContentLoaded', requestFullscreen);
+      document.addEventListener('DOMContentLoaded', ()=>{
+        requestFullscreen();
+        if(!isFullscreen) {
+          const domRetry = setInterval(()=>{
+            if(checkFullscreen()){
+              isFullscreen = true;
+              clearInterval(domRetry);
+            } else {
+              requestFullscreen();
+            }
+          }, 100);
+          setTimeout(()=>clearInterval(domRetry), 5000); // Stop after 5 seconds
+        }
+      });
     } else {
       requestFullscreen();
     }
-    // Try on first interaction
-    ['touchstart', 'click', 'mousedown'].forEach(evt => {
-      document.addEventListener(evt, requestFullscreen, {once: true, passive: true});
+    
+    // Try on ANY user interaction (multiple events)
+    ['touchstart', 'touchend', 'click', 'mousedown', 'mouseup', 'pointerdown', 'pointerup', 'keydown'].forEach(evt => {
+      document.addEventListener(evt, ()=>{
+        requestFullscreen();
+        if(!isFullscreen && checkFullscreen()) isFullscreen = true;
+      }, {passive: true});
     });
+    
     // Try when page becomes visible (app launch)
     document.addEventListener('visibilitychange', function(){
-      if(!document.hidden) requestFullscreen();
+      if(!document.hidden){
+        requestFullscreen();
+        if(!isFullscreen) {
+          const visRetry = setInterval(()=>{
+            if(checkFullscreen()){
+              isFullscreen = true;
+              clearInterval(visRetry);
+            } else {
+              requestFullscreen();
+            }
+          }, 100);
+          setTimeout(()=>clearInterval(visRetry), 3000);
+        }
+      }
     }, {passive: true});
+    
+    // Listen for fullscreen changes
+    ['fullscreenchange', 'webkitfullscreenchange', 'mozfullscreenchange', 'MSFullscreenChange'].forEach(evt => {
+      document.addEventListener(evt, ()=>{
+        if(checkFullscreen()) {
+          isFullscreen = true;
+          clearInterval(retryInterval);
+        }
+      });
+    });
   })();
 </script>
 
