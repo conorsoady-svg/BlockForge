@@ -77,6 +77,8 @@ const TCOLORS={
 };
 const TETROMINOES={I:[[1,1,1,1]],O:[[1,1],[1,1]],T:[[1,1,1],[0,1,0]],S:[[0,1,1],[1,1,0]],Z:[[1,1,0],[0,1,1]],J:[[1,0,0],[1,1,1]],L:[[0,0,1],[1,1,1]]};
 let tActive=null,tX=0,tY=0,tRot=0,tDropTimer=null,tDropMs=900,tNext=null,tLines=0,tBag=[];
+// Lock delay mechanics
+let tLockDelay=0,tLockDelayMax=500,tLockedY=null,tLockTimer=null;
 // Touch drag state for horizontal movement - using classic mode approach
 let tDragging=false,tHasDragged=false;
 function tMatrixRotate(m){const h=m.length,w=m[0].length,r=Array.from({length:w},()=>Array(h).fill(0));for(let y=0;y<h;y++)for(let x=0;x<w;x++)r[x][h-1-y]=m[y][x];return r}
@@ -94,6 +96,10 @@ function tNewPiece(){
   tActive=tNext; tRot=0;
   tX=Math.floor((width - tGetShape(tActive,0)[0].length)/2); tY=0;
   tNext=tDrawFromBag();
+  // Reset lock delay for new piece
+  tLockDelay=0;
+  tLockedY=null;
+  if(tLockTimer){clearTimeout(tLockTimer); tLockTimer=null;}
   if(tCollide(tX,tY,tActive,tRot)){ gameOverWithWave(); tStop(); return;}
   renderBoard(); tRenderNext();
 }
@@ -121,7 +127,47 @@ function tClearLines(){
     renderBoard();
   }
 }
-function tTick(){ if(!tActive) return; if(!tCollide(tX,tY+1,tActive,tRot)){ tY++; } else { tMerge(); tClearLines(); tNewPiece(); } renderBoard() }
+function tTick(){ 
+  if(!tActive) return; 
+  if(!tCollide(tX,tY+1,tActive,tRot)){
+    // Can move down - reset lock delay
+    tY++; 
+    tLockDelay=0;
+    tLockedY=null;
+    if(tLockTimer){clearTimeout(tLockTimer); tLockTimer=null;}
+  } else {
+    // Cannot move down - start/continue lock delay
+    if(tLockedY===null){
+      // First time touching ground - start lock delay
+      tLockedY=tY;
+      tLockDelay=0;
+      tStartLockTimer();
+    } else if(tY===tLockedY){
+      // Still at same Y position - continue lock delay
+      // Timer will handle lock when it expires
+    } else {
+      // Moved up (shouldn't happen, but reset if it does)
+      tLockedY=tY;
+      tLockDelay=0;
+      if(tLockTimer){clearTimeout(tLockTimer); tLockTimer=null;}
+      tStartLockTimer();
+    }
+  }
+  renderBoard();
+}
+function tStartLockTimer(){
+  if(tLockTimer) clearTimeout(tLockTimer);
+  tLockTimer=setTimeout(()=>{
+    // Lock delay expired - lock the piece
+    if(tActive && tLockedY!==null && tY===tLockedY && tCollide(tX,tY+1,tActive,tRot)){
+      tMerge(); tClearLines(); tNewPiece();
+      tLockDelay=0;
+      tLockedY=null;
+      tLockTimer=null;
+      renderBoard();
+    }
+  }, tLockDelayMax);
+}
 function tScheduleDrop(){ if(tDropTimer) clearInterval(tDropTimer); tDropTimer=setInterval(tTick,tDropMs) }
 // Touch handlers for horizontal dragging - exactly like classic mode but horizontal only
 function tOnTouchMove(e){
@@ -241,6 +287,9 @@ function tStart(){
 }
 function tStop(){ 
   if(tDropTimer){clearInterval(tDropTimer); tDropTimer=null} 
+  if(tLockTimer){clearTimeout(tLockTimer); tLockTimer=null;}
+  tLockDelay=0;
+  tLockedY=null;
   document.removeEventListener('keydown',tKeydown);
   // Remove touch listeners
   document.removeEventListener('touchstart', tTouchStart, {capture: true});
@@ -267,14 +316,74 @@ function tKeydown(e){
   renderBoard();
 }
 function tKey(btn){ if(btn==='Left') tMove(-1); if(btn==='Right') tMove(1); if(btn==='Down') tSoft(); if(btn==='Drop') tHard(); if (isPaused) return; if(btn==='Rotate') tRotate(1); renderBoard() }
-function tMove(dx){ if(!tCollide(tX+dx,tY,tActive,tRot)) { tX+=dx; tRenderGhost(); } }
-function tSoft(){ if(!tCollide(tX,tY+1,tActive,tRot)){ tY++; score+=1; updateScore(); tRenderGhost(); } }
+function tMove(dx){ 
+  if(!tCollide(tX+dx,tY,tActive,tRot)) { 
+    tX+=dx; 
+    // If piece can now move down, clear lock state (timer continues if still locked)
+    if(!tCollide(tX,tY+1,tActive,tRot)){
+      // Can move down - clear lock state and timer
+      tLockedY=null;
+      if(tLockTimer){clearTimeout(tLockTimer); tLockTimer=null;}
+      tLockDelay=0;
+    }
+    // If still locked, timer continues running (does NOT reset)
+    tRenderGhost(); 
+  } 
+}
+function tSoft(){ 
+  if(!tCollide(tX,tY+1,tActive,tRot)){
+    tY++; 
+    score+=1; 
+    updateScore(); 
+    // Reset lock delay when moving down
+    tLockDelay=0;
+    tLockedY=null;
+    if(tLockTimer){clearTimeout(tLockTimer); tLockTimer=null;}
+    tRenderGhost(); 
+  } 
+}
 function tHard(){ let dy=0; while(!tCollide(tX,tY+dy+1,tActive,tRot)) dy++; tY+=dy; score+=2*dy; updateScore(); tTick() }
 function tRotate(dir){
+  if(!tActive) return;
   const from=tRot,to=(tRot+dir+4)%4,kicks=srsKicks(tActive,from,to);
+  
+  // Check if piece is in lock position (cannot move down)
+  const isLocked = tCollide(tX,tY+1,tActive,tRot);
+  const wasLockedY = tLockedY;
+  
   for(const [dx,dy] of kicks){
     const nx=tX+dx, ny=tY+dy;
-    if(!tCollide(nx,ny,tActive,to)){ tX=nx; tY=ny; tRot=to; tRenderGhost(); return; }
+    if(!tCollide(nx,ny,tActive,to)){
+      // NEVER allow rotation that moves piece upward (dy < 0 means moving up)
+      // Pieces should always fall consistently and NEVER rise
+      if(dy < 0 || ny < tY){
+        // Rotation would move piece up - not allowed
+        continue;
+      }
+      // If piece is locked, only allow rotations that don't change Y position or move down
+      if(isLocked && wasLockedY!==null){
+        if(ny < wasLockedY){
+          // Rotation would move piece up from lock position - not allowed
+          continue;
+        }
+      }
+      // Valid rotation (no upward movement)
+      tX=nx; 
+      tY=ny; 
+      tRot=to;
+      
+      // If piece can now move down, clear lock state (timer continues if still locked)
+      if(!tCollide(tX,tY+1,tActive,tRot)){
+        // Can move down - clear lock state and timer
+        tLockedY=null;
+        if(tLockTimer){clearTimeout(tLockTimer); tLockTimer=null;}
+        tLockDelay=0;
+      }
+      // If still locked, timer continues running (does NOT reset)
+      
+      tRenderGhost(); 
+      return;
+    }
   }
 }
 // Store the cell size for the next piece tray to ensure consistency

@@ -2217,9 +2217,9 @@ html, body {
 
 <!-- Game -->
 <div id="game" class="app center hidden">
-  <!-- Settings button for Tetris -->
+  <!-- Settings button for Tetris (using pause icon) -->
   <button class="game-settings-btn" onclick="openSettings()" aria-label="Settings" title="Settings">
-    <img src="icons/settings.png" alt="" width="40" height="40" draggable="false" />
+    <img src="icons/pause.svg" alt="" width="40" height="40" draggable="false" />
   </button>
   
   <div id="score">0</div>
@@ -2371,12 +2371,40 @@ html, body {
 </script>
 <!-- Put this just above </body> -->
 <script>
+  // Request fullscreen on load to hide Android system UI (status bar and navigation)
+  function requestFullscreen(){
+    if(document.documentElement.requestFullscreen){
+      document.documentElement.requestFullscreen().catch(()=>{});
+    } else if(document.documentElement.webkitRequestFullscreen){
+      document.documentElement.webkitRequestFullscreen();
+    } else if(document.documentElement.mozRequestFullScreen){
+      document.documentElement.mozRequestFullScreen();
+    } else if(document.documentElement.msRequestFullscreen){
+      document.documentElement.msRequestFullscreen();
+    }
+  }
+  
+  // Try to enter fullscreen when page loads or becomes visible
+  if(document.readyState === 'loading'){
+    document.addEventListener('DOMContentLoaded', requestFullscreen);
+  } else {
+    requestFullscreen();
+  }
+  
+  // Also try on user interaction (some browsers require user gesture)
+  document.addEventListener('touchstart', requestFullscreen, {once: true});
+  document.addEventListener('click', requestFullscreen, {once: true});
+  
   // Make sure a global function exists for the Settings button
   // Settings modal state
   let soundEnabled = true;
   let musicEnabled = true;
   
   window.openSettings = function() {
+    // Pause the game when opening settings
+    if(typeof pauseGame === 'function'){
+      pauseGame();
+    }
     const modal = document.getElementById('settingsModal');
     const gameButtons = document.getElementById('settingsGameButtons');
     if (!modal) return;
@@ -2404,6 +2432,10 @@ html, body {
   };
   
   window.closeSettings = function() {
+    // Resume the game when closing settings (if it was paused)
+    if(typeof resumeGame === 'function'){
+      resumeGame();
+    }
     const modal = document.getElementById('settingsModal');
     if (modal) modal.classList.add('hidden');
   };
