@@ -13,105 +13,62 @@
 <meta name="theme-color" content="#0c1226">
 
 <script>
-  // Request fullscreen continuously until it works (runs before page fully loads)
+  // Loading screen and fullscreen management
   (function(){
-    let isFullscreen = false;
-    
-    function checkFullscreen(){
-      return !!(document.fullscreenElement || document.webkitFullscreenElement || 
-                document.mozFullScreenElement || document.msFullscreenElement);
+    const loadingScreen = document.getElementById('loadingScreen');
+    if(!loadingScreen) {
+      // Create loading screen if it doesn't exist yet
+      const ls = document.createElement('div');
+      ls.id = 'loadingScreen';
+      ls.className = 'loading-screen';
+      ls.innerHTML = '<div class="loading-content"><div class="loading-spinner"></div><div class="loading-text">Loading...</div></div>';
+      document.body.insertBefore(ls, document.body.firstChild);
     }
     
     function requestFullscreen(){
-      if(isFullscreen || checkFullscreen()) {
-        isFullscreen = true;
-        return;
-      }
-      
       if(document.documentElement.requestFullscreen){
-        document.documentElement.requestFullscreen().catch(()=>{}).then(()=>{
-          if(checkFullscreen()) isFullscreen = true;
-        });
+        document.documentElement.requestFullscreen().catch(()=>{});
       } else if(document.documentElement.webkitRequestFullscreen){
         document.documentElement.webkitRequestFullscreen();
-        if(checkFullscreen()) isFullscreen = true;
       } else if(document.documentElement.mozRequestFullScreen){
         document.documentElement.mozRequestFullScreen();
-        if(checkFullscreen()) isFullscreen = true;
       } else if(document.documentElement.msRequestFullscreen){
         document.documentElement.msRequestFullscreen();
-        if(checkFullscreen()) isFullscreen = true;
       }
     }
     
-    // Try immediately and keep retrying
-    requestFullscreen();
+    // Request fullscreen when loading screen is visible (simulates user interaction)
+    function tryFullscreenOnLoad(){
+      requestFullscreen();
+      // Also try on any interaction during loading
+      ['touchstart', 'click', 'mousedown'].forEach(evt => {
+        document.addEventListener(evt, requestFullscreen, {once: true, passive: true});
+      });
+    }
     
-    // Retry every 100ms until fullscreen is achieved
-    const retryInterval = setInterval(()=>{
-      if(checkFullscreen()){
-        isFullscreen = true;
-        clearInterval(retryInterval);
-      } else {
-        requestFullscreen();
-      }
-    }, 100);
-    
-    // Also try when DOM is ready
+    // Show loading screen and try fullscreen
     if(document.readyState === 'loading'){
       document.addEventListener('DOMContentLoaded', ()=>{
-        requestFullscreen();
-        if(!isFullscreen) {
-          const domRetry = setInterval(()=>{
-            if(checkFullscreen()){
-              isFullscreen = true;
-              clearInterval(domRetry);
-            } else {
-              requestFullscreen();
-            }
-          }, 100);
-          setTimeout(()=>clearInterval(domRetry), 5000); // Stop after 5 seconds
-        }
+        tryFullscreenOnLoad();
+        // Hide loading screen after brief delay
+        setTimeout(()=>{
+          const ls = document.getElementById('loadingScreen');
+          if(ls) {
+            ls.classList.add('hidden');
+            setTimeout(()=>ls.remove(), 300);
+          }
+        }, 800); // Show for 800ms
       });
     } else {
-      requestFullscreen();
+      tryFullscreenOnLoad();
+      setTimeout(()=>{
+        const ls = document.getElementById('loadingScreen');
+        if(ls) {
+          ls.classList.add('hidden');
+          setTimeout(()=>ls.remove(), 300);
+        }
+      }, 800);
     }
-    
-    // Try on ANY user interaction (multiple events)
-    ['touchstart', 'touchend', 'click', 'mousedown', 'mouseup', 'pointerdown', 'pointerup', 'keydown'].forEach(evt => {
-      document.addEventListener(evt, ()=>{
-        requestFullscreen();
-        if(!isFullscreen && checkFullscreen()) isFullscreen = true;
-      }, {passive: true});
-    });
-    
-    // Try when page becomes visible (app launch)
-    document.addEventListener('visibilitychange', function(){
-      if(!document.hidden){
-        requestFullscreen();
-        if(!isFullscreen) {
-          const visRetry = setInterval(()=>{
-            if(checkFullscreen()){
-              isFullscreen = true;
-              clearInterval(visRetry);
-            } else {
-              requestFullscreen();
-            }
-          }, 100);
-          setTimeout(()=>clearInterval(visRetry), 3000);
-        }
-      }
-    }, {passive: true});
-    
-    // Listen for fullscreen changes
-    ['fullscreenchange', 'webkitfullscreenchange', 'mozfullscreenchange', 'MSFullscreenChange'].forEach(evt => {
-      document.addEventListener(evt, ()=>{
-        if(checkFullscreen()) {
-          isFullscreen = true;
-          clearInterval(retryInterval);
-        }
-      });
-    });
   })();
 </script>
 
@@ -121,6 +78,47 @@
 html,body{height:100%;-webkit-text-size-adjust:100%}
 body{margin:0;background: radial-gradient(circle farthest-corner at 50% 50%, #010724 70%, #3A5292 150%); background-attachment: fixed; background-size: 100dvw 100dvh; background-repeat: no-repeat; background-position: center;color:#54FF10;text-align:center;font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;overscroll-behavior-y:none;-webkit-user-select:none;user-select:none}
 .hidden{display:none!important}
+
+/* Loading Screen */
+.loading-screen{
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: radial-gradient(circle farthest-corner at 50% 50%, #010724 70%, #3A5292 150%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+  transition: opacity 0.3s ease-out;
+}
+.loading-screen.hidden{
+  opacity: 0;
+  pointer-events: none;
+}
+.loading-content{
+  text-align: center;
+}
+.loading-spinner{
+  width: 60px;
+  height: 60px;
+  border: 4px solid rgba(123, 245, 255, 0.2);
+  border-top-color: #7bf5ff;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 0 auto 20px;
+}
+@keyframes spin{
+  to{ transform: rotate(360deg); }
+}
+.loading-text{
+  color: #7bf5ff;
+  font-size: 18px;
+  font-weight: 500;
+  text-shadow: 0 0 10px rgba(123, 245, 255, 0.5);
+  letter-spacing: 2px;
+}
 
 
 /* --- Update toast (PWA) --- */
@@ -2214,6 +2212,14 @@ html, body {
 </style>
 </head>
 
+
+<!-- Loading Screen -->
+<div id="loadingScreen" class="loading-screen">
+  <div class="loading-content">
+    <div class="loading-spinner"></div>
+    <div class="loading-text">Loading...</div>
+  </div>
+</div>
 
 <!-- Background demo -->
 <!--<div id="demoStage" class="stage">
