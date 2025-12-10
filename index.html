@@ -12,6 +12,38 @@
 <link rel="apple-touch-icon" href="./icons/192x192.png">
 <meta name="theme-color" content="#0c1226">
 
+<script>
+  // Request fullscreen immediately when app is clicked/launched (runs before page fully loads)
+  (function(){
+    function requestFullscreen(){
+      if(document.documentElement.requestFullscreen){
+        document.documentElement.requestFullscreen().catch(()=>{});
+      } else if(document.documentElement.webkitRequestFullscreen){
+        document.documentElement.webkitRequestFullscreen();
+      } else if(document.documentElement.mozRequestFullScreen){
+        document.documentElement.mozRequestFullScreen();
+      } else if(document.documentElement.msRequestFullscreen){
+        document.documentElement.msRequestFullscreen();
+      }
+    }
+    // Try immediately (runs as soon as script loads)
+    requestFullscreen();
+    // Also try when DOM is ready
+    if(document.readyState === 'loading'){
+      document.addEventListener('DOMContentLoaded', requestFullscreen);
+    } else {
+      requestFullscreen();
+    }
+    // Try on first interaction
+    ['touchstart', 'click', 'mousedown'].forEach(evt => {
+      document.addEventListener(evt, requestFullscreen, {once: true, passive: true});
+    });
+    // Try when page becomes visible (app launch)
+    document.addEventListener('visibilitychange', function(){
+      if(!document.hidden) requestFullscreen();
+    }, {passive: true});
+  })();
+</script>
 
 <style>
 :root{--cell:40;--gap:2;--pad:4;--clear-ms:420;--cols:8}
@@ -2371,39 +2403,7 @@ html, body {
 </script>
 <!-- Put this just above </body> -->
 <script>
-  // Request fullscreen to hide Android system UI (status bar and navigation)
-  function requestFullscreen(){
-    if(document.documentElement.requestFullscreen){
-      document.documentElement.requestFullscreen().catch(()=>{});
-    } else if(document.documentElement.webkitRequestFullscreen){
-      document.documentElement.webkitRequestFullscreen();
-    } else if(document.documentElement.mozRequestFullScreen){
-      document.documentElement.mozRequestFullScreen();
-    } else if(document.documentElement.msRequestFullscreen){
-      document.documentElement.msRequestFullscreen();
-    }
-  }
-  
-  // Try to enter fullscreen immediately (works in some browsers)
-  requestFullscreen();
-  
-  // Also try when page is ready
-  if(document.readyState === 'loading'){
-    document.addEventListener('DOMContentLoaded', requestFullscreen);
-  } else {
-    requestFullscreen();
-  }
-  
-  // Try when page becomes visible (when user switches back to app)
-  document.addEventListener('visibilitychange', ()=>{
-    if(!document.hidden) requestFullscreen();
-  });
-  
-  // Also try on any user interaction (some browsers require user gesture)
-  const tryFullscreen = ()=>{ requestFullscreen(); };
-  document.addEventListener('touchstart', tryFullscreen, {once: true, passive: true});
-  document.addEventListener('click', tryFullscreen, {once: true, passive: true});
-  document.addEventListener('mousedown', tryFullscreen, {once: true, passive: true});
+  // Fullscreen is handled in the head section for immediate execution on app launch
   
   // Make sure a global function exists for the Settings button
   // Settings modal state
